@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Inventory — Maintenance | FUTBabura HMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.2);
+      --white:#fff;--muted:rgba(255,255,255,.5);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.085);
+      --ok:#22c55e;--err:#ef4444;--warn:#f59e0b;--info:#3b82f6;
+      --sidebar-w:260px;--topbar-h:68px;--radius:14px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(34,197,94,.4);border-radius:3px}
+
+    /* ── SIDEBAR ── */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#060f24 0%,#07112b 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:200;transition:transform .3s ease}
+    .sb-logo{display:flex;align-items:center;gap:11px;padding:20px 22px;border-bottom:1px solid var(--border);text-decoration:none}
+    .sb-logo-img{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;box-shadow:0 0 14px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:1.6px;text-transform:uppercase}
+    .sb-nav{flex:1;padding:18px 14px;overflow-y:auto}
+    .sb-section-label{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 10px;margin:18px 0 8px}
+    .sb-section-label:first-child{margin-top:0}
+    .sb-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:500;transition:all .22s;margin-bottom:2px}
+    .sb-link i{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+    .sb-link:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .sb-link.active{background:rgba(34,197,94,.12);color:#86efac;border:1px solid rgba(34,197,94,.18)}
+    .sb-badge{margin-left:auto;background:var(--err);color:var(--white);font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;min-width:18px;text-align:center}
+    .sb-bottom{padding:16px 14px;border-top:1px solid var(--border)}
+    .sb-admin{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--border)}
+    .sb-admin-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--ok),#16a34a);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--white);flex-shrink:0;overflow:hidden}
+    .sb-admin-ava img{width:100%;height:100%;object-fit:cover}
+    .sb-admin-name{font-size:12.5px;font-weight:700;line-height:1.2}
+    .sb-admin-role{font-size:10px;color:#86efac;text-transform:uppercase;letter-spacing:1px}
+    .sb-signout{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);font-size:16px;cursor:pointer;padding:4px;transition:color .2s}
+    .sb-signout:hover{color:var(--err)}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199}
+    .sb-overlay.show{display:block}
+
+    /* ── TOPBAR ── */
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(7,17,43,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:150;transition:left .3s}
+    .tb-left{display:flex;align-items:center;gap:14px}
+    .tb-menu{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;display:none;padding:4px}
+    .tb-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}
+    .tb-right{display:flex;align-items:center;gap:12px}
+    .tb-badge{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.22);color:#86efac;font-size:11px;font-weight:700;padding:5px 13px;border-radius:100px;letter-spacing:.8px}
+    .user-menu-btn{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px 12px 6px 6px;cursor:pointer;transition:all .22s}
+    .user-menu-btn:hover{background:rgba(255,255,255,.07)}
+    .um-ava{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--ok),#16a34a);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--white);overflow:hidden;flex-shrink:0}
+    .um-ava img{width:100%;height:100%;object-fit:cover}
+    .um-name{font-size:13px;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dropdown-menu-hms{position:absolute;top:calc(100% + 8px);right:0;background:#0c1a3d;border:1px solid var(--border);border-radius:12px;padding:8px;min-width:190px;box-shadow:0 16px 40px rgba(0,0,0,.4);z-index:500;display:none;animation:slideDown .2s ease}
+    .dropdown-menu-hms.open{display:block}
+    .dm-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none}
+    .dm-item:hover{background:rgba(255,255,255,.06);color:var(--white)}
+    .dm-item.danger{color:rgba(239,68,68,.8)}
+    .dm-item.danger:hover{background:rgba(239,68,68,.08);color:var(--err)}
+
+    /* ── MAIN ── */
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh;transition:margin-left .3s}
+    .content{padding:28px 28px 50px}
+
+    /* ── PAGE HEADER ── */
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:16px}
+    .ph-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:900}
+    .btn-add{padding:10px 18px;border-radius:10px;background:var(--ok);color:var(--white);font-size:13px;font-weight:600;border:none;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:'Plus Jakarta Sans',sans-serif;transition:all .25s}
+    .btn-add:hover{background:#16a34a;transform:translateY(-1px)}
+
+    /* ── STATS ROW ── */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px}
+    .stat-label{font-size:11.5px;color:var(--muted);margin-bottom:6px}
+    .stat-value{font-family:'Playfair Display',serif;font-size:28px;font-weight:900}
+    .stat-sub{font-size:11px;color:var(--muted);margin-top:4px}
+
+    /* ── FILTER BAR ── */
+    .filter-bar{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .search-wrap{flex:1;min-width:250px;position:relative}
+    .search-input{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 14px 10px 40px;color:var(--white);font-size:13.5px;outline:none}
+    .search-input:focus{border-color:var(--ok)}
+    .search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px}
+    .filter-select{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 30px 10px 14px;color:var(--white);font-size:13px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='rgba(255,255,255,.4)' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-size:11px}
+    .filter-select option{background:#0c1a3d}
+    .btn-reset{padding:10px 18px;border-radius:10px;background:transparent;border:1.5px solid var(--border);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .25s}
+    .btn-reset:hover{background:rgba(255,255,255,.05);color:var(--white)}
+
+    /* ── INVENTORY GRID ── */
+    .inventory-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;margin-bottom:22px}
+    .item-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:all .25s;position:relative;overflow:hidden}
+    .item-card:hover{border-color:rgba(34,197,94,.25);transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.15)}
+    .item-category{position:absolute;top:0;left:0;right:0;height:4px}
+    .cat-electrical{background:linear-gradient(90deg,#f59e0b,#f5a623)}
+    .cat-plumbing{background:linear-gradient(90deg,#3b82f6,#60a5fa)}
+    .cat-hardware{background:linear-gradient(90deg,#a855f7,#c084fc)}
+    .cat-paint{background:linear-gradient(90deg,#14b8a6,#5eead4)}
+    .cat-cleaning{background:linear-gradient(90deg,#22c55e,#86efac)}
+    .cat-other{background:linear-gradient(90deg,#6b7280,#9ca3af)}
+    .item-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+    .item-name{font-size:16px;font-weight:700}
+    .item-actions{display:flex;gap:6px}
+    .item-btn{background:none;border:none;color:var(--muted);font-size:15px;cursor:pointer;padding:4px;transition:color .2s}
+    .item-btn:hover{color:var(--white)}
+    .item-btn.edit:hover{color:var(--gold)}
+    .item-btn.delete:hover{color:var(--err)}
+    .item-details{margin-bottom:14px}
+    .item-detail{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px}
+    .detail-label{color:var(--muted)}
+    .detail-value{font-weight:600}
+    .stock-indicator{display:flex;align-items:center;gap:8px;margin-top:12px}
+    .stock-bar{flex:1;height:6px;background:rgba(255,255,255,.1);border-radius:100px;overflow:hidden}
+    .stock-fill{height:100%;border-radius:100px;transition:width .3s}
+    .stock-text{font-size:11px;font-weight:700}
+    .stock-high .stock-fill{background:var(--ok)}
+    .stock-medium .stock-fill{background:var(--warn)}
+    .stock-low .stock-fill{background:var(--err)}
+    .item-footer{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+    .last-updated{font-size:10.5px;color:rgba(255,255,255,.3)}
+    .btn-use{padding:5px 12px;border-radius:7px;font-size:11.5px;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .2s}
+    .btn-use:hover{background:rgba(255,255,255,.05);color:var(--white);border-color:rgba(255,255,255,.2)}
+
+    /* ── TABLE VIEW TOGGLE ── */
+    .view-toggle{display:flex;gap:6px;margin-left:auto}
+    .view-btn{padding:8px 12px;border-radius:8px;font-size:13px;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
+    .view-btn:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .view-btn.active{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.4);color:#86efac}
+
+    /* ── TABLE VIEW ── */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .card-header{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .card-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:9px}
+    .table-wrapper{overflow-x:auto}
+    .admin-table{width:100%;border-collapse:collapse}
+    .admin-table th{padding:12px 16px;font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);text-align:left;background:rgba(255,255,255,.02)}
+    .admin-table td{padding:14px 16px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+    .admin-table tr:hover td{background:rgba(255,255,255,.025)}
+
+    /* modal */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center}
+    .modal-overlay.show{display:flex}
+    .modal{background:#0c1a3d;border:1px solid var(--border);border-radius:16px;width:90%;max-width:500px;max-height:85vh;overflow-y:auto;animation:slideDown .2s ease}
+    .modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+    .modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+    .modal-body{padding:22px}
+    .modal-footer{padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+    .btn-modal{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;border:none;transition:all .2s}
+    .btn-modal-primary{background:var(--ok);color:var(--white)}
+    .btn-modal-primary:hover{background:#16a34a}
+    .btn-modal-secondary{background:transparent;border:1px solid var(--border);color:var(--muted)}
+    .btn-modal-secondary:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .btn-modal-danger{background:rgba(239,68,68,.15);color:var(--err);border:1px solid rgba(239,68,68,.3)}
+    .btn-modal-danger:hover{background:rgba(239,68,68,.25)}
+
+    .field-wrap{margin-bottom:18px}
+    .field-label{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.72);margin-bottom:7px;display:block}
+    .hms-input{width:100%;background:rgba(255,255,255,.048);border:1.5px solid rgba(255,255,255,.1);border-radius:11px;padding:11px 14px;color:var(--white);font-size:13.5px;outline:none}
+    .hms-input:focus{border-color:var(--ok)}
+    .hms-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='rgba(255,255,255,.4)' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:11px;padding-right:34px}
+    .hms-select option{background:#0c1a3d}
+
+    .empty-state{text-align:center;padding:50px;color:var(--muted)}
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+
+    .hidden{display:none !important}
+
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0}.main{margin-left:0}
+      .tb-menu{display:block}
+      .content{padding:18px 14px 40px}
+      .stats-row{grid-template-columns:repeat(2,1fr)}
+      .inventory-grid{grid-template-columns:1fr}
+      .um-name{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar" id="sidebar">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+    <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Maintenance Panel</div></div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section-label">Main</div>
+    <a href="maintenance-dashboard.html" class="sb-link"><i class="bi bi-speedometer2"></i>Dashboard</a>
+    <a href="maintenance-complaints.html" class="sb-link"><i class="bi bi-tools"></i>All Complaints</a>
+    <a href="maintenance-my-tasks.html" class="sb-link"><i class="bi bi-check2-square"></i>My Tasks</a>
+    <div class="sb-section-label">Operations</div>
+    <a href="maintenance-assign.html" class="sb-link"><i class="bi bi-person-plus"></i>Assign Work</a>
+    <a href="maintenance-history.html" class="sb-link"><i class="bi bi-clock-history"></i>Work History</a>
+    <div class="sb-section-label">Reports</div>
+    <a href="maintenance-reports.html" class="sb-link"><i class="bi bi-bar-chart"></i>Reports</a>
+    <a href="maintenance-inventory.html" class="sb-link active"><i class="bi bi-box-seam"></i>Inventory</a>
+    <div class="sb-section-label">Account</div>
+    <a href="admin-login.html" class="sb-link" id="sideSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-admin">
+      <div class="sb-admin-ava" id="sbAva">M</div>
+      <div><div class="sb-admin-name" id="sbName">Loading...</div><div class="sb-admin-role">Maintenance</div></div>
+      <button class="sb-signout" id="sbSignOut"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar" id="topbar">
+  <div class="tb-left">
+    <button class="tb-menu" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+    <div class="tb-title">Inventory Management</div>
+  </div>
+  <div class="tb-right">
+    <span class="tb-badge" id="tbStaffName">Loading...</span>
+    <div style="position:relative">
+      <div class="user-menu-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="um-ava" id="umAva">M</div>
+        <span class="um-name" id="umName">Staff</span>
+        <i class="bi bi-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </div>
+      <div class="dropdown-menu-hms" id="userDropdown">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);margin-bottom:6px">
+          <div style="font-size:13px;font-weight:700" id="ddName">Maintenance Staff</div>
+          <div style="font-size:11px;color:#86efac">Maintenance Team</div>
+        </div>
+        <div class="dm-item danger" id="dropSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main" id="main">
+  <div class="content fade-up">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <h1 class="ph-title">Spare Parts & Materials</h1>
+      <div style="display:flex;gap:10px">
+        <div class="view-toggle">
+          <button class="view-btn active" onclick="setView('grid')"><i class="bi bi-grid-3x3-gap-fill"></i></button>
+          <button class="view-btn" onclick="setView('table')"><i class="bi bi-list-ul"></i></button>
+        </div>
+        <button class="btn-add" onclick="openAddModal()"><i class="bi bi-plus-lg"></i>Add Item</button>
+      </div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Total Items</div><div class="stat-value" id="stTotal">0</div><div class="stat-sub">In inventory</div></div>
+      <div class="stat-card"><div class="stat-label">Total Value</div><div class="stat-value" id="stValue">₦0</div><div class="stat-sub">Current stock value</div></div>
+      <div class="stat-card"><div class="stat-label">Low Stock Items</div><div class="stat-value" id="stLowStock" style="color:var(--err)">0</div><div class="stat-sub">Need reorder</div></div>
+      <div class="stat-card"><div class="stat-label">Used This Month</div><div class="stat-value" id="stUsed">0</div><div class="stat-sub">Items consumed</div></div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search items..." onkeyup="applyFilters()">
+      </div>
+      <select class="filter-select" id="filterCategory" onchange="applyFilters()">
+        <option value="all">All Categories</option>
+        <option value="Electrical">Electrical</option>
+        <option value="Plumbing">Plumbing</option>
+        <option value="Hardware">Hardware</option>
+        <option value="Paint">Paint</option>
+        <option value="Cleaning">Cleaning</option>
+        <option value="Other">Other</option>
+      </select>
+      <select class="filter-select" id="filterStock" onchange="applyFilters()">
+        <option value="all">All Stock Levels</option>
+        <option value="low">Low Stock</option>
+        <option value="out">Out of Stock</option>
+        <option value="available">In Stock</option>
+      </select>
+      <button class="btn-reset" onclick="resetFilters()"><i class="bi bi-arrow-counterclockwise"></i>Reset</button>
+    </div>
+
+    <!-- GRID VIEW -->
+    <div class="inventory-grid" id="gridView"></div>
+
+    <!-- TABLE VIEW -->
+    <div class="card hidden" id="tableView">
+      <div class="card-header">
+        <span class="card-title"><i class="bi bi-box-seam" style="color:#86efac"></i>Inventory List</span>
+        <span id="tableCount">0 items</span>
+      </div>
+      <div class="table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr><th>Item Name</th><th>Category</th><th>Quantity</th><th>Unit</th><th>Unit Price</th><th>Total Value</th><th>Location</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="itemModal" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Add New Item</span>
+      <button class="modal-close" onclick="closeItemModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-wrap">
+        <label class="field-label">Item Name <span style="color:var(--err)">*</span></label>
+        <input type="text" class="hms-input" id="itemName" placeholder="e.g., LED Bulb 15W">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="field-wrap">
+          <label class="field-label">Category <span style="color:var(--err)">*</span></label>
+          <select class="hms-input hms-select" id="itemCategory">
+            <option value="">Select</option><option value="Electrical">Electrical</option><option value="Plumbing">Plumbing</option><option value="Hardware">Hardware</option><option value="Paint">Paint</option><option value="Cleaning">Cleaning</option><option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Unit</label>
+          <input type="text" class="hms-input" id="itemUnit" placeholder="pcs, kg, m, L" value="pcs">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="field-wrap">
+          <label class="field-label">Quantity <span style="color:var(--err)">*</span></label>
+          <input type="number" class="hms-input" id="itemQuantity" placeholder="0" min="0" value="0">
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Minimum Stock Level</label>
+          <input type="number" class="hms-input" id="itemMinStock" placeholder="5" min="0" value="5">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="field-wrap">
+          <label class="field-label">Unit Price (₦)</label>
+          <input type="number" class="hms-input" id="itemPrice" placeholder="0" min="0" value="0">
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Location</label>
+          <input type="text" class="hms-input" id="itemLocation" placeholder="e.g., Main Store, Shelf A3">
+        </div>
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Supplier (Optional)</label>
+        <input type="text" class="hms-input" id="itemSupplier" placeholder="Supplier name">
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Notes (Optional)</label>
+        <textarea class="hms-input" id="itemNotes" placeholder="Additional notes..." rows="2" style="resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secondary" onclick="closeItemModal()">Cancel</button>
+      <button class="btn-modal btn-modal-primary" id="modalActionBtn" onclick="saveItem()">Add Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- USE ITEM MODAL -->
+<div class="modal-overlay" id="useModal" onclick="closeUseOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title"><i class="bi bi-arrow-down-circle" style="color:var(--warn);margin-right:8px"></i>Use Item</span>
+      <button class="modal-close" onclick="closeUseModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-wrap">
+        <label class="field-label">Item</label>
+        <input type="text" class="hms-input" id="useItemName" disabled style="background:rgba(255,255,255,.02)">
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Quantity to Use <span style="color:var(--err)">*</span></label>
+        <input type="number" class="hms-input" id="useQuantity" placeholder="Enter quantity" min="1" value="1">
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Available: <span id="useAvailable">0</span></div>
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Used For (Complaint/Work Order)</label>
+        <input type="text" class="hms-input" id="usePurpose" placeholder="e.g., Complaint #123 or General Maintenance">
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Notes (Optional)</label>
+        <textarea class="hms-input" id="useNotes" placeholder="Additional notes..." rows="2" style="resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secondary" onclick="closeUseModal()">Cancel</button>
+      <button class="btn-modal btn-modal-primary" onclick="confirmUseItem()">Confirm Use</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, query, where, getDocs, orderBy, onSnapshot, addDoc, updateDoc, doc, deleteDoc, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg={apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app=initializeApp(cfg);
+  const db=getFirestore(app);
+  const auth=getAuth(app);
+
+  let adminData=null, inventoryData=[], filteredData=[], currentView="grid", editingItemId=null, usingItemId=null;
+
+  onAuthStateChanged(auth, async user=>{
+    if(!user){window.location.href="admin-login.html";return;}
+    try{
+      const ps=await getDocs(query(collection(db,"users"),where("uid","==",user.uid)));
+      if(ps.empty){await signOut(auth);window.location.href="admin-login.html";return;}
+      adminData=ps.docs[0].data();
+      if(adminData.role!=="maintenance"&&adminData.role!=="super_admin"&&adminData.role!=="hostel_admin"){window.location.href="admin-login.html";return;}
+      renderAdminUI(adminData);
+      listenInventory();
+    }catch(e){console.error(e);}
+  });
+
+  function renderAdminUI(a){
+    const initials=(a.fullName||"M").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    ["sbAva","umAva"].forEach(id=>{const el=document.getElementById(id);if(el){if(a.photoURL)el.innerHTML=`<img src="${a.photoURL}" alt=""/>`;else el.textContent=initials;}});
+    document.getElementById("sbName").textContent=a.fullName||"Maintenance Staff";
+    document.getElementById("umName").textContent=(a.fullName||"Staff").split(" ")[0];
+    document.getElementById("ddName").textContent=a.fullName||"Maintenance Staff";
+    document.getElementById("tbStaffName").textContent=(a.fullName||"Maintenance Staff").split(" ")[0];
+  }
+
+  function listenInventory(){
+    const q=query(collection(db,"inventory"),orderBy("name"));
+    onSnapshot(q,snap=>{
+      inventoryData=snap.docs.map(d=>({id:d.id,...d.data()}));
+      updateStats();
+      applyFilters();
+    });
+  }
+
+  function updateStats(){
+    const total=inventoryData.length;
+    const value=inventoryData.reduce((sum,i)=>sum+((i.quantity||0)*(i.unitPrice||0)),0);
+    const lowStock=inventoryData.filter(i=>i.quantity<=i.minStock).length;
+    const usedThisMonth=inventoryData.reduce((sum,i)=>sum+(i.usedThisMonth||0),0);
+    document.getElementById("stTotal").textContent=total;
+    document.getElementById("stValue").textContent="₦"+value.toLocaleString();
+    document.getElementById("stLowStock").textContent=lowStock;
+    document.getElementById("stUsed").textContent=usedThisMonth;
+  }
+
+  window.applyFilters=function(){
+    const search=document.getElementById("searchInput").value.toLowerCase();
+    const category=document.getElementById("filterCategory").value;
+    const stock=document.getElementById("filterStock").value;
+
+    filteredData=inventoryData.filter(i=>{
+      if(category!=="all"&&i.category!==category)return false;
+      if(stock==="low"&&i.quantity>i.minStock)return false;
+      if(stock==="out"&&i.quantity>0)return false;
+      if(stock==="available"&&i.quantity<=0)return false;
+      if(search){const haystack=`${i.name||""} ${i.category||""} ${i.location||""} ${i.supplier||""}`.toLowerCase();if(!haystack.includes(search))return false;}
+      return true;
+    });
+    renderView();
+  };
+
+  window.resetFilters=function(){
+    document.getElementById("searchInput").value="";
+    document.getElementById("filterCategory").value="all";
+    document.getElementById("filterStock").value="all";
+    applyFilters();
+  };
+
+  window.setView=function(view){
+    currentView=view;
+    document.querySelectorAll(".view-btn").forEach(b=>b.classList.remove("active"));
+    event.target.closest(".view-btn").classList.add("active");
+    document.getElementById("gridView").classList.toggle("hidden",view!=="grid");
+    document.getElementById("tableView").classList.toggle("hidden",view!=="table");
+    renderView();
+  };
+
+  const catClass={Electrical:"cat-electrical",Plumbing:"cat-plumbing",Hardware:"cat-hardware",Paint:"cat-paint",Cleaning:"cat-cleaning",Other:"cat-other"};
+
+  function renderView(){
+    if(currentView==="grid")renderGridView();
+    else renderTableView();
+  }
+
+  function renderGridView(){
+    const grid=document.getElementById("gridView");
+    if(filteredData.length===0){grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><i class="bi bi-box" style="font-size:48px;opacity:.3;display:block;margin-bottom:12px"></i>No inventory items found</div>`;return;}
+
+    grid.innerHTML=filteredData.map(i=>{
+      const stockLevel=i.quantity===0?"out":i.quantity<=i.minStock?"low":i.quantity<=i.minStock*2?"medium":"high";
+      const stockPercent=Math.min((i.quantity/(i.minStock*3||10))*100,100);
+      return `<div class="item-card">
+        <div class="item-category ${catClass[i.category]||'cat-other'}"></div>
+        <div class="item-header">
+          <span class="item-name">${i.name||"—"}</span>
+          <div class="item-actions">
+            <button class="item-btn edit" onclick="openEditModal('${i.id}')"><i class="bi bi-pencil-fill"></i></button>
+            <button class="item-btn delete" onclick="deleteItem('${i.id}')"><i class="bi bi-trash-fill"></i></button>
+          </div>
+        </div>
+        <div class="item-details">
+          <div class="item-detail"><span class="detail-label">Category:</span><span class="detail-value">${i.category||"—"}</span></div>
+          <div class="item-detail"><span class="detail-label">Quantity:</span><span class="detail-value">${i.quantity||0} ${i.unit||'pcs'}</span></div>
+          <div class="item-detail"><span class="detail-label">Unit Price:</span><span class="detail-value">₦${(i.unitPrice||0).toLocaleString()}</span></div>
+          <div class="item-detail"><span class="detail-label">Location:</span><span class="detail-value">${i.location||"—"}</span></div>
+        </div>
+        <div class="stock-indicator stock-${stockLevel}">
+          <div class="stock-bar"><div class="stock-fill" style="width:${stockPercent}%"></div></div>
+          <span class="stock-text">${i.quantity===0?"Out of Stock":i.quantity<=i.minStock?"Low Stock":i.quantity<=i.minStock*2?"Medium":"Good"}</span>
+        </div>
+        <div class="item-footer">
+          <span class="last-updated"><i class="bi bi-clock"></i> ${i.updatedAt?.toDate?.().toLocaleDateString()||"—"}</span>
+          <button class="btn-use" onclick="openUseModal('${i.id}')"><i class="bi bi-arrow-down-circle"></i>Use</button>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  function renderTableView(){
+    document.getElementById("tableCount").textContent=`${filteredData.length} item${filteredData.length!==1?'s':''}`;
+    const tbody=document.getElementById("tableBody");
+    if(filteredData.length===0){tbody.innerHTML=`<tr><td colspan="9" class="empty-state">No items found</td></tr>`;return;}
+
+    tbody.innerHTML=filteredData.map(i=>{
+      const status=i.quantity===0?"<span style='color:var(--err)'>Out of Stock</span>":i.quantity<=i.minStock?"<span style='color:var(--warn)'>Low Stock</span>":"<span style='color:var(--ok)'>In Stock</span>";
+      return `<tr>
+        <td style="font-weight:600">${i.name||"—"}</td>
+        <td>${i.category||"—"}</td>
+        <td>${i.quantity||0}</td>
+        <td>${i.unit||'pcs'}</td>
+        <td>₦${(i.unitPrice||0).toLocaleString()}</td>
+        <td>₦${((i.quantity||0)*(i.unitPrice||0)).toLocaleString()}</td>
+        <td>${i.location||"—"}</td>
+        <td>${status}</td>
+        <td>
+          <button class="item-btn edit" onclick="openEditModal('${i.id}')" style="margin-right:8px"><i class="bi bi-pencil-fill"></i></button>
+          <button class="item-btn" onclick="openUseModal('${i.id}')" style="margin-right:8px;color:var(--warn)"><i class="bi bi-arrow-down-circle"></i></button>
+          <button class="item-btn delete" onclick="deleteItem('${i.id}')"><i class="bi bi-trash-fill"></i></button>
+        </td>
+      </tr>`;
+    }).join("");
+  }
+
+  window.openAddModal=function(){
+    editingItemId=null;
+    document.getElementById("modalTitle").textContent="Add New Item";
+    document.getElementById("modalActionBtn").textContent="Add Item";
+    document.getElementById("itemName").value="";
+    document.getElementById("itemCategory").value="";
+    document.getElementById("itemUnit").value="pcs";
+    document.getElementById("itemQuantity").value="0";
+    document.getElementById("itemMinStock").value="5";
+    document.getElementById("itemPrice").value="0";
+    document.getElementById("itemLocation").value="";
+    document.getElementById("itemSupplier").value="";
+    document.getElementById("itemNotes").value="";
+    document.getElementById("itemModal").classList.add("show");
+  };
+
+  window.openEditModal=function(id){
+    const item=inventoryData.find(i=>i.id===id);if(!item)return;
+    editingItemId=id;
+    document.getElementById("modalTitle").textContent="Edit Item";
+    document.getElementById("modalActionBtn").textContent="Save Changes";
+    document.getElementById("itemName").value=item.name||"";
+    document.getElementById("itemCategory").value=item.category||"";
+    document.getElementById("itemUnit").value=item.unit||"pcs";
+    document.getElementById("itemQuantity").value=item.quantity||0;
+    document.getElementById("itemMinStock").value=item.minStock||5;
+    document.getElementById("itemPrice").value=item.unitPrice||0;
+    document.getElementById("itemLocation").value=item.location||"";
+    document.getElementById("itemSupplier").value=item.supplier||"";
+    document.getElementById("itemNotes").value=item.notes||"";
+    document.getElementById("itemModal").classList.add("show");
+  };
+
+  window.closeItemModal=function(){document.getElementById("itemModal").classList.remove("show");editingItemId=null;};
+  window.closeModalOnOverlay=function(e){if(e.target.classList.contains("modal-overlay"))closeItemModal();};
+
+  window.saveItem=async function(){
+    const name=document.getElementById("itemName").value.trim();
+    const category=document.getElementById("itemCategory").value;
+    const unit=document.getElementById("itemUnit").value.trim()||"pcs";
+    const quantity=parseInt(document.getElementById("itemQuantity").value)||0;
+    const minStock=parseInt(document.getElementById("itemMinStock").value)||5;
+    const unitPrice=parseFloat(document.getElementById("itemPrice").value)||0;
+    const location=document.getElementById("itemLocation").value.trim();
+    const supplier=document.getElementById("itemSupplier").value.trim();
+    const notes=document.getElementById("itemNotes").value.trim();
+
+    if(!name){alert("Item name is required");return;}
+    if(!category){alert("Please select a category");return;}
+
+    const data={name,category,unit,quantity,minStock,unitPrice,location,supplier,notes,updatedAt:serverTimestamp()};
+
+    try{
+      if(editingItemId){await updateDoc(doc(db,"inventory",editingItemId),data);}
+      else {data.createdAt=serverTimestamp();data.usedThisMonth=0;await addDoc(collection(db,"inventory"),data);}
+      closeItemModal();
+    }catch(e){alert("Error saving item: "+e.message);}
+  };
+
+  window.deleteItem=async function(id){if(confirm("Delete this item from inventory?")){await deleteDoc(doc(db,"inventory",id));}};
+
+  window.openUseModal=function(id){
+    const item=inventoryData.find(i=>i.id===id);if(!item)return;
+    usingItemId=id;
+    document.getElementById("useItemName").value=item.name;
+    document.getElementById("useAvailable").textContent=`${item.quantity||0} ${item.unit||'pcs'}`;
+    document.getElementById("useQuantity").max=item.quantity||0;
+    document.getElementById("useQuantity").value=1;
+    document.getElementById("usePurpose").value="";
+    document.getElementById("useNotes").value="";
+    document.getElementById("useModal").classList.add("show");
+  };
+
+  window.closeUseModal=function(){document.getElementById("useModal").classList.remove("show");usingItemId=null;};
+  window.closeUseOnOverlay=function(e){if(e.target.classList.contains("modal-overlay"))closeUseModal();};
+
+  window.confirmUseItem=async function(){
+    const quantity=parseInt(document.getElementById("useQuantity").value)||0;
+    const purpose=document.getElementById("usePurpose").value.trim();
+    const notes=document.getElementById("useNotes").value.trim();
+    const item=inventoryData.find(i=>i.id===usingItemId);
+
+    if(quantity<=0){alert("Please enter a valid quantity");return;}
+    if(quantity>item.quantity){alert(`Only ${item.quantity} available`);return;}
+
+    try{
+      await updateDoc(doc(db,"inventory",usingItemId),{quantity:increment(-quantity),usedThisMonth:increment(quantity),updatedAt:serverTimestamp()});
+      await addDoc(collection(db,"inventory_usage"),{itemId:usingItemId,itemName:item.name,quantity,unit:item.unit,purpose,notes,usedBy:adminData?.fullName,usedAt:serverTimestamp()});
+      closeUseModal();
+    }catch(e){alert("Error: "+e.message);}
+  };
+
+  async function doSignOut(){await signOut(auth);window.location.href="admin-login.html";}
+  ["sideSignOut","sbSignOut","dropSignOut"].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener("click",async e=>{e.preventDefault();doSignOut();});});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleSidebar(){document.getElementById("sidebar").classList.toggle("open");document.getElementById("sbOverlay").classList.toggle("show");}
+  function toggleUserMenu(){document.getElementById("userDropdown").classList.toggle("open");}
+  document.addEventListener("click",e=>{if(!e.target.closest("#userMenuBtn")&&!e.target.closest("#userDropdown"))document.getElementById("userDropdown").classList.remove("open");});
+</script>
+</body>
+</html>

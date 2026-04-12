@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — FUTBabura HMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.2);
+      --white:#fff;--muted:rgba(255,255,255,.5);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.085);
+      --ok:#22c55e;--err:#ef4444;--warn:#f59e0b;--info:#3b82f6;
+      --sidebar-w:260px;--topbar-h:68px;--radius:14px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(245,166,35,.4);border-radius:3px}
+
+    /* ── SIDEBAR ── */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#060f24 0%,#07112b 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:200;transition:transform .3s ease}
+    .sb-logo{display:flex;align-items:center;gap:11px;padding:20px 22px;border-bottom:1px solid var(--border);text-decoration:none}
+    .sb-logo-img{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;box-shadow:0 0 14px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:1.6px;text-transform:uppercase}
+    .sb-nav{flex:1;padding:18px 14px;overflow-y:auto}
+    .sb-section-label{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 10px;margin:18px 0 8px}
+    .sb-section-label:first-child{margin-top:0}
+    .sb-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:500;transition:all .22s;margin-bottom:2px;position:relative}
+    .sb-link i{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+    .sb-link:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .sb-link.active{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.18)}
+    .sb-badge{margin-left:auto;background:var(--err);color:var(--white);font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;min-width:18px;text-align:center}
+    .sb-bottom{padding:16px 14px;border-top:1px solid var(--border)}
+    .sb-admin{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--border)}
+    .sb-admin-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#c53030,#991b1b);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--white);flex-shrink:0;overflow:hidden}
+    .sb-admin-ava img{width:100%;height:100%;object-fit:cover}
+    .sb-admin-name{font-size:12.5px;font-weight:700;line-height:1.2}
+    .sb-admin-role{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+    .sb-signout{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);font-size:16px;cursor:pointer;padding:4px;transition:color .2s}
+    .sb-signout:hover{color:var(--err)}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199}
+    .sb-overlay.show{display:block}
+
+    /* ── TOPBAR ── */
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(7,17,43,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:150;transition:left .3s}
+    .tb-left{display:flex;align-items:center;gap:14px}
+    .tb-menu{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;display:none;padding:4px}
+    .tb-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}
+    .tb-right{display:flex;align-items:center;gap:12px}
+    .tb-session{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.22);color:var(--gold);font-size:11px;font-weight:700;padding:5px 13px;border-radius:100px;letter-spacing:.8px}
+    .notif-btn{position:relative;background:var(--card);border:1px solid var(--border);border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all .22s}
+    .notif-btn:hover{background:rgba(255,255,255,.08);color:var(--white)}
+    .notif-count{position:absolute;top:-5px;right:-5px;background:var(--err);color:var(--white);font-size:9.5px;font-weight:700;padding:1px 5px;border-radius:100px;min-width:16px;text-align:center;display:none}
+    .notif-count.show{display:block}
+    .user-menu-btn{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px 12px 6px 6px;cursor:pointer;transition:all .22s}
+    .user-menu-btn:hover{background:rgba(255,255,255,.07)}
+    .um-ava{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#c53030,#991b1b);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--white);overflow:hidden;flex-shrink:0}
+    .um-ava img{width:100%;height:100%;object-fit:cover}
+    .um-name{font-size:13px;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dropdown-menu-hms{position:absolute;top:calc(100% + 8px);right:0;background:#0c1a3d;border:1px solid var(--border);border-radius:12px;padding:8px;min-width:190px;box-shadow:0 16px 40px rgba(0,0,0,.4);z-index:500;display:none;animation:slideDown .2s ease}
+    .dropdown-menu-hms.open{display:block}
+    .dm-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none}
+    .dm-item:hover{background:rgba(255,255,255,.06);color:var(--white)}
+    .dm-item.danger{color:rgba(239,68,68,.8)}
+    .dm-item.danger:hover{background:rgba(239,68,68,.08);color:var(--err)}
+    .dm-divider{height:1px;background:var(--border);margin:6px 0}
+
+    /* ── MAIN ── */
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh;transition:margin-left .3s}
+    .content{padding:28px 28px 50px}
+
+    /* ── WELCOME BANNER ── */
+    .welcome-banner{background:linear-gradient(135deg,#0c1a3d 0%,#112060 55%,#0a1840 100%);border:1px solid rgba(245,166,35,.13);border-radius:20px;padding:26px 32px;margin-bottom:24px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px}
+    .wb-glow{position:absolute;right:-5%;top:-40%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.1) 0%,transparent 68%);pointer-events:none}
+    .wb-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+    .wb-left{position:relative;z-index:2}
+    .wb-greeting{font-size:13px;color:var(--muted);margin-bottom:4px}
+    .wb-name{font-family:'Playfair Display',serif;font-size:clamp(18px,2.5vw,26px);font-weight:900;margin-bottom:8px}
+    .wb-right{display:flex;gap:10px;position:relative;z-index:2;flex-wrap:wrap}
+    .btn-quick{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:'Plus Jakarta Sans',sans-serif;transition:all .25s;text-decoration:none}
+    .bq-gold{background:var(--gold);color:var(--navy);box-shadow:0 4px 14px var(--glow)}
+    .bq-gold:hover{background:var(--gold2);color:var(--navy);transform:translateY(-1px)}
+    .bq-outline{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.14);color:var(--white)}
+    .bq-outline:hover{background:rgba(255,255,255,.1);color:var(--white)}
+
+    /* ── STATS ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:22px}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;position:relative;overflow:hidden;transition:all .25s}
+    .stat-card:hover{border-color:rgba(245,166,35,.25);transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.22)}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
+    .sc-gold::before{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+    .sc-green::before{background:linear-gradient(90deg,var(--ok),#16a34a)}
+    .sc-blue::before{background:linear-gradient(90deg,var(--info),#2563eb)}
+    .sc-red::before{background:linear-gradient(90deg,var(--err),#dc2626)}
+    .sc-purple::before{background:linear-gradient(90deg,#a855f7,#9333ea)}
+    .sc-teal::before{background:linear-gradient(90deg,#14b8a6,#0d9488)}
+    .stat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px}
+    .si-gold{background:rgba(245,166,35,.12)}
+    .si-green{background:rgba(34,197,94,.12)}
+    .si-blue{background:rgba(59,130,246,.12)}
+    .si-red{background:rgba(239,68,68,.12)}
+    .si-purple{background:rgba(168,85,247,.12)}
+    .si-teal{background:rgba(20,184,166,.12)}
+    .stat-num{font-family:'Playfair Display',serif;font-size:clamp(20px,2vw,28px);font-weight:900;line-height:1;margin-bottom:4px}
+    .stat-label{font-size:11.5px;color:var(--muted)}
+    .stat-change{font-size:11px;margin-top:4px;display:flex;align-items:center;gap:3px}
+    .change-up{color:var(--ok)}
+    .change-down{color:var(--err)}
+
+    /* ── CARD ── */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:22px}
+    .card-header{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .card-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:9px}
+    .card-body{padding:0}
+    .view-all{font-size:12.5px;color:var(--gold);text-decoration:none;font-weight:600;transition:color .2s}
+    .view-all:hover{color:var(--gold2)}
+
+    /* ── TABLE ── */
+    .admin-table{width:100%;border-collapse:collapse}
+    .admin-table th{padding:11px 18px;font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);text-align:left;background:rgba(255,255,255,.02)}
+    .admin-table td{padding:13px 18px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+    .admin-table tr:last-child td{border-bottom:none}
+    .admin-table tr:hover td{background:rgba(255,255,255,.025)}
+
+    /* badges */
+    .tbadge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+    .tb-active{background:rgba(34,197,94,.12);color:var(--ok);border:1px solid rgba(34,197,94,.2)}
+    .tb-pending{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+    .tb-expired{background:rgba(239,68,68,.1);color:var(--err);border:1px solid rgba(239,68,68,.18)}
+    .tb-received{background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.2)}
+    .tb-progress{background:rgba(168,85,247,.12);color:#d8b4fe;border:1px solid rgba(168,85,247,.2)}
+    .tb-resolved{background:rgba(34,197,94,.12);color:var(--ok);border:1px solid rgba(34,197,94,.2)}
+
+    /* action buttons */
+    .btn-tbl{padding:5px 12px;border-radius:7px;font-size:11.5px;font-weight:600;border:none;cursor:pointer;transition:all .22s;font-family:'Plus Jakarta Sans',sans-serif;display:inline-flex;align-items:center;gap:5px}
+    .bt-view{background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.2)}
+    .bt-view:hover{background:rgba(59,130,246,.22);color:#bfdbfe}
+    .bt-assign{background:rgba(245,166,35,.1);color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+    .bt-assign:hover{background:rgba(245,166,35,.2)}
+
+    /* ── CHARTS ROW ── */
+    .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:22px}
+    .chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .chart-body{padding:20px}
+
+    /* ── REVENUE CARD ── */
+    .revenue-card{background:linear-gradient(135deg,rgba(245,166,35,.08) 0%,rgba(245,166,35,.03) 100%);border:1px solid rgba(245,166,35,.18);border-radius:var(--radius);padding:22px;margin-bottom:22px}
+    .rev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
+    .rev-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:11px;padding:16px}
+    .rev-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+    .rev-amount{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--gold)}
+    .rev-sub{font-size:11px;color:var(--muted);margin-top:3px}
+
+    /* ── BOTTOM GRID ── */
+    .bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+
+    /* skeleton */
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    /* empty */
+    .tbl-empty{text-align:center;padding:36px;color:var(--muted);font-size:13.5px}
+
+    /* student avatar */
+    .student-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--navy);overflow:hidden;flex-shrink:0}
+    .student-ava img{width:100%;height:100%;object-fit:cover}
+
+    @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+
+    @media(max-width:1300px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:1050px){.charts-row,.bottom-grid{grid-template-columns:1fr}}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0}.main{margin-left:0}
+      .tb-menu{display:block}
+      .content{padding:18px 14px 40px}
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+      .welcome-banner{flex-direction:column}
+      .tb-session,.um-name{display:none}
+    }
+    @media(max-width:480px){.stats-grid{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar" id="sidebar">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+    <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Admin Panel</div></div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section-label">Main</div>
+    <a href="admin-dashboard.html" class="sb-link active"><i class="bi bi-grid-fill"></i>Dashboard</a>
+    <a href="admin-rooms.html" class="sb-link"><i class="bi bi-door-open-fill"></i>Rooms</a>
+    <a href="admin-bookings.html" class="sb-link"><i class="bi bi-house-check-fill"></i>Bookings <span class="sb-badge" id="pendingBadge" style="display:none">0</span></a>
+    <a href="admin-complaints.html" class="sb-link"><i class="bi bi-tools"></i>Complaints <span class="sb-badge" id="openBadge" style="display:none">0</span></a>
+    <a href="admin-visitors.html" class="sb-link"><i class="bi bi-people-fill"></i>Visitors</a>
+    <div class="sb-section-label">Management</div>
+    <a href="admin-students.html" class="sb-link"><i class="bi bi-mortarboard-fill"></i>Students</a>
+    <a href="admin-reports.html" class="sb-link"><i class="bi bi-bar-chart-fill"></i>Reports</a>
+    <div class="sb-section-label">System</div>
+    <a href="admin-settings.html" class="sb-link"><i class="bi bi-gear-fill"></i>Settings</a>
+    <a href="admin-login.html" class="sb-link" id="sideSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-admin">
+      <div class="sb-admin-ava" id="sbAva">A</div>
+      <div><div class="sb-admin-name" id="sbName">Loading...</div><div class="sb-admin-role">Hostel Admin</div></div>
+      <button class="sb-signout" id="sbSignOut"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar" id="topbar">
+  <div class="tb-left">
+    <button class="tb-menu" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+    <div class="tb-title">Admin Dashboard</div>
+  </div>
+  <div class="tb-right">
+    <span class="tb-session" id="tbSession">Loading...</span>
+    <div class="notif-btn" id="notifBtn">
+      <i class="bi bi-bell-fill"></i>
+      <span class="notif-count" id="notifCount"></span>
+    </div>
+    <div style="position:relative">
+      <div class="user-menu-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="um-ava" id="umAva">A</div>
+        <span class="um-name" id="umName">Admin</span>
+        <i class="bi bi-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </div>
+      <div class="dropdown-menu-hms" id="userDropdown">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);margin-bottom:6px">
+          <div style="font-size:13px;font-weight:700" id="ddName">Admin</div>
+          <div style="font-size:11px;color:var(--gold)">Hostel Admin</div>
+        </div>
+        <a href="admin-settings.html" class="dm-item"><i class="bi bi-gear-fill"></i>Settings</a>
+        <div class="dm-divider"></div>
+        <div class="dm-item danger" id="dropSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main" id="main">
+  <div class="content fade-up">
+
+    <!-- WELCOME BANNER -->
+    <div class="welcome-banner">
+      <div class="wb-glow"></div><div class="wb-dots"></div>
+      <div class="wb-left">
+        <div class="wb-greeting" id="wbGreeting">Good morning 👋</div>
+        <div class="wb-name" id="wbName">Loading...</div>
+        <div style="font-size:12.5px;color:var(--muted);margin-top:4px" id="wbDate"></div>
+      </div>
+      <div class="wb-right">
+        <a href="admin-rooms.html" class="btn-quick bq-gold"><i class="bi bi-plus-lg"></i>Add Room</a>
+        <a href="admin-bookings.html" class="btn-quick bq-outline"><i class="bi bi-house-check-fill"></i>View Bookings</a>
+        <a href="admin-reports.html" class="btn-quick bq-outline"><i class="bi bi-file-earmark-bar-graph-fill"></i>Reports</a>
+      </div>
+    </div>
+
+    <!-- STATS GRID -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card sc-gold"><div class="stat-icon si-gold">🏠</div><div class="stat-num" id="sTotalRooms"><div class="skeleton" style="width:50px;height:24px"></div></div><div class="stat-label">Total Rooms</div></div>
+      <div class="stat-card sc-red"><div class="stat-icon si-red">🔴</div><div class="stat-num" id="sOccupied"><div class="skeleton" style="width:50px;height:24px"></div></div><div class="stat-label">Occupied</div></div>
+      <div class="stat-card sc-green"><div class="stat-icon si-green">🟢</div><div class="stat-num" id="sAvailable"><div class="skeleton" style="width:50px;height:24px"></div></div><div class="stat-label">Available</div></div>
+      <div class="stat-card sc-blue"><div class="stat-icon si-blue">📋</div><div class="stat-num" id="sBookings"><div class="skeleton" style="width:50px;height:24px"></div></div><div class="stat-label">Total Bookings</div></div>
+      <div class="stat-card sc-teal"><div class="stat-icon si-teal">💰</div><div class="stat-num" id="sRevenue"><div class="skeleton" style="width:70px;height:24px"></div></div><div class="stat-label">Revenue (₦)</div></div>
+      <div class="stat-card sc-purple"><div class="stat-icon si-purple">🔧</div><div class="stat-num" id="sComplaints"><div class="skeleton" style="width:50px;height:24px"></div></div><div class="stat-label">Open Complaints</div></div>
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="card-header">
+          <span class="card-title"><i class="bi bi-bar-chart-fill" style="color:var(--gold)"></i>Occupancy by Block</span>
+          <span style="font-size:11.5px;color:var(--muted)" id="chartSession"></span>
+        </div>
+        <div class="chart-body">
+          <canvas id="occupancyChart" height="200"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="card-header">
+          <span class="card-title"><i class="bi bi-pie-chart-fill" style="color:var(--gold)"></i>Booking Status Distribution</span>
+        </div>
+        <div class="chart-body" style="display:flex;align-items:center;justify-content:center;padding:10px">
+          <canvas id="bookingPieChart" height="200" style="max-width:260px"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVENUE SUMMARY -->
+    <div class="revenue-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px"><i class="bi bi-cash-coin" style="color:var(--gold)"></i>Revenue Summary</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px" id="revSession">Current Session</div>
+        </div>
+        <a href="admin-reports.html" class="btn-quick bq-outline" style="font-size:12.5px;padding:7px 16px"><i class="bi bi-download"></i>Export Report</a>
+      </div>
+      <div class="rev-grid">
+        <div class="rev-item">
+          <div class="rev-label">Total Collected</div>
+          <div class="rev-amount" id="revTotal">₦—</div>
+          <div class="rev-sub">Confirmed payments</div>
+        </div>
+        <div class="rev-item">
+          <div class="rev-label">Pending Payments</div>
+          <div class="rev-amount" style="color:var(--warn)" id="revPending">₦—</div>
+          <div class="rev-sub">Awaiting payment</div>
+        </div>
+        <div class="rev-item">
+          <div class="rev-label">Expected Total</div>
+          <div class="rev-amount" style="color:var(--info)" id="revExpected">₦—</div>
+          <div class="rev-sub">If all pay</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT BOOKINGS -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="bi bi-house-check-fill" style="color:var(--gold)"></i>Recent Bookings</span>
+        <a href="admin-bookings.html" class="view-all">View All →</a>
+      </div>
+      <div class="card-body">
+        <div style="overflow-x:auto">
+          <table class="admin-table" id="bookingsTable">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Matric No.</th>
+                <th>Room</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTbody">
+              <tr><td colspan="7" class="tbl-empty"><div class="skeleton" style="height:40px;border-radius:8px;margin-bottom:8px"></div><div class="skeleton" style="height:40px;border-radius:8px;margin-bottom:8px"></div><div class="skeleton" style="height:40px;border-radius:8px"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM GRID -->
+    <div class="bottom-grid">
+
+      <!-- Recent Complaints -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header">
+          <span class="card-title"><i class="bi bi-tools" style="color:var(--gold)"></i>Recent Complaints</span>
+          <a href="admin-complaints.html" class="view-all">View All →</a>
+        </div>
+        <table class="admin-table" id="complaintsTable">
+          <thead>
+            <tr><th>Student</th><th>Category</th><th>Priority</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody id="complaintsTbody">
+            <tr><td colspan="5" class="tbl-empty"><div class="skeleton" style="height:36px;border-radius:8px;margin-bottom:6px"></div><div class="skeleton" style="height:36px;border-radius:8px"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Recent Students -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header">
+          <span class="card-title"><i class="bi bi-people-fill" style="color:var(--gold)"></i>Recent Students</span>
+          <a href="admin-students.html" class="view-all">View All →</a>
+        </div>
+        <table class="admin-table" id="studentsTable">
+          <thead>
+            <tr><th>Student</th><th>Dept.</th><th>Level</th><th>Gender</th><th>Booking</th></tr>
+          </thead>
+          <tbody id="studentsTbody">
+            <tr><td colspan="5" class="tbl-empty"><div class="skeleton" style="height:36px;border-radius:8px;margin-bottom:6px"></div><div class="skeleton" style="height:36px;border-radius:8px"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, query, where,
+    getDocs, orderBy, limit, onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg={apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app=initializeApp(cfg);
+  const db=getFirestore(app);
+  const auth=getAuth(app);
+
+  let adminData=null, settings={}, occupancyChart=null, pieChart=null;
+
+  // ── AUTH GUARD ──
+  onAuthStateChanged(auth, async user=>{
+    if(!user){window.location.href="admin-login.html";return;}
+    try{
+      const ps=await getDocs(query(collection(db,"users"),where("uid","==",user.uid)));
+      if(ps.empty){await signOut(auth);window.location.href="admin-login.html";return;}
+      adminData=ps.docs[0].data();
+      if(adminData.role==="student"||!adminData.role){await signOut(auth);window.location.href="admin-login.html";return;}
+      if(adminData.role!=="hostel_admin"&&adminData.role!=="super_admin"){
+        // redirect to correct dashboard
+        const map={security:"security-dashboard.html",maintenance:"maintenance-dashboard.html"};
+        window.location.href=map[adminData.role]||"admin-login.html";
+        return;
+      }
+      renderAdminUI(adminData);
+      await loadSettings();
+      await Promise.all([loadStats(),loadBookings(),loadComplaints(),loadStudents()]);
+    }catch(e){console.error(e);}
+  });
+
+  function renderAdminUI(a){
+    const initials=(a.fullName||"A").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    ["sbAva","umAva"].forEach(id=>{
+      const el=document.getElementById(id);if(!el)return;
+      if(a.photoURL)el.innerHTML=`<img src="${a.photoURL}" alt=""/>`;else el.textContent=initials;
+    });
+    const first=(a.fullName||"Admin").split(" ")[0];
+    document.getElementById("sbName").textContent=a.fullName||"Admin";
+    document.getElementById("umName").textContent=first;
+    document.getElementById("ddName").textContent=a.fullName||"Admin";
+    const h=new Date().getHours();
+    document.getElementById("wbGreeting").textContent=h<12?"Good morning 👋":h<17?"Good afternoon 👋":"Good evening 👋";
+    document.getElementById("wbName").textContent=`Welcome back, ${first}`;
+    document.getElementById("wbDate").textContent=new Date().toLocaleDateString("en-NG",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  }
+
+  async function loadSettings(){
+    const ss=await getDocs(collection(db,"settings"));
+    settings=ss.empty?{}:ss.docs[0].data();
+    const session=settings.currentSession||"2024/2025";
+    document.getElementById("tbSession").textContent=session+" Session";
+    document.getElementById("chartSession").textContent=session;
+    document.getElementById("revSession").textContent=session+" Academic Session";
+  }
+
+  // ══════════════════════════════
+  // LOAD STATS
+  // ══════════════════════════════
+  async function loadStats(){
+    const session=settings.currentSession||"2024/2025";
+    const [roomsSnap,bookingsSnap,complaintsSnap]=await Promise.all([
+      getDocs(collection(db,"rooms")),
+      getDocs(query(collection(db,"bookings"),where("session","==",session))),
+      getDocs(query(collection(db,"complaints"),where("status","!=","resolved"))),
+    ]);
+
+    let totalRooms=0,occupied=0,available=0;
+    const blockData={};
+    roomsSnap.forEach(d=>{
+      const r=d.data();
+      totalRooms++;
+      const total=r.totalSlots||1;
+      const avail=r.slotsLeft!==undefined?r.slotsLeft:total;
+      const occ=total-avail;
+      occupied+=occ;
+      available+=avail;
+      const bn=r.blockName||"Other";
+      if(!blockData[bn])blockData[bn]={total:0,occupied:0};
+      blockData[bn].total+=total;
+      blockData[bn].occupied+=occ;
+    });
+
+    let totalBookings=0,activeBookings=0,pendingBookings=0,expiredBookings=0,totalRevenue=0,pendingRevenue=0;
+    bookingsSnap.forEach(d=>{
+      const b=d.data();
+      totalBookings++;
+      if(b.status==="active"){activeBookings++;totalRevenue+=Number(b.amountPaid||b.amount||0);}
+      else if(b.status==="pending_payment"){pendingBookings++;pendingRevenue+=Number(b.amount||0);}
+      else if(b.status==="expired")expiredBookings++;
+    });
+
+    // Update stat cards
+    document.getElementById("sTotalRooms").textContent=totalRooms;
+    document.getElementById("sOccupied").textContent=occupied;
+    document.getElementById("sAvailable").textContent=available;
+    document.getElementById("sBookings").textContent=totalBookings;
+    document.getElementById("sRevenue").textContent=totalRevenue>0?"₦"+Math.round(totalRevenue/1000)+"K":"₦0";
+    document.getElementById("sComplaints").textContent=complaintsSnap.size;
+
+    // sidebar badges
+    if(pendingBookings>0){const b=document.getElementById("pendingBadge");b.textContent=pendingBookings;b.style.display="";}
+    if(complaintsSnap.size>0){const b=document.getElementById("openBadge");b.textContent=complaintsSnap.size;b.style.display="";}
+
+    // Revenue summary
+    document.getElementById("revTotal").textContent="₦"+totalRevenue.toLocaleString();
+    document.getElementById("revPending").textContent="₦"+pendingRevenue.toLocaleString();
+    document.getElementById("revExpected").textContent="₦"+(totalRevenue+pendingRevenue).toLocaleString();
+
+    // Charts
+    renderOccupancyChart(blockData);
+    renderPieChart(activeBookings,pendingBookings,expiredBookings);
+  }
+
+  // ── OCCUPANCY CHART ──
+  function renderOccupancyChart(blockData){
+    const labels=Object.keys(blockData);
+    const occData=labels.map(b=>blockData[b].occupied);
+    const availData=labels.map(b=>blockData[b].total-blockData[b].occupied);
+    const ctx=document.getElementById("occupancyChart").getContext("2d");
+    if(occupancyChart)occupancyChart.destroy();
+    occupancyChart=new Chart(ctx,{
+      type:"bar",
+      data:{
+        labels,
+        datasets:[
+          {label:"Occupied",data:occData,backgroundColor:"rgba(239,68,68,.7)",borderRadius:6,borderSkipped:false},
+          {label:"Available",data:availData,backgroundColor:"rgba(34,197,94,.5)",borderRadius:6,borderSkipped:false},
+        ]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:true,
+        plugins:{legend:{labels:{color:"rgba(255,255,255,.6)",font:{size:11}}}},
+        scales:{
+          x:{stacked:true,ticks:{color:"rgba(255,255,255,.5)"},grid:{color:"rgba(255,255,255,.05)"}},
+          y:{stacked:true,ticks:{color:"rgba(255,255,255,.5)"},grid:{color:"rgba(255,255,255,.05)"},beginAtZero:true}
+        }
+      }
+    });
+  }
+
+  // ── PIE CHART ──
+  function renderPieChart(active,pending,expired){
+    const ctx=document.getElementById("bookingPieChart").getContext("2d");
+    if(pieChart)pieChart.destroy();
+    pieChart=new Chart(ctx,{
+      type:"doughnut",
+      data:{
+        labels:["Active","Pending Payment","Expired"],
+        datasets:[{data:[active,pending,expired],backgroundColor:["rgba(34,197,94,.7)","rgba(245,166,35,.7)","rgba(239,68,68,.6)"],borderWidth:0,hoverOffset:6}]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:true,cutout:"68%",
+        plugins:{legend:{position:"bottom",labels:{color:"rgba(255,255,255,.6)",font:{size:11},padding:14}}}
+      }
+    });
+  }
+
+  // ══════════════════════════════
+  // LOAD BOOKINGS TABLE
+  // ══════════════════════════════
+  async function loadBookings(){
+    const session=settings.currentSession||"2024/2025";
+    const snap=await getDocs(query(collection(db,"bookings"),where("session","==",session),orderBy("createdAt","desc"),limit(10)));
+    const tbody=document.getElementById("bookingsTbody");
+    if(snap.empty){tbody.innerHTML=`<tr><td colspan="7" class="tbl-empty">No bookings found for this session</td></tr>`;return;}
+    const statusMap={active:{cls:"tb-active",label:"Active"},pending_payment:{cls:"tb-pending",label:"Pending Pay"},expired:{cls:"tb-expired",label:"Expired"}};
+    tbody.innerHTML=snap.docs.map(d=>{
+      const b=d.data();
+      const sm=statusMap[b.status]||statusMap.pending_payment;
+      const date=b.createdAt?.toDate?b.createdAt.toDate().toLocaleDateString("en-NG",{day:"numeric",month:"short",year:"numeric"}):"—";
+      const initials=(b.studentName||"S").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+      return `<tr>
+        <td><div style="display:flex;align-items:center;gap:10px"><div class="student-ava">${initials}</div><div><div style="font-size:13px;font-weight:600">${b.studentName||"—"}</div></div></div></td>
+        <td style="color:var(--muted);font-size:12px">${b.matricNo||"—"}</td>
+        <td><span style="font-weight:600">${b.blockName||"—"}</span> — Rm ${b.roomNumber||"—"}</td>
+        <td style="color:var(--gold);font-weight:700">₦${Number(b.amountPaid||b.amount||0).toLocaleString()}</td>
+        <td><span class="tbadge ${sm.cls}">${sm.label}</span></td>
+        <td style="color:var(--muted);font-size:12px">${date}</td>
+        <td><a href="admin-bookings.html" class="btn-tbl bt-view"><i class="bi bi-eye-fill"></i>View</a></td>
+      </tr>`;
+    }).join("");
+  }
+
+  // ══════════════════════════════
+  // LOAD COMPLAINTS TABLE
+  // ══════════════════════════════
+  async function loadComplaints(){
+    const snap=await getDocs(query(collection(db,"complaints"),orderBy("createdAt","desc"),limit(5)));
+    const tbody=document.getElementById("complaintsTbody");
+    if(snap.empty){tbody.innerHTML=`<tr><td colspan="5" class="tbl-empty">No complaints filed yet</td></tr>`;return;}
+    const statusMap={received:{cls:"tb-received",label:"Received"},assigned:{cls:"tb-pending",label:"Assigned"},in_progress:{cls:"tb-progress",label:"In Progress"},resolved:{cls:"tb-resolved",label:"Resolved"}};
+    const prioMap={low:"🟢 Low",medium:"🟡 Medium",high:"🔴 High",urgent:"🚨 Urgent"};
+    tbody.innerHTML=snap.docs.map(d=>{
+      const c=d.data();
+      const sm=statusMap[c.status]||statusMap.received;
+      return `<tr>
+        <td style="font-weight:600;font-size:13px">${c.studentName||"—"}<div style="font-size:11px;color:var(--muted)">${c.title||""}</div></td>
+        <td style="font-size:12px;color:var(--muted)">${c.category||"—"}</td>
+        <td style="font-size:12px">${prioMap[c.priority]||"—"}</td>
+        <td><span class="tbadge ${sm.cls}">${sm.label}</span></td>
+        <td><a href="admin-complaints.html" class="btn-tbl bt-assign"><i class="bi bi-arrow-right-circle"></i>Manage</a></td>
+      </tr>`;
+    }).join("");
+  }
+
+  // ══════════════════════════════
+  // LOAD STUDENTS TABLE
+  // ══════════════════════════════
+  async function loadStudents(){
+    const session=settings.currentSession||"2024/2025";
+    const snap=await getDocs(query(collection(db,"users"),where("role","==","student"),orderBy("createdAt","desc"),limit(5)));
+    const tbody=document.getElementById("studentsTbody");
+    if(snap.empty){tbody.innerHTML=`<tr><td colspan="5" class="tbl-empty">No students registered yet</td></tr>`;return;}
+
+    // get booking statuses
+    const uids=snap.docs.map(d=>d.data().uid).filter(Boolean);
+    const bookingMap={};
+    if(uids.length>0){
+      const bSnap=await getDocs(query(collection(db,"bookings"),where("session","==",session)));
+      bSnap.forEach(d=>{bookingMap[d.data().studentUid]=d.data().status;});
+    }
+
+    tbody.innerHTML=snap.docs.map(d=>{
+      const s=d.data();
+      const bStatus=bookingMap[s.uid];
+      const bBadge=bStatus?`<span class="tbadge ${bStatus==="active"?"tb-active":bStatus==="pending_payment"?"tb-pending":"tb-expired"}">${bStatus==="active"?"Active":bStatus==="pending_payment"?"Pending":"Expired"}</span>`:`<span class="tbadge" style="background:rgba(255,255,255,.06);color:var(--muted)">No Booking</span>`;
+      const initials=(s.fullName||"S").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+      return `<tr>
+        <td><div style="display:flex;align-items:center;gap:10px"><div class="student-ava" style="width:30px;height:30px;font-size:11px">${s.photoURL?`<img src="${s.photoURL}" alt=""/>`:initials}</div><div><div style="font-size:13px;font-weight:600">${s.fullName||"—"}</div><div style="font-size:11px;color:var(--muted)">${s.matricNo||"—"}</div></div></div></td>
+        <td style="font-size:12px;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.department||"—"}</td>
+        <td style="font-size:12.5px">${s.level||"—"}</td>
+        <td style="font-size:12.5px">${s.gender||"—"}</td>
+        <td>${bBadge}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  // sign out
+  async function doSignOut(){await signOut(auth);window.location.href="admin-login.html";}
+  ["sideSignOut","sbSignOut","dropSignOut"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener("click",async e=>{e.preventDefault();doSignOut();});
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleSidebar(){
+    document.getElementById("sidebar").classList.toggle("open");
+    document.getElementById("sbOverlay").classList.toggle("show");
+  }
+  function toggleUserMenu(){document.getElementById("userDropdown").classList.toggle("open");}
+  document.addEventListener("click",e=>{
+    if(!e.target.closest("#userMenuBtn")&&!e.target.closest("#userDropdown"))
+      document.getElementById("userDropdown").classList.remove("open");
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Complaints — FUTBabura HMS</title>
+  
+  <!-- Preload critical resources -->
+  <link rel="preload" href="logo.jpg" as="image" fetchpriority="high">
+  <link rel="preconnect" href="https://www.gstatic.com">
+  <link rel="preconnect" href="https://firestore.googleapis.com">
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.2);
+      --white:#fff;--muted:rgba(255,255,255,.5);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.085);
+      --ok:#22c55e;--err:#ef4444;--warn:#f59e0b;--info:#3b82f6;
+      --sidebar-w:260px;--topbar-h:68px;--radius:14px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(245,166,35,.4);border-radius:3px}
+
+    /* ── SIDEBAR ── */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#060f24 0%,#0a1535 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:200;transition:transform .3s ease}
+    .sb-logo{display:flex;align-items:center;gap:11px;padding:20px 22px;border-bottom:1px solid var(--border);text-decoration:none}
+    .sb-logo-img{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;box-shadow:0 0 14px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:1.6px;text-transform:uppercase}
+    .sb-nav{flex:1;padding:18px 14px;overflow-y:auto}
+    .sb-section-label{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 10px;margin:18px 0 8px}
+    .sb-section-label:first-child{margin-top:0}
+    .sb-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:500;transition:all .22s;margin-bottom:2px}
+    .sb-link i{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+    .sb-link:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .sb-link.active{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.18)}
+    .sb-bottom{padding:16px 14px;border-top:1px solid var(--border)}
+    .sb-user{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--border)}
+    .sb-user-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy);flex-shrink:0;overflow:hidden}
+    .sb-user-ava img{width:100%;height:100%;object-fit:cover}
+    .sb-user-name{font-size:12.5px;font-weight:700}
+    .sb-user-role{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+    .sb-signout{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);font-size:16px;cursor:pointer;padding:4px;transition:color .2s}
+    .sb-signout:hover{color:var(--err)}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199}
+    .sb-overlay.show{display:block}
+
+    /* ── TOPBAR ── */
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(7,17,43,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:150}
+    .tb-left{display:flex;align-items:center;gap:14px}
+    .tb-menu{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;display:none;padding:4px}
+    .tb-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}
+    .tb-right{display:flex;align-items:center;gap:14px}
+    .notif-btn{position:relative;background:var(--card);border:1px solid var(--border);border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all .22s}
+    .notif-btn:hover{background:rgba(255,255,255,.08);color:var(--white)}
+    .user-menu-btn{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px 12px 6px 6px;cursor:pointer;transition:all .22s}
+    .user-menu-btn:hover{background:rgba(255,255,255,.07)}
+    .um-ava{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--navy);overflow:hidden;flex-shrink:0}
+    .um-ava img{width:100%;height:100%;object-fit:cover}
+    .um-name{font-size:13px;font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dropdown-menu-hms{position:absolute;top:calc(100% + 8px);right:0;background:#0c1a3d;border:1px solid var(--border);border-radius:12px;padding:8px;min-width:180px;box-shadow:0 16px 40px rgba(0,0,0,.4);z-index:500;display:none;animation:slideDown .2s ease}
+    .dropdown-menu-hms.open{display:block}
+    .dm-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none}
+    .dm-item:hover{background:rgba(255,255,255,.06);color:var(--white)}
+    .dm-item.danger{color:rgba(239,68,68,.8)}
+    .dm-item.danger:hover{background:rgba(239,68,68,.08);color:var(--err)}
+    .dm-divider{height:1px;background:var(--border);margin:6px 0}
+
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh}
+    .content{padding:28px 28px 50px}
+
+    /* ── PAGE LAYOUT ── */
+    .page-grid{display:grid;grid-template-columns:1fr 360px;gap:22px;align-items:start}
+
+    /* ── STATS ROW ── */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+    .stat-mini{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;gap:14px;transition:all .25s}
+    .stat-mini:hover{border-color:rgba(245,166,35,.25);transform:translateY(-2px)}
+    .stat-mini-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .smi-gold{background:rgba(245,166,35,.12)}
+    .smi-blue{background:rgba(59,130,246,.12)}
+    .smi-warn{background:rgba(245,158,11,.12)}
+    .smi-green{background:rgba(34,197,94,.12)}
+    .stat-mini-num{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;line-height:1}
+    .stat-mini-label{font-size:11.5px;color:var(--muted);margin-top:2px}
+
+    /* ── COMPLAINT LIST ── */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .card-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .card-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:9px}
+
+    /* filter tabs */
+    .filter-tabs{display:flex;gap:6px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02)}
+    .ftab{padding:6px 14px;border-radius:100px;font-size:12.5px;font-weight:600;cursor:pointer;border:1.5px solid rgba(255,255,255,.1);background:transparent;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;transition:all .22s}
+    .ftab:hover{border-color:rgba(245,166,35,.3);color:var(--white)}
+    .ftab.active{background:rgba(245,166,35,.12);border-color:rgba(245,166,35,.4);color:var(--gold)}
+
+    /* complaint items */
+    .complaint-list{max-height:520px;overflow-y:auto}
+    .complaint-item{display:flex;gap:14px;padding:16px 22px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:background .2s;position:relative}
+    .complaint-item:hover{background:rgba(255,255,255,.03)}
+    .complaint-item.selected{background:rgba(245,166,35,.05);border-left:3px solid var(--gold)}
+    .ci-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+    .ci-title{font-size:13.5px;font-weight:700;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+    .ci-meta{font-size:11.5px;color:var(--muted);margin-bottom:5px}
+    .ci-preview{font-size:12px;color:rgba(255,255,255,.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px}
+    .ci-time{font-size:10.5px;color:rgba(255,255,255,.3);margin-left:auto;flex-shrink:0;padding-top:2px}
+
+    /* status badges */
+    .sbadge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;text-transform:uppercase;letter-spacing:.5px}
+    .sb-received{background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.2)}
+    .sb-assigned{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+    .sb-progress{background:rgba(168,85,247,.12);color:#d8b4fe;border:1px solid rgba(168,85,247,.2)}
+    .sb-resolved{background:rgba(34,197,94,.12);color:var(--ok);border:1px solid rgba(34,197,94,.2)}
+    .sb-closed{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid rgba(255,255,255,.1)}
+
+    /* priority badges */
+    .pbadge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px}
+    .pb-low{background:rgba(34,197,94,.1);color:var(--ok)}
+    .pb-medium{background:rgba(245,166,35,.1);color:var(--gold)}
+    .pb-high{background:rgba(239,68,68,.1);color:var(--err)}
+    .pb-urgent{background:rgba(239,68,68,.2);color:var(--err);border:1px solid rgba(239,68,68,.3)}
+
+    .empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+    .empty-icon{font-size:48px;display:block;margin-bottom:12px;opacity:.45}
+
+    /* ── DETAIL PANEL ── */
+    .detail-panel{position:sticky;top:calc(var(--topbar-h) + 20px)}
+    .detail-placeholder{text-align:center;padding:48px 20px;color:var(--muted)}
+
+    /* timeline */
+    .timeline{padding:18px 22px}
+    .tl-item{display:flex;gap:14px;padding-bottom:20px;position:relative}
+    .tl-item:not(:last-child)::before{content:'';position:absolute;left:15px;top:30px;bottom:0;width:2px;background:rgba(255,255,255,.07)}
+    .tl-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;position:relative;z-index:1}
+    .tl-dot-done{background:rgba(34,197,94,.15);border:2px solid rgba(34,197,94,.3)}
+    .tl-dot-active{background:rgba(245,166,35,.15);border:2px solid rgba(245,166,35,.3);box-shadow:0 0 0 4px rgba(245,166,35,.08)}
+    .tl-dot-pending{background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1)}
+    .tl-content{flex:1;padding-top:4px}
+    .tl-title{font-size:13px;font-weight:700;margin-bottom:2px}
+    .tl-desc{font-size:12px;color:var(--muted);line-height:1.55}
+    .tl-time{font-size:10.5px;color:rgba(255,255,255,.28);margin-top:3px}
+
+    /* admin reply */
+    .admin-reply{background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.18);border-radius:11px;padding:14px 16px;margin:14px 22px}
+    .ar-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .ar-badge{background:rgba(59,130,246,.15);color:#93c5fd;font-size:10px;font-weight:700;padding:2px 9px;border-radius:100px;letter-spacing:.5px;text-transform:uppercase}
+    .ar-text{font-size:13px;color:rgba(255,255,255,.82);line-height:1.65}
+    .ar-time{font-size:11px;color:var(--muted);margin-top:6px}
+
+    /* ── NEW COMPLAINT FORM ── */
+    .field-wrap{margin-bottom:18px}
+    .field-label{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.72);margin-bottom:7px;display:flex;align-items:center;gap:5px}
+    .req{color:var(--gold);font-size:14px}
+    .input-rel{position:relative}
+    .fi{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;color:rgba(255,255,255,.3);pointer-events:none;z-index:1}
+    .hms-input{width:100%;background:rgba(255,255,255,.048);border:1.5px solid rgba(255,255,255,.1);border-radius:11px;padding:11px 13px 11px 38px;color:var(--white);font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .25s,box-shadow .25s}
+    .hms-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,166,35,.11)}
+    .hms-input::placeholder{color:rgba(255,255,255,.25)}
+    .hms-input.err{border-color:var(--err)!important}
+    .hms-select{appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='rgba(255,255,255,.4)' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;background-size:11px;cursor:pointer}
+    .hms-select option{background:#0c1a3d}
+    .hms-textarea{width:100%;background:rgba(255,255,255,.048);border:1.5px solid rgba(255,255,255,.1);border-radius:11px;padding:11px 13px;color:var(--white);font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;resize:vertical;min-height:100px;transition:border-color .25s;line-height:1.65}
+    .hms-textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,166,35,.11)}
+    .hms-textarea::placeholder{color:rgba(255,255,255,.25)}
+    .char-count{font-size:11px;color:var(--muted);text-align:right;margin-top:4px}
+    .ferr{font-size:11.5px;color:var(--err);margin-top:5px;display:none;align-items:center;gap:4px}
+    .ferr.show{display:flex}
+
+    /* photo upload for complaint */
+    .photo-upload-grid{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+    .photo-thumb{width:68px;height:68px;border-radius:9px;object-fit:cover;border:1px solid rgba(255,255,255,.1)}
+    .add-photo-btn{width:68px;height:68px;border-radius:9px;border:1.5px dashed rgba(245,166,35,.3);background:rgba(245,166,35,.05);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:3px;font-size:10px;color:var(--gold);font-weight:600;transition:all .25s}
+    .add-photo-btn:hover{background:rgba(245,166,35,.1);border-color:var(--gold)}
+
+    /* priority selector */
+    .priority-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+    .pcard{border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;transition:all .22s;font-size:11px;font-weight:700}
+    .pcard:hover{border-color:rgba(245,166,35,.3)}
+    .pcard.selected-low{border-color:var(--ok);background:rgba(34,197,94,.08);color:var(--ok)}
+    .pcard.selected-medium{border-color:var(--gold);background:rgba(245,166,35,.08);color:var(--gold)}
+    .pcard.selected-high{border-color:var(--err);background:rgba(239,68,68,.08);color:var(--err)}
+    .pcard.selected-urgent{border-color:var(--err);background:rgba(239,68,68,.14);color:var(--err)}
+    .pcard-icon{font-size:18px;margin-bottom:4px;display:block}
+
+    /* submit btn */
+    .btn-submit{width:100%;padding:13px;border-radius:11px;background:var(--gold);color:var(--navy);font-size:14.5px;font-weight:700;border:none;cursor:pointer;box-shadow:0 6px 20px var(--glow);transition:all .3s;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px}
+    .btn-submit:hover:not(:disabled){background:var(--gold2);transform:translateY(-2px)}
+    .btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+    /* global alert */
+    .g-alert{border-radius:11px;padding:12px 16px;font-size:13px;font-weight:500;display:none;align-items:center;gap:10px;margin-bottom:16px}
+    .g-alert.show{display:flex}
+    .g-alert.a-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+    .g-alert.a-ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86efac}
+    .g-alert.a-warn{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);color:#fde68a}
+
+    /* skeleton */
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .spin{width:17px;height:17px;border:2.5px solid rgba(7,17,43,.35);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+
+    @media(max-width:1050px){.page-grid{grid-template-columns:1fr}.detail-panel{position:static}}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0}.main{margin-left:0}
+      .tb-menu{display:block}
+      .content{padding:18px 14px 40px}
+      .stats-row{grid-template-columns:1fr 1fr}
+      .um-name{display:none}
+    }
+    @media(max-width:480px){.priority-cards{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+    <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Student Portal</div></div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section-label">Main Menu</div>
+    <a href="dashboard.html" class="sb-link"><i class="bi bi-grid-fill"></i>Dashboard</a>
+    <a href="browse-rooms.html" class="sb-link"><i class="bi bi-door-open-fill"></i>Browse Rooms</a>
+    <a href="my-booking.html" class="sb-link"><i class="bi bi-house-check-fill"></i>My Booking</a>
+    <div class="sb-section-label">Services</div>
+    <a href="complaints.html" class="sb-link active"><i class="bi bi-tools"></i>Complaints</a>
+    <a href="visitors.html" class="sb-link"><i class="bi bi-people-fill"></i>Visitors</a>
+    <div class="sb-section-label">Account</div>
+    <a href="profile.html" class="sb-link"><i class="bi bi-person-fill"></i>My Profile</a>
+    <a href="#" class="sb-link" id="sideSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-user-ava" id="sbAva">S</div>
+      <div><div class="sb-user-name" id="sbName">Loading...</div><div class="sb-user-role">Student</div></div>
+      <button class="sb-signout" id="sbSignOut"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-left">
+    <button class="tb-menu" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+    <div class="tb-title">Complaints</div>
+  </div>
+  <div class="tb-right">
+    <div class="notif-btn" onclick="window.location.href='dashboard.html'"><i class="bi bi-bell-fill"></i></div>
+    <div style="position:relative">
+      <div class="user-menu-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="um-ava" id="umAva">S</div>
+        <span class="um-name" id="umName">Student</span>
+        <i class="bi bi-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </div>
+      <div class="dropdown-menu-hms" id="userDropdown">
+        <a href="dashboard.html" class="dm-item"><i class="bi bi-grid-fill"></i>Dashboard</a>
+        <div class="dm-divider"></div>
+        <div class="dm-item danger" id="dropSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="content fade-up">
+
+    <!-- Stats row -->
+    <div class="stats-row" id="statsRow">
+      <div class="stat-mini"><div class="stat-mini-icon smi-gold">📋</div><div><div class="stat-mini-num" id="stTotal">—</div><div class="stat-mini-label">Total Filed</div></div></div>
+      <div class="stat-mini"><div class="stat-mini-icon smi-blue">🔵</div><div><div class="stat-mini-num" id="stOpen">—</div><div class="stat-mini-label">Open</div></div></div>
+      <div class="stat-mini"><div class="stat-mini-icon smi-warn">⚙️</div><div><div class="stat-mini-num" id="stProgress">—</div><div class="stat-mini-label">In Progress</div></div></div>
+      <div class="stat-mini"><div class="stat-mini-icon smi-green">✅</div><div><div class="stat-mini-num" id="stResolved">—</div><div class="stat-mini-label">Resolved</div></div></div>
+    </div>
+
+    <div class="page-grid">
+
+      <!-- LEFT: list + new complaint form -->
+      <div style="display:flex;flex-direction:column;gap:20px">
+
+        <!-- Complaints list -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title"><i class="bi bi-tools" style="color:var(--gold)"></i>My Complaints</span>
+            <button class="sbadge sb-received" style="cursor:pointer;background:rgba(245,166,35,.12);color:var(--gold);border-color:rgba(245,166,35,.25)" onclick="scrollToForm()">
+              <i class="bi bi-plus-lg"></i> New Complaint
+            </button>
+          </div>
+          <div class="filter-tabs" id="filterTabs">
+            <button class="ftab active" onclick="filterComplaints('all',this)">All</button>
+            <button class="ftab" onclick="filterComplaints('received',this)">Received</button>
+            <button class="ftab" onclick="filterComplaints('assigned',this)">Assigned</button>
+            <button class="ftab" onclick="filterComplaints('in_progress',this)">In Progress</button>
+            <button class="ftab" onclick="filterComplaints('resolved',this)">Resolved</button>
+          </div>
+          <div class="complaint-list" id="complaintList">
+            <div style="padding:14px 22px"><div class="skeleton" style="height:64px;border-radius:10px;margin-bottom:10px"></div><div class="skeleton" style="height:64px;border-radius:10px;margin-bottom:10px"></div><div class="skeleton" style="height:64px;border-radius:10px"></div></div>
+          </div>
+        </div>
+
+        <!-- New Complaint Form -->
+        <div class="card" id="complaintForm">
+          <div class="card-header">
+            <span class="card-title"><i class="bi bi-plus-circle-fill" style="color:var(--gold)"></i>File New Complaint</span>
+          </div>
+          <div style="padding:22px">
+            <div class="g-alert" id="formAlert"><i class="bi" id="formAlertIcon"></i><span id="formAlertMsg"></span></div>
+
+            <!-- must have booking warning -->
+            <div class="g-alert a-warn" id="noBookingWarn">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <span>You must have an active room booking to file a complaint. <a href="browse-rooms.html" style="color:var(--gold);font-weight:700">Book a room first →</a></span>
+            </div>
+
+            <div id="formFields">
+              <div class="field-wrap">
+                <label class="field-label">Complaint Title <span class="req">*</span></label>
+                <div class="input-rel">
+                  <input type="text" class="hms-input" id="cTitle" placeholder="e.g. Broken ceiling fan in room" maxlength="100"/>
+                  <i class="bi bi-pencil-fill fi"></i>
+                </div>
+                <div class="ferr" id="cTitleErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div class="field-wrap">
+                  <label class="field-label">Category <span class="req">*</span></label>
+                  <div class="input-rel">
+                    <select class="hms-input hms-select" id="cCategory">
+                      <option value="">Select category</option>
+                      <option>Electrical</option>
+                      <option>Plumbing</option>
+                      <option>Structural / Building</option>
+                      <option>Furniture / Fittings</option>
+                      <option>Water Supply</option>
+                      <option>Power Supply</option>
+                      <option>Sanitation / Hygiene</option>
+                      <option>Security</option>
+                      <option>Noise / Disturbance</option>
+                      <option>Roommate Issue</option>
+                      <option>Other</option>
+                    </select>
+                    <i class="bi bi-tag-fill fi"></i>
+                  </div>
+                  <div class="ferr" id="cCategoryErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+                </div>
+                <div class="field-wrap">
+                  <label class="field-label">Location <span class="req">*</span></label>
+                  <div class="input-rel">
+                    <input type="text" class="hms-input" id="cLocation" placeholder="e.g. Block A, Room 101"/>
+                    <i class="bi bi-geo-alt-fill fi"></i>
+                  </div>
+                  <div class="ferr" id="cLocationErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+                </div>
+              </div>
+
+              <div class="field-wrap">
+                <label class="field-label">Priority Level <span class="req">*</span></label>
+                <div class="priority-cards" id="priorityCards">
+                  <div class="pcard" data-p="low" onclick="selectPriority('low')"><span class="pcard-icon">🟢</span>Low</div>
+                  <div class="pcard" data-p="medium" onclick="selectPriority('medium')"><span class="pcard-icon">🟡</span>Medium</div>
+                  <div class="pcard" data-p="high" onclick="selectPriority('high')"><span class="pcard-icon">🔴</span>High</div>
+                  <div class="pcard" data-p="urgent" onclick="selectPriority('urgent')"><span class="pcard-icon">🚨</span>Urgent</div>
+                </div>
+                <div class="ferr" id="cPriorityErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+              </div>
+
+              <div class="field-wrap">
+                <label class="field-label">Description <span class="req">*</span></label>
+                <textarea class="hms-textarea" id="cDesc" placeholder="Describe the issue in detail. Include when it started, how it affects you, and any steps already taken..." maxlength="600" oninput="document.getElementById('descCount').textContent=this.value.length+'/600'"></textarea>
+                <div class="char-count" id="descCount">0/600</div>
+                <div class="ferr" id="cDescErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+              </div>
+
+              <div class="field-wrap">
+                <label class="field-label">Attach Photos <span style="font-size:11px;color:var(--muted);font-weight:400">(Optional, max 3)</span></label>
+                <div class="photo-upload-grid" id="photoGrid">
+                  <label class="add-photo-btn" for="photoInput"><i class="bi bi-camera-fill" style="font-size:20px"></i>Add Photo</label>
+                  <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="handlePhotoUpload(this)"/>
+                </div>
+              </div>
+
+              <button class="btn-submit" id="submitBtn" onclick="submitComplaint()">
+                <span id="submitText"><i class="bi bi-send-fill"></i> Submit Complaint</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: detail panel -->
+      <div class="detail-panel">
+        <div class="card" id="detailCard">
+          <div class="card-header">
+            <span class="card-title"><i class="bi bi-info-circle-fill" style="color:var(--gold)"></i>Complaint Details</span>
+          </div>
+          <div class="detail-placeholder" id="detailPlaceholder">
+            <span class="empty-icon">🔍</span>
+            <p style="font-size:13.5px">Click on a complaint to view its full details and status timeline.</p>
+          </div>
+          <div id="detailContent" style="display:none"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- OPTIMIZED FIREBASE SCRIPT -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, doc, query, where,
+    getDocs, addDoc, onSnapshot, orderBy, serverTimestamp, enableIndexedDbPersistence, limit
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { 
+    getStorage, ref, uploadBytes, getDownloadURL 
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+  import { 
+    getAuth, onAuthStateChanged, signOut 
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg={
+    apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",
+    authDomain:"futb-485e8.firebaseapp.com",
+    projectId:"futb-485e8",
+    storageBucket:"futb-485e8.firebasestorage.app",
+    messagingSenderId:"260966342395",
+    appId:"1:260966342395:web:8a43fd08e01af57c111a5e"
+  };
+  
+  const app = initializeApp(cfg);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+  const auth = getAuth(app);
+
+  // Enable offline persistence for instant loads
+  try {
+    enableIndexedDbPersistence(db);
+  } catch(e) { console.log("Persistence enabled"); }
+
+  let currentUser=null, studentData=null, allComplaints=[], selectedPriority="", activeFilter="all", hasActiveBooking=false, photoFiles=[], unsubComplaints=null;
+
+  const CACHE_KEY = 'hms_complaints_cache_v2';
+  const CACHE_TIME = 5 * 60 * 1000; // 5 minutes
+
+  // ── AUTH GUARD ──
+  onAuthStateChanged(auth, async user => {
+    if(!user || !user.emailVerified) {
+      await signOut(auth);
+      window.location.href="login.html";
+      return;
+    }
+    currentUser = user;
+    
+    // Show cached data immediately while loading fresh data
+    loadFromCache();
+    await boot(user);
+  });
+
+  // ── CACHE FUNCTIONS ──
+  function loadFromCache() {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if(!cached) return;
+    
+    try {
+      const { data, timestamp } = JSON.parse(cached);
+      if(Date.now() - timestamp > CACHE_TIME) return;
+      
+      // Render cached data immediately
+      if(data.student) renderStudentUI(data.student);
+      if(data.complaints) {
+        allComplaints = data.complaints;
+        updateStats();
+        renderList('all');
+      }
+      if(data.hasActiveBooking !== undefined) {
+        hasActiveBooking = data.hasActiveBooking;
+        updateBookingUI(data.hasActiveBooking, data.bookingLocation);
+      }
+      
+      console.log("✅ Complaints loaded from cache");
+    } catch(e) { console.error("Cache error:", e); }
+  }
+
+  function saveToCache(key, data) {
+    try {
+      const existing = JSON.parse(localStorage.getItem(CACHE_KEY) || '{"data":{}}');
+      if(!existing.data) existing.data = {};
+      existing.data[key] = data;
+      existing.timestamp = Date.now();
+      localStorage.setItem(CACHE_KEY, JSON.stringify(existing));
+    } catch(e) { /* Storage full */ }
+  }
+
+  // ════════════════════════════════════════════════════════
+  // BOOT (PARALLEL LOADING - FAST!)
+  // ════════════════════════════════════════════════════════
+  async function boot(user) {
+    const startTime = performance.now();
+    
+    try {
+      // 1. Get student profile
+      const profSnap = await getDocs(query(
+        collection(db,"users"), 
+        where("uid","==",user.uid), 
+        limit(1)
+      ));
+      
+      if(profSnap.empty || profSnap.docs[0].data().role !== "student") {
+        await signOut(auth);
+        window.location.href="login.html";
+        return;
+      }
+      
+      studentData = profSnap.docs[0].data();
+      renderStudentUI(studentData);
+      saveToCache('student', studentData);
+
+      // 2. Load settings and booking IN PARALLEL
+      const [settingsSnap, complaintsSnap] = await Promise.all([
+        getDocs(query(collection(db,"settings"), limit(1))),
+        // Start complaints listener (returns unsubscribe function)
+        Promise.resolve(startComplaintsListener(user.uid))
+      ]);
+
+      const settings = settingsSnap.empty ? {} : settingsSnap.docs[0].data();
+      
+      // 3. Check booking status (separate query for form validation)
+      const bookingSnap = await getDocs(query(
+        collection(db,"bookings"),
+        where("studentUid","==",user.uid),
+        where("session","==",settings.currentSession||"2024/2025"),
+        where("status","==","active"),
+        limit(1)
+      ));
+      
+      hasActiveBooking = !bookingSnap.empty;
+      let bookingLocation = "";
+      
+      if(hasActiveBooking) {
+        const b = bookingSnap.docs[0].data();
+        bookingLocation = `${b.blockName}, Room ${b.roomNumber}`;
+        document.getElementById("cLocation").value = bookingLocation;
+      }
+      
+      updateBookingUI(hasActiveBooking, bookingLocation);
+      saveToCache('hasActiveBooking', hasActiveBooking);
+      saveToCache('bookingLocation', bookingLocation);
+
+      const loadTime = performance.now() - startTime;
+      console.log(`⚡ Complaints page loaded in ${loadTime.toFixed(0)}ms`);
+
+    } catch(e) {
+      console.error("Boot error:", e);
+    }
+  }
+
+  function renderStudentUI(s) {
+    const initials = (s.fullName||"S").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    
+    ["sbAva","umAva"].forEach(id => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      
+      if(s.photoURL) {
+        const img = new Image();
+        img.onload = () => { el.innerHTML = `<img src="${s.photoURL}" alt=""/>`; };
+        img.src = s.photoURL;
+      } else {
+        el.textContent = initials;
+      }
+    });
+    
+    document.getElementById("sbName").textContent = s.fullName || "Student";
+    document.getElementById("umName").textContent = (s.fullName || "Student").split(" ")[0];
+  }
+
+  function updateBookingUI(hasBooking, location) {
+    if(!hasBooking) {
+      document.getElementById("noBookingWarn").classList.add("show");
+      document.getElementById("formFields").style.opacity = ".45";
+      document.getElementById("formFields").style.pointerEvents = "none";
+    }
+  }
+
+  // ── REAL-TIME COMPLAINTS LISTENER ──
+  function startComplaintsListener(uid) {
+    if(unsubComplaints) unsubComplaints();
+    
+    const q = query(
+      collection(db,"complaints"),
+      where("studentUid","==",uid),
+      orderBy("createdAt","desc")
+    );
+    
+    unsubComplaints = onSnapshot(q, snap => {
+      allComplaints = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      updateStats();
+      renderList(activeFilter);
+      saveToCache('complaints', allComplaints);
+    }, err => {
+      console.error("Complaints listener error:", err);
+      // Try to load from cache if listener fails
+      loadFromCache();
+    });
+    
+    return unsubComplaints;
+  }
+
+  function updateStats() {
+    const total = allComplaints.length;
+    const open = allComplaints.filter(c => c.status === "received" || c.status === "assigned").length;
+    const prog = allComplaints.filter(c => c.status === "in_progress").length;
+    const res = allComplaints.filter(c => c.status === "resolved" || c.status === "closed").length;
+    
+    document.getElementById("stTotal").textContent = total;
+    document.getElementById("stOpen").textContent = open;
+    document.getElementById("stProgress").textContent = prog;
+    document.getElementById("stResolved").textContent = res;
+  }
+
+  // ── FILTER ──
+  window.filterComplaints = function(filter, btn) {
+    activeFilter = filter;
+    document.querySelectorAll(".ftab").forEach(t => t.classList.remove("active"));
+    btn.classList.add("active");
+    renderList(filter);
+  };
+
+  // ── RENDER LIST ──
+  const catIcons = {
+    Electrical:"⚡",Plumbing:"🔧","Structural / Building":"🏗","Furniture / Fittings":"🪑",
+    "Water Supply":"💧","Power Supply":"🔌","Sanitation / Hygiene":"🧹",Security:"🔐",
+    "Noise / Disturbance":"📢","Roommate Issue":"👥",Other:"📋"
+  };
+  
+  const catColors = {
+    Electrical:"rgba(245,166,35,.12)",Plumbing:"rgba(59,130,246,.12)",
+    "Structural / Building":"rgba(168,85,247,.12)","Water Supply":"rgba(59,130,246,.12)",
+    "Power Supply":"rgba(245,166,35,.12)","Sanitation / Hygiene":"rgba(34,197,94,.12)",
+    Security:"rgba(239,68,68,.12)","Noise / Disturbance":"rgba(239,68,68,.12)",
+    "Roommate Issue":"rgba(168,85,247,.12)",Other:"rgba(255,255,255,.06)"
+  };
+
+  function renderList(filter) {
+    const list = document.getElementById("complaintList");
+    let data = filter === 'all' ? allComplaints : allComplaints.filter(c => c.status === filter);
+
+    if(data.length === 0) {
+      list.innerHTML = `<div class="empty-state"><span class="empty-icon">🔧</span><p style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:6px">No complaints found</p><p style="font-size:13px">${filter==="all"?"You haven't filed any complaints yet.":"No complaints with this status."}</p></div>`;
+      return;
+    }
+
+    const statusMap = {
+      received:{cls:"sb-received",label:"Received"},
+      assigned:{cls:"sb-assigned",label:"Assigned"},
+      in_progress:{cls:"sb-progress",label:"In Progress"},
+      resolved:{cls:"sb-resolved",label:"Resolved"},
+      closed:{cls:"sb-closed",label:"Closed"}
+    };
+    
+    const timeAgo = ts => {
+      if(!ts) return "";
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      const diff = (Date.now()-d)/1000;
+      if(diff<60) return "just now";
+      if(diff<3600) return `${Math.floor(diff/60)}m ago`;
+      if(diff<86400) return `${Math.floor(diff/3600)}h ago`;
+      return `${Math.floor(diff/86400)}d ago`;
+    };
+
+    list.innerHTML = data.map(c => {
+      const sm = statusMap[c.status] || statusMap.received;
+      const icon = catIcons[c.category] || "📋";
+      const bg = catColors[c.category] || "rgba(255,255,255,.06)";
+      
+      return `<div class="complaint-item" id="ci-${c.id}" onclick="showDetail('${c.id}')">
+        <div class="ci-icon" style="background:${bg}">${icon}</div>
+        <div style="flex:1;min-width:0">
+          <div class="ci-title">${c.title||"Complaint"}</div>
+          <div class="ci-meta">${c.category||"General"} · <span class="sbadge ${sm.cls}">${sm.label}</span></div>
+          <div class="ci-preview">${c.description||""}</div>
+        </div>
+        <div class="ci-time">${timeAgo(c.createdAt)}</div>
+      </div>`;
+    }).join("");
+  }
+
+  // ── SHOW DETAIL ──
+  const statusTimeline = {
+    received: [
+      {status:"received",done:true,label:"Complaint Received",desc:"Your complaint has been received by the hostel office."},
+      {status:"assigned",done:false,label:"Assigned to Staff",desc:"Waiting to be assigned to maintenance personnel."},
+      {status:"in_progress",done:false,label:"Work in Progress",desc:"Maintenance staff working on the issue."},
+      {status:"resolved",done:false,label:"Issue Resolved",desc:"The complaint has been fully resolved."}
+    ],
+    assigned: [
+      {status:"received",done:true,label:"Complaint Received",desc:"Your complaint has been received."},
+      {status:"assigned",done:true,label:"Assigned to Staff",desc:"Assigned to a maintenance officer."},
+      {status:"in_progress",done:false,label:"Work in Progress",desc:"Waiting for work to commence."},
+      {status:"resolved",done:false,label:"Issue Resolved",desc:"The complaint will be resolved soon."}
+    ],
+    in_progress: [
+      {status:"received",done:true,label:"Complaint Received",desc:"Your complaint has been received."},
+      {status:"assigned",done:true,label:"Assigned to Staff",desc:"Assigned to a maintenance officer."},
+      {status:"in_progress",done:true,label:"Work in Progress",desc:"Maintenance staff are currently working on it."},
+      {status:"resolved",done:false,label:"Issue Resolved",desc:"Work is ongoing — resolution expected soon."}
+    ],
+    resolved: [
+      {status:"received",done:true,label:"Complaint Received",desc:""},
+      {status:"assigned",done:true,label:"Assigned to Staff",desc:""},
+      {status:"in_progress",done:true,label:"Work Completed",desc:""},
+      {status:"resolved",done:true,label:"Issue Resolved ✓",desc:"Your complaint has been fully resolved."}
+    ]
+  };
+
+  window.showDetail = function(id) {
+    const c = allComplaints.find(x => x.id === id);
+    if(!c) return;
+    
+    document.querySelectorAll(".complaint-item").forEach(el => el.classList.remove("selected"));
+    const el = document.getElementById(`ci-${id}`);
+    if(el) el.classList.add("selected");
+
+    const priorityBadge = {
+      low:"pb-low Low", medium:"pb-medium Medium", 
+      high:"pb-high High", urgent:"pb-urgent 🚨 Urgent"
+    }[c.priority] || "pb-low Low";
+    
+    const tl = statusTimeline[c.status] || statusTimeline.received;
+    
+    const timeAgo = ts => {
+      if(!ts) return "—";
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleDateString("en-NG",{day:"numeric",month:"short",year:"numeric"}) + ", " + 
+             d.toLocaleTimeString("en-NG",{hour:"2-digit",minute:"2-digit"});
+    };
+
+    document.getElementById("detailPlaceholder").style.display = "none";
+    document.getElementById("detailContent").style.display = "block";
+    
+    document.getElementById("detailContent").innerHTML = `
+      <div style="padding:18px 22px;border-bottom:1px solid var(--border)">
+        <div style="font-size:17px;font-weight:700;margin-bottom:6px">${c.title}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px">
+          <span class="sbadge sb-${c.status||"received"}">${c.status?.replace("_"," ")||"received"}</span>
+          <span class="pbadge ${priorityBadge.split(" ")[0]}">${priorityBadge.split(" ").slice(1).join(" ")}</span>
+          <span class="sbadge sb-closed">${c.category||"General"}</span>
+        </div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7">${c.description||""}</p>
+        ${c.photos?.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">${c.photos.map(p=>`<img src="${p}" style="width:72px;height:72px;border-radius:8px;object-fit:cover;border:1px solid rgba(255,255,255,.1)">`).join("")}</div>` : ""}
+        <div style="font-size:11px;color:rgba(255,255,255,.28);margin-top:10px">Filed: ${timeAgo(c.createdAt)} · Location: ${c.location||"—"}</div>
+      </div>
+      ${c.adminReply ? `<div class="admin-reply"><div class="ar-header"><i class="bi bi-person-badge-fill" style="color:#93c5fd"></i><span class="ar-badge">Admin Reply</span></div><div class="ar-text">${c.adminReply}</div><div class="ar-time">${c.adminReplyDate ? new Date(c.adminReplyDate?.toDate ? c.adminReplyDate.toDate() : c.adminReplyDate).toLocaleDateString("en-NG",{day:"numeric",month:"short",year:"numeric"}) : "—"}</div></div>` : ""}
+      <div class="timeline">
+        <div style="font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:14px;letter-spacing:.5px;text-transform:uppercase">Status Timeline</div>
+        ${tl.map(step => `
+          <div class="tl-item">
+            <div class="tl-dot ${step.done ? "tl-dot-done" : step.status === c.status ? "tl-dot-active" : "tl-dot-pending"}">${step.done ? "✓" : step.status === c.status ? "●" : "○"}</div>
+            <div class="tl-content">
+              <div class="tl-title" style="color:${step.done ? "var(--ok)" : step.status === c.status ? "var(--gold)" : "var(--muted)"}">${step.label}</div>
+              <div class="tl-desc">${step.desc}</div>
+            </div>
+          </div>`).join("")}
+      </div>`;
+  };
+
+  // ── PHOTO UPLOAD ──
+  window.handlePhotoUpload = function(input) {
+    const files = Array.from(input.files).slice(0, 3 - photoFiles.length);
+    
+    files.forEach(f => {
+      if(photoFiles.length >= 3) return;
+      photoFiles.push(f);
+      
+      const reader = new FileReader();
+      reader.onload = e => {
+        const grid = document.getElementById("photoGrid");
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        img.className = "photo-thumb";
+        const addBtn = grid.querySelector(".add-photo-btn");
+        grid.insertBefore(img, addBtn);
+        if(photoFiles.length >= 3 && addBtn) addBtn.style.display = "none";
+      };
+      reader.readAsDataURL(f);
+    });
+    
+    input.value = "";
+  };
+
+  // ── PRIORITY SELECT ──
+  window.selectPriority = function(p) {
+    selectedPriority = p;
+    document.querySelectorAll(".pcard").forEach(c => {
+      c.className = "pcard";
+      if(c.dataset.p === p) c.classList.add(`selected-${p}`);
+    });
+    document.getElementById("cPriorityErr").classList.remove("show");
+  };
+
+  // ── SUBMIT COMPLAINT ──
+  window.submitComplaint = async function() {
+    if(!currentUser || !studentData) return;
+    if(!hasActiveBooking) return;
+
+    const title = document.getElementById("cTitle").value.trim();
+    const category = document.getElementById("cCategory").value;
+    const location = document.getElementById("cLocation").value.trim();
+    const desc = document.getElementById("cDesc").value.trim();
+    let valid = true;
+
+    if(!title) { showFieldErr("cTitle","cTitleErr","Complaint title is required"); valid = false; }
+    if(!category) { showFieldErr("cCategory","cCategoryErr","Please select a category"); valid = false; }
+    if(!location) { showFieldErr("cLocation","cLocationErr","Please enter the location"); valid = false; }
+    if(!selectedPriority) {
+      document.getElementById("cPriorityErr").classList.add("show");
+      document.getElementById("cPriorityErr").querySelector("span").textContent = "Please select a priority level";
+      valid = false;
+    }
+    if(!desc || desc.length < 20) { showFieldErr("cDesc","cDescErr","Please provide a more detailed description (at least 20 characters)"); valid = false; }
+    
+    if(!valid) return;
+
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    document.getElementById("submitText").innerHTML = `<div class="spin"></div> Submitting...`;
+
+    try {
+      // Upload photos
+      const photoUrls = [];
+      for(const file of photoFiles) {
+        const sRef = ref(storage, `complaint_photos/${currentUser.uid}/${Date.now()}_${file.name}`);
+        await uploadBytes(sRef, file);
+        const url = await getDownloadURL(sRef);
+        photoUrls.push(url);
+      }
+
+      // Save complaint
+      await addDoc(collection(db,"complaints"), {
+        studentUid: currentUser.uid,
+        studentName: studentData.fullName,
+        matricNo: studentData.matricNo,
+        roomNumber: studentData.roomNumber || "",
+        department: studentData.department,
+        title, category, location,
+        priority: selectedPriority,
+        description: desc,
+        photos: photoUrls,
+        status: "received",
+        adminReply: "",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+
+      // Send notification
+      await addDoc(collection(db,"notifications"), {
+        studentUid: currentUser.uid,
+        type: "complaint",
+        message: `🔧 Your complaint "${title}" has been received and is being reviewed.`,
+        read: false,
+        createdAt: serverTimestamp()
+      });
+
+      // Reset form
+      document.getElementById("cTitle").value = "";
+      document.getElementById("cCategory").value = "";
+      document.getElementById("cDesc").value = "";
+      document.getElementById("descCount").textContent = "0/600";
+      selectedPriority = "";
+      photoFiles = [];
+      document.querySelectorAll(".pcard").forEach(c => c.className = "pcard");
+      document.querySelectorAll(".photo-thumb").forEach(el => el.remove());
+      document.querySelector(".add-photo-btn").style.display = "";
+
+      showFormAlert("Complaint submitted successfully! We will review and respond shortly.", "a-ok");
+
+    } catch(e) {
+      console.error(e);
+      showFormAlert("Failed to submit complaint. Please try again.", "a-err");
+    } finally {
+      btn.disabled = false;
+      document.getElementById("submitText").innerHTML = `<i class="bi bi-send-fill"></i> Submit Complaint`;
+    }
+  };
+
+  function showFieldErr(inputId, errId, msg) {
+    document.getElementById(inputId)?.classList.add("err");
+    const e = document.getElementById(errId);
+    if(e) { e.classList.add("show"); e.querySelector("span").textContent = msg; }
+  }
+
+  function showFormAlert(msg, cls) {
+    const el = document.getElementById("formAlert");
+    el.className = `g-alert ${cls} show`;
+    document.getElementById("formAlertIcon").className = cls === "a-err" ? "bi bi-exclamation-circle-fill" : "bi bi-check-circle-fill";
+    document.getElementById("formAlertMsg").textContent = msg;
+    el.scrollIntoView({behavior: "smooth", block: "nearest"});
+  }
+
+  // Sign out handlers
+  ["sideSignOut","sbSignOut","dropSignOut"].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.addEventListener("click", async e => {
+      e.preventDefault();
+      if(unsubComplaints) unsubComplaints();
+      await signOut(auth);
+      localStorage.removeItem(CACHE_KEY);
+      window.location.href = "login.html";
+    });
+  });
+
+  // Clear errors on input
+  ["cTitle","cCategory","cLocation","cDesc"].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.addEventListener("input", () => el.classList.remove("err"));
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("open");
+    document.getElementById("sbOverlay").classList.toggle("show");
+  }
+  function toggleUserMenu() {
+    document.getElementById("userDropdown").classList.toggle("open");
+  }
+  function scrollToForm() {
+    document.getElementById("complaintForm").scrollIntoView({behavior: "smooth"});
+  }
+  document.addEventListener("click", e => {
+    if(!e.target.closest("#userMenuBtn") && !e.target.closest("#userDropdown")) {
+      document.getElementById("userDropdown").classList.remove("open");
+    }
+  });
+</script>
+</body>
+</html>

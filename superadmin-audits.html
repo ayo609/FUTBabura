@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Audit Logs — Super Admin | FUTBabura HMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.2);
+      --white:#fff;--muted:rgba(255,255,255,.5);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.085);
+      --ok:#22c55e;--err:#ef4444;--warn:#f59e0b;--info:#3b82f6;--purple:#a855f7;
+      --sidebar-w:280px;--topbar-h:70px;--radius:16px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:rgba(245,166,35,.4);border-radius:3px}
+
+    /* ── SIDEBAR ── */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#050e20 0%,#07112b 100%);border-right:1px solid rgba(245,166,35,.12);display:flex;flex-direction:column;z-index:200;transition:transform .3s ease}
+    .sb-logo{display:flex;align-items:center;gap:12px;padding:22px 24px;border-bottom:1px solid rgba(245,166,35,.15);text-decoration:none}
+    .sb-logo-img{width:42px;height:42px;border-radius:50%;border:2.5px solid var(--gold);overflow:hidden;box-shadow:0 0 20px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+    .sb-nav{flex:1;padding:20px 16px;overflow-y:auto}
+    .sb-section-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 12px;margin:20px 0 10px}
+    .sb-section-label:first-child{margin-top:0}
+    .sb-link{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:11px;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:500;transition:all .22s;margin-bottom:3px}
+    .sb-link i{font-size:17px;width:22px;text-align:center;flex-shrink:0}
+    .sb-link:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .sb-link.active{background:linear-gradient(135deg,rgba(245,166,35,.15),rgba(245,166,35,.05));color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+    .sb-bottom{padding:18px 16px;border-top:1px solid rgba(245,166,35,.1)}
+    .sb-admin{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.12)}
+    .sb-admin-ava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:var(--navy);flex-shrink:0;overflow:hidden}
+    .sb-admin-ava img{width:100%;height:100%;object-fit:cover}
+    .sb-admin-name{font-size:13px;font-weight:700;line-height:1.2}
+    .sb-admin-role{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px}
+    .sb-signout{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);font-size:17px;cursor:pointer;padding:4px;transition:color .2s}
+    .sb-signout:hover{color:var(--err)}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:199}
+    .sb-overlay.show{display:block}
+
+    /* ── TOPBAR ── */
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(7,17,43,.98);backdrop-filter:blur(20px);border-bottom:1px solid rgba(245,166,35,.1);display:flex;align-items:center;justify-content:space-between;padding:0 32px;z-index:150}
+    .tb-left{display:flex;align-items:center;gap:16px}
+    .tb-menu{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;display:none;padding:4px}
+    .tb-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+    .tb-right{display:flex;align-items:center;gap:16px}
+    .user-menu-btn{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:6px 14px 6px 8px;cursor:pointer;transition:all .22s}
+    .user-menu-btn:hover{background:rgba(255,255,255,.07)}
+    .um-ava{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--navy);overflow:hidden;flex-shrink:0}
+    .um-name{font-size:13.5px;font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dropdown-menu-hms{position:absolute;top:calc(100% + 10px);right:0;background:#0c1a3d;border:1px solid rgba(245,166,35,.15);border-radius:14px;padding:8px;min-width:200px;box-shadow:0 20px 40px rgba(0,0,0,.5);z-index:500;display:none;animation:slideDown .2s ease}
+    .dropdown-menu-hms.open{display:block}
+    .dm-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:9px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none}
+    .dm-item:hover{background:rgba(255,255,255,.06);color:var(--white)}
+    .dm-item.danger{color:rgba(239,68,68,.8)}
+    .dm-item.danger:hover{background:rgba(239,68,68,.08);color:var(--err)}
+
+    /* ── MAIN ── */
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh}
+    .content{padding:28px 32px 50px}
+
+    /* ── PAGE HEADER ── */
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px}
+    .ph-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:900}
+    .ph-actions{display:flex;gap:12px}
+    .btn-outline{padding:12px 22px;border-radius:11px;background:transparent;border:1.5px solid var(--border);color:var(--muted);font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .25s}
+    .btn-outline:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .btn-danger-outline{padding:12px 22px;border-radius:11px;background:transparent;border:1.5px solid rgba(239,68,68,.3);color:#fca5a5;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .25s}
+    .btn-danger-outline:hover{background:rgba(239,68,68,.1)}
+
+    /* ── STATS ROW ── */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px}
+    .stat-label{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+    .stat-value{font-family:'Playfair Display',serif;font-size:26px;font-weight:900}
+
+    /* ── FILTER BAR ── */
+    .filter-bar{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .search-wrap{flex:1;min-width:250px;position:relative}
+    .search-input{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 16px 11px 44px;color:var(--white);font-size:13.5px;outline:none}
+    .search-input:focus{border-color:var(--gold)}
+    .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px}
+    .filter-select{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 32px 11px 14px;color:var(--white);font-size:13px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='rgba(255,255,255,.4)' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:11px}
+    .filter-select option{background:#0c1a3d}
+    .btn-reset{padding:11px 20px;border-radius:10px;background:transparent;border:1.5px solid var(--border);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .25s}
+    .btn-reset:hover{background:rgba(255,255,255,.05);color:var(--white)}
+
+    /* ── TABLE ── */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .card-header{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .card-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:9px}
+    .table-wrapper{overflow-x:auto}
+    .audit-table{width:100%;border-collapse:collapse;min-width:1200px}
+    .audit-table th{padding:13px 16px;font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);text-align:left;background:rgba(255,255,255,.02)}
+    .audit-table td{padding:14px 16px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+    .audit-table tr:hover td{background:rgba(255,255,255,.02)}
+
+    /* action badges */
+    .action-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:4px 10px;border-radius:100px;text-transform:uppercase;white-space:nowrap}
+    .action-create{background:rgba(34,197,94,.12);color:var(--ok)}
+    .action-update{background:rgba(59,130,246,.12);color:#93c5fd}
+    .action-delete{background:rgba(239,68,68,.12);color:var(--err)}
+    .action-login{background:rgba(245,166,35,.12);color:var(--gold)}
+    .action-logout{background:rgba(255,255,255,.06);color:var(--muted)}
+    .action-failed{background:rgba(239,68,68,.15);color:var(--err);border:1px solid rgba(239,68,68,.3)}
+    .action-system{background:rgba(168,85,247,.12);color:#d8b4fe}
+
+    .status-success{color:var(--ok)}
+    .status-failed{color:var(--err)}
+
+    /* pagination */
+    .pagination-wrap{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-top:1px solid var(--border)}
+    .pagination{display:flex;gap:6px}
+    .page-btn{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
+    .page-btn:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .page-btn.active{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+    .page-btn:disabled{opacity:.4;cursor:not-allowed}
+
+    /* detail modal */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:center;justify-content:center}
+    .modal-overlay.show{display:flex}
+    .modal{background:#0c1a3d;border:1px solid rgba(245,166,35,.2);border-radius:18px;width:90%;max-width:600px;max-height:85vh;overflow-y:auto;animation:slideDown .2s ease}
+    .modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+    .modal-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer}
+    .modal-body{padding:24px}
+    .modal-footer{padding:18px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end}
+    .btn-modal{padding:10px 22px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:none}
+    .btn-modal-secondary{background:transparent;border:1.5px solid var(--border);color:var(--muted)}
+    .btn-modal-secondary:hover{background:rgba(255,255,255,.05);color:var(--white)}
+
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+    .detail-item{margin-bottom:8px}
+    .detail-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+    .detail-value{font-size:14px;font-weight:500;word-break:break-word}
+    .detail-full{grid-column:span 2}
+
+    .empty-state{text-align:center;padding:50px;color:var(--muted)}
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0}.main{margin-left:0}
+      .tb-menu{display:block}
+      .content{padding:18px 16px 40px}
+      .stats-row{grid-template-columns:repeat(2,1fr)}
+      .um-name{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar" id="sidebar">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+    <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Super Admin</div></div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section-label">MAIN</div>
+    <a href="superadmin-dashboard.html" class="sb-link"><i class="bi bi-grid-fill"></i>Dashboard</a>
+    <a href="superadmin-admins.html" class="sb-link"><i class="bi bi-shield-lock-fill"></i>Admin Management</a>
+    <a href="superadmin-students.html" class="sb-link"><i class="bi bi-people-fill"></i>Students</a>
+    <div class="sb-section-label">HOSTEL MANAGEMENT</div>
+    <a href="superadmin-hostels.html" class="sb-link"><i class="bi bi-building"></i>Hostels</a>
+    <a href="superadmin-rooms.html" class="sb-link"><i class="bi bi-door-open-fill"></i>Rooms</a>
+    <a href="superadmin-bookings.html" class="sb-link"><i class="bi bi-house-check-fill"></i>All Bookings</a>
+    <div class="sb-section-label">FINANCE</div>
+    <a href="superadmin-payments.html" class="sb-link"><i class="bi bi-cash-stack"></i>Payments</a>
+    <a href="superadmin-reports.html" class="sb-link"><i class="bi bi-bar-chart-fill"></i>Reports</a>
+    <div class="sb-section-label">SYSTEM</div>
+    <a href="superadmin-settings.html" class="sb-link"><i class="bi bi-gear-fill"></i>Settings</a>
+    <a href="superadmin-audit.html" class="sb-link active"><i class="bi bi-journal-text"></i>Audit Logs</a>
+    <div class="sb-section-label">ACCOUNT</div>
+    <a href="admin-login.html" class="sb-link" id="sideSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-admin">
+      <div class="sb-admin-ava" id="sbAva">SA</div>
+      <div><div class="sb-admin-name" id="sbName">Loading...</div><div class="sb-admin-role">SUPER ADMIN</div></div>
+      <button class="sb-signout" id="sbSignOut"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar" id="topbar">
+  <div class="tb-left">
+    <button class="tb-menu" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+    <div class="tb-title">Audit Logs</div>
+  </div>
+  <div class="tb-right">
+    <div style="position:relative">
+      <div class="user-menu-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="um-ava" id="umAva">SA</div>
+        <span class="um-name" id="umName">Super Admin</span>
+        <i class="bi bi-chevron-down" style="font-size:12px;color:var(--muted)"></i>
+      </div>
+      <div class="dropdown-menu-hms" id="userDropdown">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);margin-bottom:6px">
+          <div style="font-size:13px;font-weight:700" id="ddName">Super Admin</div>
+          <div style="font-size:11px;color:var(--gold)">System Administrator</div>
+        </div>
+        <div class="dm-item danger" id="dropSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main" id="main">
+  <div class="content fade-up">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <h1 class="ph-title">System Audit Trail</h1>
+      <div class="ph-actions">
+        <button class="btn-outline" onclick="exportLogs()"><i class="bi bi-download"></i>Export Logs</button>
+        <button class="btn-danger-outline" onclick="clearOldLogs()"><i class="bi bi-trash"></i>Clear Old Logs</button>
+      </div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Total Events</div><div class="stat-value" id="stTotal">0</div></div>
+      <div class="stat-card"><div class="stat-label">Today</div><div class="stat-value" id="stToday">0</div></div>
+      <div class="stat-card"><div class="stat-label">Failed Logins</div><div class="stat-value" id="stFailed" style="color:var(--err)">0</div></div>
+      <div class="stat-card"><div class="stat-label">Admin Actions</div><div class="stat-value" id="stAdminActions">0</div></div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search by user, action, or details..." onkeyup="applyFilters()">
+      </div>
+      <select class="filter-select" id="filterAction" onchange="applyFilters()">
+        <option value="all">All Actions</option>
+        <option value="create">Create</option>
+        <option value="update">Update</option>
+        <option value="delete">Delete</option>
+        <option value="login">Login</option>
+        <option value="logout">Logout</option>
+        <option value="failed_login">Failed Login</option>
+        <option value="system">System</option>
+      </select>
+      <select class="filter-select" id="filterUser" onchange="applyFilters()">
+        <option value="all">All Users</option>
+      </select>
+      <select class="filter-select" id="filterDate" onchange="applyFilters()">
+        <option value="all">All Time</option>
+        <option value="today">Today</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="thisWeek">This Week</option>
+        <option value="thisMonth">This Month</option>
+      </select>
+      <button class="btn-reset" onclick="resetFilters()"><i class="bi bi-arrow-counterclockwise"></i>Reset</button>
+    </div>
+
+    <!-- AUDIT TABLE -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="bi bi-clock-history" style="color:var(--gold)"></i>Activity Log</span>
+        <span id="resultCount">0 events</span>
+      </div>
+      <div class="table-wrapper">
+        <table class="audit-table" id="auditTable">
+          <thead>
+            <tr><th>Timestamp</th><th>User</th><th>Role</th><th>Action</th><th>Entity</th><th>Details</th><th>IP Address</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td colspan="9" class="empty-state"><div class="skeleton" style="height:40px;margin-bottom:8px"></div><div class="skeleton" style="height:40px"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination-wrap">
+        <div>Showing <span id="showingStart">1</span>-<span id="showingEnd">10</span> of <span id="totalCount">0</span></div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="detailModal" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title"><i class="bi bi-info-circle-fill" style="color:var(--gold);margin-right:8px"></i>Log Details</span>
+      <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secondary" onclick="closeDetailModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, query, where, getDocs, orderBy, limit, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg={apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app=initializeApp(cfg);
+  const db=getFirestore(app);
+  const auth=getAuth(app);
+
+  let adminData=null, allLogs=[], filteredLogs=[], admins=[];
+  let currentPage=1, pageSize=15;
+
+  onAuthStateChanged(auth, async user=>{
+    if(!user){window.location.href="admin-login.html";return;}
+    try{
+      const ps=await getDocs(query(collection(db,"users"),where("uid","==",user.uid)));
+      if(ps.empty||ps.docs[0].data().role!=="super_admin"){await signOut(auth);window.location.href="admin-login.html";return;}
+      adminData=ps.docs[0].data();
+      renderAdminUI(adminData);
+      await logAction("login","system",`Super Admin logged in`);
+      await loadAdmins();
+      listenLogs();
+    }catch(e){console.error(e);}
+  });
+
+  function renderAdminUI(a){
+    const initials=(a.fullName||"SA").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    ["sbAva","umAva"].forEach(id=>{const el=document.getElementById(id);if(el){if(a.photoURL)el.innerHTML=`<img src="${a.photoURL}" alt=""/>`;else el.textContent=initials;}});
+    document.getElementById("sbName").textContent=a.fullName||"Super Admin";
+    document.getElementById("umName").textContent=(a.fullName||"Super Admin").split(" ")[0];
+    document.getElementById("ddName").textContent=a.fullName||"Super Admin";
+  }
+
+  async function logAction(action,entity,details,status="success",targetId=null){
+    try{
+      await addDoc(collection(db,"audit_logs"),{
+        user:adminData?.fullName||"System",userEmail:adminData?.email,userRole:adminData?.role,action,entity,targetId,details,status,ipAddress:"System",userAgent:navigator.userAgent,timestamp:serverTimestamp()
+      });
+    }catch(e){console.error("Logging failed:",e);}
+  }
+
+  async function loadAdmins(){
+    const snap=await getDocs(query(collection(db,"users"),where("role","!=","student")));
+    admins=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const select=document.getElementById("filterUser");
+    select.innerHTML='<option value="all">All Users</option>'+admins.map(a=>`<option value="${a.fullName||a.email}">${a.fullName||a.email}</option>`).join("");
+  }
+
+  function listenLogs(){
+    const q=query(collection(db,"audit_logs"),orderBy("timestamp","desc"),limit(500));
+    onSnapshot(q,snap=>{
+      allLogs=snap.docs.map(d=>({id:d.id,...d.data()}));
+      updateStats();
+      applyFilters();
+    });
+  }
+
+  function updateStats(){
+    const total=allLogs.length;
+    const today=new Date().toDateString();
+    const todayLogs=allLogs.filter(l=>l.timestamp?.toDate?.().toDateString()===today).length;
+    const failed=allLogs.filter(l=>l.action==="failed_login"||l.status==="failed").length;
+    const adminActions=allLogs.filter(l=>l.userRole!=="system"&&l.action!=="login"&&l.action!=="logout").length;
+    document.getElementById("stTotal").textContent=total;
+    document.getElementById("stToday").textContent=todayLogs;
+    document.getElementById("stFailed").textContent=failed;
+    document.getElementById("stAdminActions").textContent=adminActions;
+  }
+
+  window.applyFilters=function(){
+    const search=document.getElementById("searchInput").value.toLowerCase();
+    const action=document.getElementById("filterAction").value;
+    const user=document.getElementById("filterUser").value;
+    const dateFilter=document.getElementById("filterDate").value;
+
+    filteredLogs=allLogs.filter(l=>{
+      if(action!=="all"&&l.action!==action)return false;
+      if(user!=="all"&&l.user!==user)return false;
+      if(dateFilter!=="all"){
+        const d=l.timestamp?.toDate?.()||new Date();
+        const today=new Date();today.setHours(0,0,0,0);
+        const yesterday=new Date(today);yesterday.setDate(yesterday.getDate()-1);
+        const weekAgo=new Date(today);weekAgo.setDate(weekAgo.getDate()-7);
+        const monthAgo=new Date(today);monthAgo.setMonth(monthAgo.getMonth()-1);
+        if(dateFilter==="today"&&d<today)return false;
+        if(dateFilter==="yesterday"&&(d<yesterday||d>=today))return false;
+        if(dateFilter==="thisWeek"&&d<weekAgo)return false;
+        if(dateFilter==="thisMonth"&&d<monthAgo)return false;
+      }
+      if(search){
+        const haystack=`${l.user||""} ${l.action||""} ${l.entity||""} ${l.details||""} ${l.userRole||""}`.toLowerCase();
+        if(!haystack.includes(search))return false;
+      }
+      return true;
+    });
+    currentPage=1;
+    renderTable();
+  };
+
+  window.resetFilters=function(){
+    document.getElementById("searchInput").value="";
+    document.getElementById("filterAction").value="all";
+    document.getElementById("filterUser").value="all";
+    document.getElementById("filterDate").value="all";
+    applyFilters();
+  };
+
+  const actionMap={
+    create:{cls:"action-create",icon:"➕"},update:{cls:"action-update",icon:"✏️"},delete:{cls:"action-delete",icon:"🗑️"},
+    login:{cls:"action-login",icon:"🔐"},logout:{cls:"action-logout",icon:"🚪"},failed_login:{cls:"action-failed",icon:"❌"},
+    system:{cls:"action-system",icon:"⚙️"},password_reset:{cls:"action-update",icon:"🔑"},toggle_status:{cls:"action-update",icon:"🔄"}
+  };
+
+  function renderTable(){
+    const total=filteredLogs.length;
+    const totalPages=Math.ceil(total/pageSize);
+    const start=(currentPage-1)*pageSize;
+    const end=Math.min(start+pageSize,total);
+    const pageData=filteredLogs.slice(start,end);
+
+    document.getElementById("resultCount").textContent=`${total} event${total!==1?'s':''}`;
+    document.getElementById("showingStart").textContent=total?start+1:0;
+    document.getElementById("showingEnd").textContent=end;
+    document.getElementById("totalCount").textContent=total;
+
+    const tbody=document.getElementById("tableBody");
+    if(pageData.length===0){tbody.innerHTML=`<tr><td colspan="9" class="empty-state"><i class="bi bi-journal-check" style="font-size:40px;opacity:.3;display:block;margin-bottom:12px"></i>No audit logs found</td></tr>`;renderPagination(totalPages);return;}
+
+    tbody.innerHTML=pageData.map(l=>{
+      const am=actionMap[l.action]||{cls:"action-system",icon:"📋"};
+      const time=l.timestamp?.toDate?.().toLocaleString("en-NG",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})||"—";
+      return `<tr>
+        <td style="font-size:12px;white-space:nowrap">${time}</td>
+        <td><span style="font-weight:600">${l.user||"System"}</span><div style="font-size:10px;color:var(--muted)">${l.userEmail||""}</div></td>
+        <td><span style="font-size:11px;padding:2px 8px;border-radius:100px;background:rgba(245,166,35,.1);color:var(--gold)">${l.userRole||"system"}</span></td>
+        <td><span class="action-badge ${am.cls}">${am.icon} ${l.action?.replace(/_/g," ").toUpperCase()||"—"}</span></td>
+        <td>${l.entity||"—"}</td>
+        <td style="max-width:250px"><span style="font-size:12px">${l.details?.slice(0,60)||"—"}${l.details?.length>60?'...':''}</span></td>
+        <td style="font-size:11px;color:var(--muted)">${l.ipAddress||"—"}</td>
+        <td><span class="${l.status==='success'?'status-success':'status-failed'}"><i class="bi bi-${l.status==='success'?'check-circle-fill':'x-circle-fill'}"></i> ${l.status||"success"}</span></td>
+        <td><button class="btn-icon view" onclick="openDetailModal('${l.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer"><i class="bi bi-three-dots-vertical"></i></button></td>
+      </tr>`;
+    }).join("");
+    renderPagination(totalPages);
+  }
+
+  function renderPagination(totalPages){
+    const pg=document.getElementById("pagination");
+    if(totalPages<=1){pg.innerHTML="";return;}
+    let html=`<button class="page-btn" onclick="goToPage(${currentPage-1})" ${currentPage===1?'disabled':''}><i class="bi bi-chevron-left"></i></button>`;
+    for(let i=1;i<=totalPages;i++){
+      if(i===1||i===totalPages||(i>=currentPage-2&&i<=currentPage+2)){
+        html+=`<button class="page-btn ${i===currentPage?'active':''}" onclick="goToPage(${i})">${i}</button>`;
+      }else if(i===currentPage-3||i===currentPage+3){
+        html+=`<span style="color:var(--muted);padding:7px 5px">...</span>`;
+      }
+    }
+    html+=`<button class="page-btn" onclick="goToPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}><i class="bi bi-chevron-right"></i></button>`;
+    pg.innerHTML=html;
+  }
+
+  window.goToPage=function(page){if(page>=1&&page<=Math.ceil(filteredLogs.length/pageSize)){currentPage=page;renderTable();}};
+
+  window.openDetailModal=function(id){
+    const log=allLogs.find(l=>l.id===id);if(!log)return;
+    document.getElementById("detailBody").innerHTML=`
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-label">Timestamp</div><div class="detail-value">${log.timestamp?.toDate?.().toLocaleString()||"—"}</div></div>
+        <div class="detail-item"><div class="detail-label">User</div><div class="detail-value">${log.user||"System"} (${log.userEmail||""})</div></div>
+        <div class="detail-item"><div class="detail-label">Role</div><div class="detail-value">${log.userRole||"system"}</div></div>
+        <div class="detail-item"><div class="detail-label">Action</div><div class="detail-value">${log.action?.replace(/_/g," ").toUpperCase()}</div></div>
+        <div class="detail-item"><div class="detail-label">Entity</div><div class="detail-value">${log.entity||"—"}</div></div>
+        <div class="detail-item"><div class="detail-label">Target ID</div><div class="detail-value">${log.targetId||"—"}</div></div>
+        <div class="detail-item"><div class="detail-label">IP Address</div><div class="detail-value">${log.ipAddress||"—"}</div></div>
+        <div class="detail-item"><div class="detail-label">Status</div><div class="detail-value"><span class="${log.status==='success'?'status-success':'status-failed'}">${log.status}</span></div></div>
+        <div class="detail-full"><div class="detail-label">Details</div><div class="detail-value" style="padding:12px;background:rgba(255,255,255,.03);border-radius:8px;margin-top:6px">${log.details||"No additional details"}</div></div>
+        ${log.metadata?`<div class="detail-full"><div class="detail-label">Metadata</div><div class="detail-value"><pre style="font-size:11px;overflow-x:auto">${JSON.stringify(log.metadata,null,2)}</pre></div></div>`:""}
+      </div>`;
+    document.getElementById("detailModal").classList.add("show");
+  };
+
+  window.closeDetailModal=function(){document.getElementById("detailModal").classList.remove("show");};
+  window.closeModalOnOverlay=function(e){if(e.target.classList.contains("modal-overlay"))closeDetailModal();};
+
+  window.exportLogs=function(){
+    const headers=["Timestamp","User","Email","Role","Action","Entity","Target ID","Details","IP Address","Status"];
+    const rows=filteredLogs.map(l=>[l.timestamp?.toDate?.().toISOString()||"",l.user||"",l.userEmail||"",l.userRole||"",l.action||"",l.entity||"",l.targetId||"",l.details||"",l.ipAddress||"",l.status||""]);
+    const csv=[headers.join(","),...rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(","))].join("\n");
+    const blob=new Blob([csv],{type:"text/csv"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`audit_logs_${new Date().toISOString().split('T')[0]}.csv`;a.click();
+    logAction("export","audit_logs","Exported filtered audit logs");
+  };
+
+  window.clearOldLogs=async function(){
+    if(!confirm("Delete logs older than 90 days? This cannot be undone."))return;
+    const ninetyDaysAgo=new Date();ninetyDaysAgo.setDate(ninetyDaysAgo.getDate()-90);
+    const oldLogs=allLogs.filter(l=>l.timestamp?.toDate?.()<ninetyDaysAgo);
+    if(oldLogs.length===0){alert("No logs older than 90 days found.");return;}
+    const batch=writeBatch(db);
+    oldLogs.forEach(l=>batch.delete(doc(db,"audit_logs",l.id)));
+    await batch.commit();
+    logAction("delete","audit_logs",`Deleted ${oldLogs.length} old logs (>90 days)`);
+    alert(`Deleted ${oldLogs.length} old log entries.`);
+  };
+
+  async function doSignOut(){
+    await logAction("logout","system",`Super Admin logged out`);
+    await signOut(auth);
+    window.location.href="admin-login.html";
+  }
+  ["sideSignOut","sbSignOut","dropSignOut"].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener("click",async e=>{e.preventDefault();doSignOut();});});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleSidebar(){document.getElementById("sidebar").classList.toggle("open");document.getElementById("sbOverlay").classList.toggle("show");}
+  function toggleUserMenu(){document.getElementById("userDropdown").classList.toggle("open");}
+  document.addEventListener("click",e=>{if(!e.target.closest("#userMenuBtn")&&!e.target.closest("#userDropdown"))document.getElementById("userDropdown").classList.remove("open");});
+</script>
+</body>
+</html>

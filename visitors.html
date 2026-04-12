@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Visitors — FUTBabura HMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.2);
+      --white:#fff;--muted:rgba(255,255,255,.5);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.085);
+      --ok:#22c55e;--err:#ef4444;--warn:#f59e0b;--info:#3b82f6;
+      --sidebar-w:260px;--topbar-h:68px;--radius:14px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(245,166,35,.4);border-radius:3px}
+
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#060f24 0%,#0a1535 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:200;transition:transform .3s ease}
+    .sb-logo{display:flex;align-items:center;gap:11px;padding:20px 22px;border-bottom:1px solid var(--border);text-decoration:none}
+    .sb-logo-img{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;box-shadow:0 0 14px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:1.6px;text-transform:uppercase}
+    .sb-nav{flex:1;padding:18px 14px;overflow-y:auto}
+    .sb-section-label{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 10px;margin:18px 0 8px}
+    .sb-section-label:first-child{margin-top:0}
+    .sb-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:500;transition:all .22s;margin-bottom:2px}
+    .sb-link i{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+    .sb-link:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .sb-link.active{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.18)}
+    .sb-bottom{padding:16px 14px;border-top:1px solid var(--border)}
+    .sb-user{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--border)}
+    .sb-user-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy);flex-shrink:0;overflow:hidden}
+    .sb-user-ava img{width:100%;height:100%;object-fit:cover}
+    .sb-user-name{font-size:12.5px;font-weight:700}
+    .sb-user-role{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+    .sb-signout{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);font-size:16px;cursor:pointer;padding:4px;transition:color .2s}
+    .sb-signout:hover{color:var(--err)}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199}
+    .sb-overlay.show{display:block}
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(7,17,43,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:150}
+    .tb-left{display:flex;align-items:center;gap:14px}
+    .tb-menu{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;display:none;padding:4px}
+    .tb-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}
+    .tb-right{display:flex;align-items:center;gap:14px}
+    .notif-btn{position:relative;background:var(--card);border:1px solid var(--border);border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all .22s}
+    .notif-btn:hover{background:rgba(255,255,255,.08);color:var(--white)}
+    .user-menu-btn{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px 12px 6px 6px;cursor:pointer;transition:all .22s}
+    .user-menu-btn:hover{background:rgba(255,255,255,.07)}
+    .um-ava{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--navy);overflow:hidden;flex-shrink:0}
+    .um-ava img{width:100%;height:100%;object-fit:cover}
+    .um-name{font-size:13px;font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dropdown-menu-hms{position:absolute;top:calc(100% + 8px);right:0;background:#0c1a3d;border:1px solid var(--border);border-radius:12px;padding:8px;min-width:180px;box-shadow:0 16px 40px rgba(0,0,0,.4);z-index:500;display:none;animation:slideDown .2s ease}
+    .dropdown-menu-hms.open{display:block}
+    .dm-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none}
+    .dm-item:hover{background:rgba(255,255,255,.06);color:var(--white)}
+    .dm-item.danger{color:rgba(239,68,68,.8)}
+    .dm-item.danger:hover{background:rgba(239,68,68,.08);color:var(--err)}
+    .dm-divider{height:1px;background:var(--border);margin:6px 0}
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh}
+    .content{padding:28px 28px 50px}
+
+    /* ── STATS ── */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+    .stat-mini{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;gap:14px;transition:all .25s}
+    .stat-mini:hover{border-color:rgba(245,166,35,.25);transform:translateY(-2px)}
+    .stat-mini-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .smi-gold{background:rgba(245,166,35,.12)}
+    .smi-green{background:rgba(34,197,94,.12)}
+    .smi-blue{background:rgba(59,130,246,.12)}
+    .smi-purple{background:rgba(168,85,247,.12)}
+    .stat-mini-num{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;line-height:1}
+    .stat-mini-label{font-size:11.5px;color:var(--muted);margin-top:2px}
+
+    /* ── PAGE GRID ── */
+    .page-grid{display:grid;grid-template-columns:1fr 380px;gap:22px;align-items:start}
+
+    /* ── CARD ── */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .card-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .card-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:9px}
+
+    /* filter tabs */
+    .filter-tabs{display:flex;gap:6px;padding:12px 18px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);flex-wrap:wrap}
+    .ftab{padding:6px 14px;border-radius:100px;font-size:12.5px;font-weight:600;cursor:pointer;border:1.5px solid rgba(255,255,255,.1);background:transparent;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;transition:all .22s}
+    .ftab:hover{border-color:rgba(245,166,35,.3);color:var(--white)}
+    .ftab.active{background:rgba(245,166,35,.12);border-color:rgba(245,166,35,.4);color:var(--gold)}
+
+    /* visitor list */
+    .visitor-list{max-height:480px;overflow-y:auto}
+    .visitor-item{display:flex;gap:14px;padding:15px 22px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:background .2s}
+    .visitor-item:hover{background:rgba(255,255,255,.03)}
+    .visitor-item.selected{background:rgba(245,166,35,.05);border-left:3px solid var(--gold)}
+    .vi-avatar{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:var(--navy);flex-shrink:0;font-family:'Playfair Display',serif}
+    .vi-name{font-size:14px;font-weight:700;margin-bottom:3px}
+    .vi-meta{font-size:12px;color:var(--muted);margin-bottom:4px}
+    .vi-time{font-size:10.5px;color:rgba(255,255,255,.28);margin-left:auto;flex-shrink:0;padding-top:2px;text-align:right}
+
+    /* badges */
+    .vbadge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;text-transform:uppercase;letter-spacing:.5px}
+    .vb-upcoming{background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.2)}
+    .vb-today{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.25)}
+    .vb-visited{background:rgba(34,197,94,.12);color:var(--ok);border:1px solid rgba(34,197,94,.2)}
+    .vb-expired{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid rgba(255,255,255,.1)}
+    .vb-cancelled{background:rgba(239,68,68,.1);color:var(--err);border:1px solid rgba(239,68,68,.18)}
+
+    .empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+    .empty-icon{font-size:48px;display:block;margin-bottom:12px;opacity:.45}
+
+    /* ── FORM ── */
+    .field-wrap{margin-bottom:18px}
+    .field-label{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.72);margin-bottom:7px;display:flex;align-items:center;gap:5px}
+    .req{color:var(--gold);font-size:14px}
+    .input-rel{position:relative}
+    .fi{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;color:rgba(255,255,255,.3);pointer-events:none;z-index:1}
+    .hms-input{width:100%;background:rgba(255,255,255,.048);border:1.5px solid rgba(255,255,255,.1);border-radius:11px;padding:11px 13px 11px 38px;color:var(--white);font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .25s,box-shadow .25s}
+    .hms-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,166,35,.11)}
+    .hms-input::placeholder{color:rgba(255,255,255,.25)}
+    .hms-input.err{border-color:var(--err)!important}
+    .hms-select{appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='rgba(255,255,255,.4)' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;background-size:11px;cursor:pointer}
+    .hms-select option{background:#0c1a3d}
+    .ferr{font-size:11.5px;color:var(--err);margin-top:5px;display:none;align-items:center;gap:4px}
+    .ferr.show{display:flex}
+
+    /* visit type cards */
+    .vtype-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+    .vtype-card{border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 8px;text-align:center;cursor:pointer;transition:all .22s;font-size:11.5px;font-weight:600;color:var(--muted)}
+    .vtype-card:hover{border-color:rgba(245,166,35,.3);color:var(--white)}
+    .vtype-card.selected{border-color:var(--gold);background:rgba(245,166,35,.1);color:var(--gold)}
+    .vtype-icon{font-size:20px;display:block;margin-bottom:5px}
+
+    /* max visitors info */
+    .max-info{background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.18);border-radius:10px;padding:11px 14px;font-size:12.5px;color:#93c5fd;margin-bottom:18px;display:flex;align-items:flex-start;gap:8px;line-height:1.6}
+
+    .btn-submit{width:100%;padding:13px;border-radius:11px;background:var(--gold);color:var(--navy);font-size:14.5px;font-weight:700;border:none;cursor:pointer;box-shadow:0 6px 20px var(--glow);transition:all .3s;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px}
+    .btn-submit:hover:not(:disabled){background:var(--gold2);transform:translateY(-2px)}
+    .btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+    /* ── DETAIL PANEL & PASS ── */
+    .detail-panel{position:sticky;top:calc(var(--topbar-h) + 20px)}
+
+    /* visitor pass */
+    .pass-card{
+      background:linear-gradient(135deg,#0c1a3d 0%,#112060 100%);
+      border:1.5px solid rgba(245,166,35,.3);
+      border-radius:18px;padding:24px;
+      position:relative;overflow:hidden;
+      box-shadow:0 12px 40px rgba(0,0,0,.4);
+    }
+    .pass-card::before{content:'';position:absolute;top:-40%;right:-15%;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.09) 0%,transparent 68%);pointer-events:none}
+    .pass-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);background-size:20px 20px;pointer-events:none}
+    .pass-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;position:relative;z-index:1}
+    .pass-logo{display:flex;align-items:center;gap:9px}
+    .pass-logo-img{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--gold);overflow:hidden}
+    .pass-logo-img img{width:100%;height:100%;object-fit:cover}
+    .pass-logo-name{font-family:'Playfair Display',serif;font-size:12px;font-weight:700;line-height:1.1}
+    .pass-logo-sub{font-size:8.5px;color:var(--gold);letter-spacing:1.2px;text-transform:uppercase}
+    .pass-type{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.22);padding:4px 11px;border-radius:100px}
+    .pass-visitor-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;margin-bottom:4px;position:relative;z-index:1}
+    .pass-visitor-id{font-size:11px;color:var(--muted);margin-bottom:16px;position:relative;z-index:1}
+    .pass-details{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;position:relative;z-index:1}
+    .pd-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:9px 11px}
+    .pd-label{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px}
+    .pd-value{font-size:12.5px;font-weight:700}
+    .pass-qr-section{display:flex;align-items:center;gap:14px;padding:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;margin-bottom:14px;position:relative;z-index:1}
+    #passQrCode{flex-shrink:0}
+    .pass-qr-info p{font-size:11.5px;color:var(--muted);line-height:1.6}
+    .pass-qr-info strong{color:var(--white)}
+    .pass-footer{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(255,255,255,.08);position:relative;z-index:1}
+    .pass-valid{font-size:10.5px;color:var(--muted)}
+    .pass-valid strong{color:var(--ok)}
+    .pass-id{font-size:9.5px;color:rgba(255,255,255,.25);font-family:monospace}
+
+    /* status dot */
+    .sdot{width:6px;height:6px;border-radius:50%;display:inline-block}
+    .sdot-green{background:var(--ok);box-shadow:0 0 5px var(--ok)}
+    .sdot-gold{background:var(--gold);box-shadow:0 0 5px var(--gold)}
+    .sdot-gray{background:rgba(255,255,255,.3)}
+    .sdot-red{background:var(--err)}
+
+    .pass-actions{display:flex;gap:8px;margin-top:12px}
+    .btn-pass-action{flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:6px}
+    .bpa-gold{background:var(--gold);color:var(--navy)}
+    .bpa-gold:hover{background:var(--gold2)}
+    .bpa-outline{background:rgba(255,255,255,.06);color:var(--white);border:1.5px solid rgba(255,255,255,.14)}
+    .bpa-outline:hover{background:rgba(255,255,255,.1)}
+    .bpa-red{background:rgba(239,68,68,.1);color:var(--err);border:1.5px solid rgba(239,68,68,.2)}
+    .bpa-red:hover{background:rgba(239,68,68,.18)}
+
+    /* detail placeholder */
+    .detail-placeholder{text-align:center;padding:44px 20px;color:var(--muted)}
+
+    /* no booking warning */
+    .g-alert{border-radius:11px;padding:12px 16px;font-size:13px;font-weight:500;display:none;align-items:center;gap:10px;margin-bottom:16px}
+    .g-alert.show{display:flex}
+    .g-alert.a-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+    .g-alert.a-ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86efac}
+    .g-alert.a-warn{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);color:#fde68a}
+
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .spin{width:17px;height:17px;border:2.5px solid rgba(7,17,43,.35);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+
+    @media(max-width:1050px){.page-grid{grid-template-columns:1fr}.detail-panel{position:static}}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0}.main{margin-left:0}
+      .tb-menu{display:block}
+      .content{padding:18px 14px 40px}
+      .stats-row{grid-template-columns:1fr 1fr}
+      .um-name{display:none}
+    }
+    @media(max-width:480px){.vtype-grid{grid-template-columns:repeat(2,1fr)}.pass-details{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+    <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Student Portal</div></div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section-label">Main Menu</div>
+    <a href="dashboard.html" class="sb-link"><i class="bi bi-grid-fill"></i>Dashboard</a>
+    <a href="browse-rooms.html" class="sb-link"><i class="bi bi-door-open-fill"></i>Browse Rooms</a>
+    <a href="my-booking.html" class="sb-link"><i class="bi bi-house-check-fill"></i>My Booking</a>
+    <div class="sb-section-label">Services</div>
+    <a href="complaints.html" class="sb-link"><i class="bi bi-tools"></i>Complaints</a>
+    <a href="visitors.html" class="sb-link active"><i class="bi bi-people-fill"></i>Visitors</a>
+    <div class="sb-section-label">Account</div>
+    <a href="profile.html" class="sb-link"><i class="bi bi-person-fill"></i>My Profile</a>
+    <a href="#" class="sb-link" id="sideSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-user-ava" id="sbAva">S</div>
+      <div><div class="sb-user-name" id="sbName">Loading...</div><div class="sb-user-role">Student</div></div>
+      <button class="sb-signout" id="sbSignOut"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-left">
+    <button class="tb-menu" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+    <div class="tb-title">Visitor Management</div>
+  </div>
+  <div class="tb-right">
+    <div class="notif-btn" onclick="window.location.href='dashboard.html'"><i class="bi bi-bell-fill"></i></div>
+    <div style="position:relative">
+      <div class="user-menu-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="um-ava" id="umAva">S</div>
+        <span class="um-name" id="umName">Student</span>
+        <i class="bi bi-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </div>
+      <div class="dropdown-menu-hms" id="userDropdown">
+        <a href="dashboard.html" class="dm-item"><i class="bi bi-grid-fill"></i>Dashboard</a>
+        <div class="dm-divider"></div>
+        <div class="dm-item danger" id="dropSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="content fade-up">
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-mini"><div class="stat-mini-icon smi-gold">👥</div><div><div class="stat-mini-num" id="stTotal">—</div><div class="stat-mini-label">Total Registered</div></div></div>
+      <div class="stat-mini"><div class="stat-mini-icon smi-blue">📅</div><div><div class="stat-mini-num" id="stUpcoming">—</div><div class="stat-mini-label">Upcoming</div></div></div>
+      <div class="stat-mini"><div class="stat-mini-icon smi-gold">🌟</div><div><div class="stat-mini-num" id="stToday">—</div><div class="stat-mini-label">Today</div></div></div>
+      <div class="stat-mini"><div class="stat-mini-icon smi-green">✅</div><div><div class="stat-mini-num" id="stVisited">—</div><div class="stat-mini-label">Visited</div></div></div>
+    </div>
+
+    <div class="page-grid">
+
+      <!-- LEFT -->
+      <div style="display:flex;flex-direction:column;gap:20px">
+
+        <!-- Visitor List -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title"><i class="bi bi-people-fill" style="color:var(--gold)"></i>My Visitors</span>
+            <button class="vbadge vb-upcoming" style="cursor:pointer" onclick="scrollToForm()">
+              <i class="bi bi-plus-lg"></i> Register Visitor
+            </button>
+          </div>
+          <div class="filter-tabs">
+            <button class="ftab active" onclick="filterVisitors('all',this)">All</button>
+            <button class="ftab" onclick="filterVisitors('upcoming',this)">Upcoming</button>
+            <button class="ftab" onclick="filterVisitors('today',this)">Today</button>
+            <button class="ftab" onclick="filterVisitors('visited',this)">Visited</button>
+            <button class="ftab" onclick="filterVisitors('expired',this)">Expired</button>
+          </div>
+          <div class="visitor-list" id="visitorList">
+            <div style="padding:14px 22px">
+              <div class="skeleton" style="height:64px;border-radius:10px;margin-bottom:10px"></div>
+              <div class="skeleton" style="height:64px;border-radius:10px;margin-bottom:10px"></div>
+              <div class="skeleton" style="height:64px;border-radius:10px"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Register Visitor Form -->
+        <div class="card" id="visitorForm">
+          <div class="card-header">
+            <span class="card-title"><i class="bi bi-person-plus-fill" style="color:var(--gold)"></i>Register New Visitor</span>
+          </div>
+          <div style="padding:22px">
+            <div class="g-alert" id="formAlert"><i class="bi" id="formAlertIcon"></i><span id="formAlertMsg"></span></div>
+            <div class="g-alert a-warn" id="noBookingWarn">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <span>You must have an active room booking to register visitors. <a href="browse-rooms.html" style="color:var(--gold);font-weight:700">Book a room first →</a></span>
+            </div>
+
+            <div id="formFields">
+              <div class="max-info" id="maxInfo">
+                <i class="bi bi-info-circle-fill" style="flex-shrink:0;margin-top:1px"></i>
+                <span>You can register up to <strong id="maxVisitorsText">3 visitors</strong> per day as set by the hostel admin. Each visitor pass is valid for the date of visit only.</span>
+              </div>
+
+              <!-- Visitor details -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div class="field-wrap">
+                  <label class="field-label">Visitor's Full Name <span class="req">*</span></label>
+                  <div class="input-rel">
+                    <input type="text" class="hms-input" id="vName" placeholder="e.g. Ibrahim Musa"/>
+                    <i class="bi bi-person-fill fi"></i>
+                  </div>
+                  <div class="ferr" id="vNameErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+                </div>
+                <div class="field-wrap">
+                  <label class="field-label">Visitor's Phone <span class="req">*</span></label>
+                  <div class="input-rel">
+                    <input type="tel" class="hms-input" id="vPhone" placeholder="e.g. 08012345678" maxlength="11"/>
+                    <i class="bi bi-telephone-fill fi"></i>
+                  </div>
+                  <div class="ferr" id="vPhoneErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div class="field-wrap">
+                  <label class="field-label">Relationship <span class="req">*</span></label>
+                  <div class="input-rel">
+                    <select class="hms-input hms-select" id="vRelationship">
+                      <option value="">Select relationship</option>
+                      <option>Parent / Guardian</option>
+                      <option>Sibling</option>
+                      <option>Relative</option>
+                      <option>Friend</option>
+                      <option>Course Mate</option>
+                      <option>Other</option>
+                    </select>
+                    <i class="bi bi-people-fill fi"></i>
+                  </div>
+                  <div class="ferr" id="vRelErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+                </div>
+                <div class="field-wrap">
+                  <label class="field-label">Visit Date <span class="req">*</span></label>
+                  <div class="input-rel">
+                    <input type="date" class="hms-input" id="vDate" style="color-scheme:dark"/>
+                    <i class="bi bi-calendar-fill fi"></i>
+                  </div>
+                  <div class="ferr" id="vDateErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div class="field-wrap">
+                  <label class="field-label">Expected Arrival Time <span class="req">*</span></label>
+                  <div class="input-rel">
+                    <input type="time" class="hms-input" id="vTime" style="color-scheme:dark"/>
+                    <i class="bi bi-clock-fill fi"></i>
+                  </div>
+                  <div class="ferr" id="vTimeErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+                </div>
+                <div class="field-wrap">
+                  <label class="field-label">Duration <span class="req">*</span></label>
+                  <div class="input-rel">
+                    <select class="hms-input hms-select" id="vDuration">
+                      <option value="">Select duration</option>
+                      <option value="1">1 Hour</option>
+                      <option value="2">2 Hours</option>
+                      <option value="3">3 Hours</option>
+                      <option value="4">4 Hours</option>
+                      <option value="6">6 Hours (Half Day)</option>
+                    </select>
+                    <i class="bi bi-hourglass-split fi"></i>
+                  </div>
+                  <div class="ferr" id="vDurErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+                </div>
+              </div>
+
+              <div class="field-wrap">
+                <label class="field-label">Purpose of Visit <span class="req">*</span></label>
+                <div class="vtype-grid" id="vtypeGrid">
+                  <div class="vtype-card" data-t="Family Visit" onclick="selectVType('Family Visit',this)"><span class="vtype-icon">👨‍👩‍👧</span>Family Visit</div>
+                  <div class="vtype-card" data-t="Academic" onclick="selectVType('Academic',this)"><span class="vtype-icon">📚</span>Academic</div>
+                  <div class="vtype-card" data-t="Delivery" onclick="selectVType('Delivery',this)"><span class="vtype-icon">📦</span>Delivery</div>
+                  <div class="vtype-card" data-t="Social" onclick="selectVType('Social',this)"><span class="vtype-icon">🤝</span>Social</div>
+                  <div class="vtype-card" data-t="Medical" onclick="selectVType('Medical',this)"><span class="vtype-icon">🏥</span>Medical</div>
+                  <div class="vtype-card" data-t="Other" onclick="selectVType('Other',this)"><span class="vtype-icon">📋</span>Other</div>
+                </div>
+                <div class="ferr" id="vTypeErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+              </div>
+
+              <button class="btn-submit" id="submitBtn" onclick="submitVisitor()">
+                <span id="submitText"><i class="bi bi-person-check-fill"></i> Register Visitor & Generate Pass</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: detail / pass panel -->
+      <div class="detail-panel">
+        <div class="card" id="detailCard">
+          <div class="card-header">
+            <span class="card-title"><i class="bi bi-ticket-perforated-fill" style="color:var(--gold)"></i>Visitor Pass</span>
+            <span style="font-size:11.5px;color:var(--muted)">Click a visitor to view pass</span>
+          </div>
+          <div id="detailPlaceholder" class="detail-placeholder">
+            <span class="empty-icon">🎫</span>
+            <p style="font-size:13.5px">Select a visitor from the list to view their digital pass. The pass contains a QR code for security desk validation.</p>
+          </div>
+          <div id="detailContent" style="display:none;padding:18px"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, doc, query, where,
+    getDocs, addDoc, updateDoc, deleteDoc,
+    onSnapshot, orderBy, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg={apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app=initializeApp(cfg);
+  const db=getFirestore(app);
+  const auth=getAuth(app);
+
+  let currentUser=null, studentData=null, bookingData=null;
+  let allVisitors=[], selectedType="", activeFilter="all";
+  let maxVisitorsPerDay=3, settings={};
+
+  // ── AUTH GUARD ──
+  onAuthStateChanged(auth,async user=>{
+    if(!user||!user.emailVerified){await signOut(auth);window.location.href="login.html";return;}
+    currentUser=user;
+    await boot(user);
+  });
+
+  async function boot(user){
+    try{
+      // profile
+      const ps=await getDocs(query(collection(db,"users"),where("uid","==",user.uid)));
+      if(ps.empty||ps.docs[0].data().role!=="student"){await signOut(auth);window.location.href="login.html";return;}
+      studentData=ps.docs[0].data();
+      renderStudentUI(studentData);
+
+      // settings — admin controls max visitors per day
+      const ss=await getDocs(collection(db,"settings"));
+      settings=ss.empty?{}:ss.docs[0].data();
+      maxVisitorsPerDay=settings.maxVisitorsPerDay||3;
+      document.getElementById("maxVisitorsText").textContent=`${maxVisitorsPerDay} visitor${maxVisitorsPerDay!==1?"s":""}`;
+
+      // check active booking
+      const session=settings.currentSession||"2024/2025";
+      const bs=await getDocs(query(collection(db,"bookings"),where("studentUid","==",user.uid),where("session","==",session),where("status","==","active")));
+      if(bs.empty){
+        document.getElementById("noBookingWarn").classList.add("show");
+        document.getElementById("formFields").style.opacity=".45";
+        document.getElementById("formFields").style.pointerEvents="none";
+      } else {
+        bookingData=bs.docs[0].data();
+      }
+
+      // set min date to today
+      const today=new Date().toISOString().split("T")[0];
+      document.getElementById("vDate").min=today;
+      document.getElementById("vDate").value=today;
+
+      // real-time visitors
+      listenVisitors(user.uid);
+    }catch(e){console.error(e);}
+  }
+
+  function renderStudentUI(s){
+    const initials=(s.fullName||"S").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    ["sbAva","umAva"].forEach(id=>{
+      const el=document.getElementById(id);if(!el)return;
+      if(s.photoURL)el.innerHTML=`<img src="${s.photoURL}" alt=""/>`;else el.textContent=initials;
+    });
+    document.getElementById("sbName").textContent=s.fullName||"Student";
+    document.getElementById("umName").textContent=(s.fullName||"Student").split(" ")[0];
+  }
+
+  // ── REAL-TIME VISITORS ──
+  function listenVisitors(uid){
+    const q=query(collection(db,"visitors"),where("studentUid","==",uid),orderBy("visitDate","desc"));
+    onSnapshot(q,snap=>{
+      allVisitors=snap.docs.map(d=>({id:d.id,...d.data()}));
+      updateStats();
+      renderList(activeFilter);
+    });
+  }
+
+  function getVisitorStatus(v){
+    const today=new Date(); today.setHours(0,0,0,0);
+    const vDate=v.visitDate?.toDate?v.visitDate.toDate():new Date(v.visitDate);
+    const vDay=new Date(vDate); vDay.setHours(0,0,0,0);
+    if(v.status==="cancelled")return"cancelled";
+    if(v.status==="visited")return"visited";
+    if(vDay.getTime()===today.getTime())return"today";
+    if(vDay>today)return"upcoming";
+    return"expired";
+  }
+
+  function updateStats(){
+    const total=allVisitors.length;
+    const today=new Date(); today.setHours(0,0,0,0);
+    const upcoming=allVisitors.filter(v=>getVisitorStatus(v)==="upcoming").length;
+    const todayCount=allVisitors.filter(v=>getVisitorStatus(v)==="today").length;
+    const visited=allVisitors.filter(v=>v.status==="visited").length;
+    document.getElementById("stTotal").textContent=total;
+    document.getElementById("stUpcoming").textContent=upcoming;
+    document.getElementById("stToday").textContent=todayCount;
+    document.getElementById("stVisited").textContent=visited;
+  }
+
+  // ── FILTER ──
+  window.filterVisitors=function(f,btn){
+    activeFilter=f;
+    document.querySelectorAll(".ftab").forEach(t=>t.classList.remove("active"));
+    btn.classList.add("active");
+    renderList(f);
+  };
+
+  // ── RENDER LIST ──
+  const avatarColors=["#1a3c8f","#7b1fa2","#1b5e20","#8d4e00","#004d40","#b71c1c"];
+  function renderList(filter){
+    const list=document.getElementById("visitorList");
+    let data=allVisitors;
+    if(filter!=="all") data=allVisitors.filter(v=>getVisitorStatus(v)===filter);
+
+    if(data.length===0){
+      list.innerHTML=`<div class="empty-state"><span class="empty-icon">👥</span><p style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:6px">No visitors found</p><p style="font-size:13px">${filter==="all"?"You haven't registered any visitors yet.":"No visitors with this status."}</p></div>`;
+      return;
+    }
+
+    const statusBadge={
+      upcoming:`<span class="vbadge vb-upcoming"><span class="sdot sdot-green"></span>Upcoming</span>`,
+      today:`<span class="vbadge vb-today"><span class="sdot sdot-gold"></span>Today</span>`,
+      visited:`<span class="vbadge vb-visited">✓ Visited</span>`,
+      expired:`<span class="vbadge vb-expired">Expired</span>`,
+      cancelled:`<span class="vbadge vb-cancelled">Cancelled</span>`,
+    };
+
+    list.innerHTML=data.map((v,i)=>{
+      const st=getVisitorStatus(v);
+      const initials=(v.visitorName||"V").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+      const bg=avatarColors[i%avatarColors.length];
+      const vDate=v.visitDate?.toDate?v.visitDate.toDate():new Date(v.visitDate);
+      const dateStr=vDate.toLocaleDateString("en-NG",{weekday:"short",day:"numeric",month:"short"});
+      return `<div class="visitor-item" id="vi-${v.id}" onclick="showDetail('${v.id}')">
+        <div class="vi-avatar" style="background:${bg}">${initials}</div>
+        <div style="flex:1;min-width:0">
+          <div class="vi-name">${v.visitorName}</div>
+          <div class="vi-meta">${v.relationship||"Visitor"} · ${v.purpose||"Visit"} · ${statusBadge[st]||""}</div>
+        </div>
+        <div class="vi-time">${dateStr}<br/>${v.arrivalTime||""}</div>
+      </div>`;
+    }).join("");
+  }
+
+  // ── SHOW DETAIL / PASS ──
+  window.showDetail=function(id){
+    const v=allVisitors.find(x=>x.id===id);
+    if(!v)return;
+    document.querySelectorAll(".visitor-item").forEach(el=>el.classList.remove("selected"));
+    const el=document.getElementById(`vi-${id}`);if(el)el.classList.add("selected");
+
+    const st=getVisitorStatus(v);
+    const vDate=v.visitDate?.toDate?v.visitDate.toDate():new Date(v.visitDate);
+    const dateStr=vDate.toLocaleDateString("en-NG",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    const passId=id.slice(-8).toUpperCase();
+    const verifyUrl=`${window.location.origin}/verify-visitor.html?ref=${id}`;
+    const isValid=st==="upcoming"||st==="today";
+    const dotClass=st==="today"?"sdot-gold":st==="upcoming"?"sdot-green":"sdot-gray";
+
+    document.getElementById("detailPlaceholder").style.display="none";
+    document.getElementById("detailContent").style.display="block";
+    document.getElementById("detailContent").innerHTML=`
+      <div class="pass-card">
+        <div class="pass-dots"></div>
+        <div class="pass-header">
+          <div class="pass-logo">
+            <div class="pass-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+            <div><div class="pass-logo-name">FUTBabura HMS</div><div class="pass-logo-sub">Visitor Pass</div></div>
+          </div>
+          <span class="pass-type">VISITOR PASS</span>
+        </div>
+        <div class="pass-visitor-name">${v.visitorName}</div>
+        <div class="pass-visitor-id"><span class="sdot ${dotClass}" style="margin-right:5px"></span>${v.relationship||"Visitor"} · ${v.purpose||"Visit"}</div>
+        <div class="pass-details">
+          <div class="pd-item"><div class="pd-label">Host Student</div><div class="pd-value">${studentData.fullName}</div></div>
+          <div class="pd-item"><div class="pd-label">Room</div><div class="pd-value">${bookingData?`${bookingData.blockName}, Rm ${bookingData.roomNumber}`:"—"}</div></div>
+          <div class="pd-item"><div class="pd-label">Visit Date</div><div class="pd-value">${dateStr}</div></div>
+          <div class="pd-item"><div class="pd-label">Arrival Time</div><div class="pd-value">${v.arrivalTime||"—"}</div></div>
+          <div class="pd-item"><div class="pd-label">Duration</div><div class="pd-value">${v.duration?v.duration+" Hour"+(v.duration>1?"s":""):"—"}</div></div>
+          <div class="pd-item"><div class="pd-label">Phone</div><div class="pd-value">${v.visitorPhone||"—"}</div></div>
+        </div>
+        <div class="pass-qr-section">
+          <div id="passQrCode"></div>
+          <div class="pass-qr-info">
+            <p><strong>Security QR Code</strong></p>
+            <p>Show this pass to the security officer at the hostel gate. They will scan the QR code to validate entry.</p>
+            <p style="font-size:10px;margin-top:4px;color:rgba(255,255,255,.3)">Pass valid: ${isValid?"<span style='color:var(--ok)'>Active</span>":"<span style='color:var(--err)'>Expired / Cancelled</span>"}</p>
+          </div>
+        </div>
+        <div class="pass-footer">
+          <div class="pass-valid">Status: <strong>${isValid?"Valid for Entry":"Not Valid"}</strong></div>
+          <div class="pass-id">ID: ${passId}</div>
+        </div>
+      </div>
+      <div class="pass-actions">
+        ${isValid?`
+          <button class="btn-pass-action bpa-outline" onclick="printPass()"><i class="bi bi-printer-fill"></i>Print Pass</button>
+          <button class="btn-pass-action bpa-red" onclick="cancelVisitor('${id}')"><i class="bi bi-x-circle"></i>Cancel</button>
+        `:`<button class="btn-pass-action bpa-outline" style="flex:none;width:100%" disabled>This pass is no longer valid</button>`}
+      </div>`;
+
+    // Generate QR code
+    setTimeout(()=>{
+      const qrEl=document.getElementById("passQrCode");
+      if(qrEl){
+        qrEl.innerHTML="";
+        try{
+          new QRCode(qrEl,{
+            text:verifyUrl,width:90,height:90,
+            colorDark:"#07112b",colorLight:"#ffffff",
+            correctLevel:QRCode.CorrectLevel.H
+          });
+        }catch(e){console.error("QR error",e);}
+      }
+    },200);
+  };
+
+  // ── VISIT TYPE SELECT ──
+  window.selectVType=function(t,el){
+    selectedType=t;
+    document.querySelectorAll(".vtype-card").forEach(c=>c.classList.remove("selected"));
+    el.classList.add("selected");
+    document.getElementById("vTypeErr").classList.remove("show");
+  };
+
+  // ── SUBMIT VISITOR ──
+  window.submitVisitor=async function(){
+    if(!currentUser||!studentData||!bookingData)return;
+    const name=document.getElementById("vName").value.trim();
+    const phone=document.getElementById("vPhone").value.trim();
+    const rel=document.getElementById("vRelationship").value;
+    const date=document.getElementById("vDate").value;
+    const time=document.getElementById("vTime").value;
+    const dur=document.getElementById("vDuration").value;
+    let valid=true;
+
+    if(!name){showFieldErr("vName","vNameErr","Visitor name is required");valid=false;}
+    if(!phone||!/^0[7-9][0-1]\d{8}$/.test(phone)){showFieldErr("vPhone","vPhoneErr","Enter a valid Nigerian phone number");valid=false;}
+    if(!rel){showFieldErr("vRelationship","vRelErr","Please select relationship");valid=false;}
+    if(!date){showFieldErr("vDate","vDateErr","Please select visit date");valid=false;}
+    if(!time){showFieldErr("vTime","vTimeErr","Please enter arrival time");valid=false;}
+    if(!dur){showFieldErr("vDuration","vDurErr","Please select visit duration");valid=false;}
+    if(!selectedType){const e=document.getElementById("vTypeErr");e.classList.add("show");e.querySelector("span").textContent="Please select purpose of visit";valid=false;}
+    if(!valid)return;
+
+    // check daily limit
+    const visitDate=new Date(date); visitDate.setHours(0,0,0,0);
+    const todayVisitors=allVisitors.filter(v=>{
+      const vd=v.visitDate?.toDate?v.visitDate.toDate():new Date(v.visitDate);
+      const vDay=new Date(vd); vDay.setHours(0,0,0,0);
+      return vDay.getTime()===visitDate.getTime()&&v.status!=="cancelled";
+    });
+    if(todayVisitors.length>=maxVisitorsPerDay){
+      showFormAlert(`You've reached the maximum of ${maxVisitorsPerDay} visitors for ${date===new Date().toISOString().split("T")[0]?"today":"that day"}. Limit set by admin.`,"a-err");
+      return;
+    }
+
+    const btn=document.getElementById("submitBtn");
+    btn.disabled=true;
+    document.getElementById("submitText").innerHTML=`<div class="spin"></div> Registering...`;
+
+    try{
+      const docRef=await addDoc(collection(db,"visitors"),{
+        studentUid:   currentUser.uid,
+        studentName:  studentData.fullName,
+        matricNo:     studentData.matricNo,
+        blockName:    bookingData.blockName,
+        roomNumber:   bookingData.roomNumber,
+        visitorName:  name,
+        visitorPhone: phone,
+        relationship: rel,
+        visitDate:    new Date(date),
+        arrivalTime:  time,
+        duration:     Number(dur),
+        purpose:      selectedType,
+        status:       "pending",
+        checkedIn:    false,
+        createdAt:    serverTimestamp()
+      });
+
+      // notify student
+      await addDoc(collection(db,"notifications"),{
+        studentUid:currentUser.uid,
+        type:"visitor",
+        message:`👤 Visitor "${name}" has been registered for ${date}. Show them the digital pass at the gate.`,
+        read:false,
+        createdAt:serverTimestamp()
+      });
+
+      // reset form
+      ["vName","vPhone","vDate"].forEach(id=>document.getElementById(id).value="");
+      document.getElementById("vRelationship").value="";
+      document.getElementById("vDuration").value="";
+      document.getElementById("vTime").value="";
+      selectedType="";
+      document.querySelectorAll(".vtype-card").forEach(c=>c.classList.remove("selected"));
+      document.getElementById("vDate").value=new Date().toISOString().split("T")[0];
+
+      showFormAlert("Visitor registered! Their digital pass is ready.","a-ok");
+      setTimeout(()=>showDetail(docRef.id),800);
+    }catch(e){
+      console.error(e);
+      showFormAlert("Failed to register visitor. Please try again.","a-err");
+    }finally{
+      btn.disabled=false;
+      document.getElementById("submitText").innerHTML=`<i class="bi bi-person-check-fill"></i> Register Visitor & Generate Pass`;
+    }
+  };
+
+  // ── CANCEL VISITOR ──
+  window.cancelVisitor=async function(id){
+    if(!confirm("Cancel this visitor registration?"))return;
+    try{
+      await updateDoc(doc(db,"visitors",id),{status:"cancelled"});
+      document.getElementById("detailPlaceholder").style.display="block";
+      document.getElementById("detailContent").style.display="none";
+    }catch(e){alert("Failed to cancel. Try again.");}
+  };
+
+  // ── PRINT PASS ──
+  window.printPass=function(){
+    const pass=document.querySelector(".pass-card");
+    if(!pass)return;
+    const w=window.open("","_blank","width=500,height=700");
+    w.document.write(`
+      <html><head><title>Visitor Pass</title>
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+      <style>
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:#fff;padding:24px;margin:0}
+        .pass-card{background:#f8faff;border:2px solid #1a3c8f;border-radius:16px;padding:22px;max-width:420px;margin:0 auto}
+        .pass-dots{display:none}
+        *{box-sizing:border-box}
+      </style></head>
+      <body>${pass.outerHTML}
+      <script>setTimeout(()=>{window.print();window.close();},600)<\/script>
+      </body></html>`);
+    w.document.close();
+  };
+
+  function showFieldErr(inputId,errId,msg){
+    document.getElementById(inputId)?.classList.add("err");
+    const e=document.getElementById(errId);if(e){e.classList.add("show");e.querySelector("span").textContent=msg;}
+  }
+  function showFormAlert(msg,cls){
+    const el=document.getElementById("formAlert");el.className=`g-alert ${cls} show`;
+    document.getElementById("formAlertIcon").className=cls==="a-err"?"bi bi-exclamation-circle-fill":"bi bi-check-circle-fill";
+    document.getElementById("formAlertMsg").textContent=msg;
+    el.scrollIntoView({behavior:"smooth",block:"nearest"});
+  }
+
+  ["sideSignOut","sbSignOut","dropSignOut"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener("click",async e=>{e.preventDefault();await signOut(auth);window.location.href="login.html";});
+  });
+
+  ["vName","vPhone","vRelationship","vDate","vTime","vDuration"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener("input",()=>el.classList.remove("err"));
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleSidebar(){
+    document.getElementById("sidebar").classList.toggle("open");
+    document.getElementById("sbOverlay").classList.toggle("show");
+  }
+  function toggleUserMenu(){document.getElementById("userDropdown").classList.toggle("open");}
+  function scrollToForm(){document.getElementById("visitorForm").scrollIntoView({behavior:"smooth"});}
+  document.addEventListener("click",e=>{
+    if(!e.target.closest("#userMenuBtn")&&!e.target.closest("#userDropdown"))
+      document.getElementById("userDropdown").classList.remove("open");
+  });
+</script>
+</body>
+</html>

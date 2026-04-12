@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Complaints — FUTBabura HMS Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.2);
+      --white:#fff;--muted:rgba(255,255,255,.5);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.085);
+      --ok:#22c55e;--err:#ef4444;--warn:#f59e0b;--info:#3b82f6;
+      --sidebar-w:260px;--topbar-h:68px;--radius:14px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(245,166,35,.4);border-radius:3px}
+
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#060f24 0%,#07112b 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:200;transition:transform .3s}
+    .sb-logo{display:flex;align-items:center;gap:11px;padding:20px 22px;border-bottom:1px solid var(--border);text-decoration:none}
+    .sb-logo-img{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;box-shadow:0 0 14px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:1.6px;text-transform:uppercase}
+    .sb-nav{flex:1;padding:18px 14px;overflow-y:auto}
+    .sb-section-label{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 10px;margin:18px 0 8px}
+    .sb-section-label:first-child{margin-top:0}
+    .sb-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:500;transition:all .22s;margin-bottom:2px}
+    .sb-link i{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+    .sb-link:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .sb-link.active{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.18)}
+    .sb-bottom{padding:16px 14px;border-top:1px solid var(--border)}
+    .sb-admin{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--border)}
+    .sb-admin-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#c53030,#991b1b);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--white);flex-shrink:0;overflow:hidden}
+    .sb-admin-ava img{width:100%;height:100%;object-fit:cover}
+    .sb-admin-name{font-size:12.5px;font-weight:700}
+    .sb-admin-role{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+    .sb-signout{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);font-size:16px;cursor:pointer;padding:4px;transition:color .2s}
+    .sb-signout:hover{color:var(--err)}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199}
+    .sb-overlay.show{display:block}
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(7,17,43,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:150}
+    .tb-left{display:flex;align-items:center;gap:14px}
+    .tb-menu{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;display:none;padding:4px}
+    .tb-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}
+    .tb-right{display:flex;align-items:center;gap:12px}
+    .user-menu-btn{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px 12px 6px 6px;cursor:pointer;transition:all .22s}
+    .user-menu-btn:hover{background:rgba(255,255,255,.07)}
+    .um-ava{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#c53030,#991b1b);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--white);overflow:hidden;flex-shrink:0}
+    .um-ava img{width:100%;height:100%;object-fit:cover}
+    .um-name{font-size:13px;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dropdown-menu-hms{position:absolute;top:calc(100% + 8px);right:0;background:#0c1a3d;border:1px solid var(--border);border-radius:12px;padding:8px;min-width:180px;box-shadow:0 16px 40px rgba(0,0,0,.4);z-index:500;display:none;animation:slideDown .2s ease}
+    .dropdown-menu-hms.open{display:block}
+    .dm-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none}
+    .dm-item:hover{background:rgba(255,255,255,.06);color:var(--white)}
+    .dm-item.danger{color:rgba(239,68,68,.8)}
+    .dm-item.danger:hover{background:rgba(239,68,68,.08);color:var(--err)}
+    .dm-divider{height:1px;background:var(--border);margin:6px 0}
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh}
+    .content{padding:28px 28px 50px}
+
+    /* stats */
+    .stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px}
+    .stat-mini{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;gap:12px;transition:all .25s;position:relative;overflow:hidden}
+    .stat-mini::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+    .sm-gold::before{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+    .sm-blue::before{background:linear-gradient(90deg,var(--info),#2563eb)}
+    .sm-amber::before{background:linear-gradient(90deg,var(--warn),#d97706)}
+    .sm-purple::before{background:linear-gradient(90deg,#a855f7,#9333ea)}
+    .sm-green::before{background:linear-gradient(90deg,var(--ok),#16a34a)}
+    .stat-mini:hover{border-color:rgba(245,166,35,.22);transform:translateY(-2px)}
+    .sm-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .smi-gold{background:rgba(245,166,35,.12)}
+    .smi-blue{background:rgba(59,130,246,.12)}
+    .smi-amber{background:rgba(245,158,11,.12)}
+    .smi-purple{background:rgba(168,85,247,.12)}
+    .smi-green{background:rgba(34,197,94,.12)}
+    .sm-num{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;line-height:1}
+    .sm-label{font-size:11px;color:var(--muted);margin-top:2px}
+
+    /* page layout */
+    .page-layout{display:grid;grid-template-columns:1fr 400px;gap:22px;align-items:start}
+
+    /* complaints list panel */
+    .panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .panel-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+    .panel-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+
+    /* toolbar */
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02)}
+    .search-wrap{position:relative;flex:1;min-width:180px}
+    .search-wrap i{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.3);font-size:13px;pointer-events:none}
+    .search-input{width:100%;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:9px;padding:8px 12px 8px 32px;color:var(--white);font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .2s}
+    .search-input:focus{border-color:var(--gold)}
+    .search-input::placeholder{color:rgba(255,255,255,.25)}
+    .filter-sel{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:9px;padding:8px 30px 8px 11px;color:var(--white);font-size:12.5px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='rgba(255,255,255,.4)' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;background-size:10px;transition:border-color .2s}
+    .filter-sel:focus{border-color:var(--gold)}
+    .filter-sel option{background:#0c1a3d}
+
+    /* filter tabs */
+    .filter-tabs{display:flex;gap:5px;padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);flex-wrap:wrap}
+    .ftab{padding:5px 13px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid rgba(255,255,255,.1);background:transparent;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;transition:all .22s;display:flex;align-items:center;gap:5px}
+    .ftab:hover{border-color:rgba(245,166,35,.3);color:var(--white)}
+    .ftab.active{background:rgba(245,166,35,.12);border-color:rgba(245,166,35,.4);color:var(--gold)}
+    .ftab-ct{font-size:10px;background:rgba(255,255,255,.1);padding:1px 6px;border-radius:100px}
+    .ftab.active .ftab-ct{background:rgba(245,166,35,.25)}
+
+    /* complaint items */
+    .complaints-list{max-height:620px;overflow-y:auto}
+    .c-item{display:flex;gap:12px;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:background .2s;position:relative}
+    .c-item:hover{background:rgba(255,255,255,.03)}
+    .c-item.active-item{background:rgba(245,166,35,.05);border-left:3px solid var(--gold)}
+    .c-item.unread{background:rgba(59,130,246,.03)}
+    .c-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .c-title{font-size:13.5px;font-weight:700;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:230px}
+    .c-meta{font-size:11.5px;color:var(--muted);margin-bottom:5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+    .c-preview{font-size:12px;color:rgba(255,255,255,.45);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px}
+    .c-time{font-size:10.5px;color:rgba(255,255,255,.28);margin-left:auto;flex-shrink:0;text-align:right}
+    .c-priority-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+    .pd-low{background:var(--ok)}
+    .pd-medium{background:var(--gold)}
+    .pd-high{background:var(--err)}
+    .pd-urgent{background:var(--err);box-shadow:0 0 6px var(--err)}
+
+    /* badges */
+    .sbadge{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:100px;text-transform:uppercase;letter-spacing:.5px}
+    .sb-received{background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.18)}
+    .sb-assigned{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.18)}
+    .sb-progress{background:rgba(168,85,247,.12);color:#d8b4fe;border:1px solid rgba(168,85,247,.18)}
+    .sb-resolved{background:rgba(34,197,94,.12);color:var(--ok);border:1px solid rgba(34,197,94,.18)}
+    .sb-closed{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid rgba(255,255,255,.1)}
+
+    .empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+    .empty-icon{font-size:48px;display:block;margin-bottom:12px;opacity:.4}
+
+    /* DETAIL PANEL */
+    .detail-panel{position:sticky;top:calc(var(--topbar-h) + 20px)}
+    .detail-placeholder{text-align:center;padding:52px 20px;color:var(--muted)}
+    .detail-content{display:none}
+
+    /* complaint detail */
+    .cd-header{padding:20px 22px;border-bottom:1px solid var(--border)}
+    .cd-title{font-size:17px;font-weight:700;margin-bottom:8px}
+    .cd-badges{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+    .cd-desc{font-size:13.5px;color:rgba(255,255,255,.78);line-height:1.72;padding:0 22px 16px;border-bottom:1px solid var(--border)}
+    .cd-photos{display:flex;gap:8px;flex-wrap:wrap;padding:14px 22px;border-bottom:1px solid var(--border)}
+    .cd-photo{width:76px;height:76px;border-radius:9px;object-fit:cover;border:1px solid rgba(255,255,255,.1);cursor:pointer}
+    .cd-info{padding:16px 22px;border-bottom:1px solid var(--border)}
+    .cd-info-row{display:flex;justify-content:space-between;padding:6px 0;font-size:12.5px;border-bottom:1px solid rgba(255,255,255,.04)}
+    .cd-info-row:last-child{border-bottom:none}
+    .cd-info-label{color:var(--muted)}
+    .cd-info-value{font-weight:600;text-align:right}
+
+    /* status update section */
+    .status-update{padding:18px 22px;border-bottom:1px solid var(--border)}
+    .su-title{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+    .su-title i{color:var(--gold)}
+    .status-steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+    .status-step{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .22s;border:1.5px solid rgba(255,255,255,.1);background:transparent;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif}
+    .status-step:hover{border-color:rgba(245,166,35,.35);color:var(--white)}
+    .status-step.active-step{background:rgba(245,166,35,.12);border-color:var(--gold);color:var(--gold)}
+    .status-step.step-done{background:rgba(34,197,94,.1);border-color:var(--ok);color:var(--ok)}
+
+    /* assign staff */
+    .assign-wrap{margin-bottom:12px}
+    .assign-label{font-size:12px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:6px}
+    .hms-select{width:100%;background:rgba(255,255,255,.048);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 32px 10px 12px;color:var(--white);font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;cursor:pointer;transition:border-color .2s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='rgba(255,255,255,.4)' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;background-size:11px}
+    .hms-select:focus{border-color:var(--gold)}
+    .hms-select option{background:#0c1a3d}
+    .hms-textarea{width:100%;background:rgba(255,255,255,.048);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 13px;color:var(--white);font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;resize:vertical;min-height:80px;transition:border-color .2s;line-height:1.65}
+    .hms-textarea:focus{border-color:var(--gold)}
+    .hms-textarea::placeholder{color:rgba(255,255,255,.25)}
+
+    .btn-update{width:100%;padding:12px;border-radius:10px;background:var(--gold);color:var(--navy);font-size:14px;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 16px var(--glow);transition:all .3s;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:8px}
+    .btn-update:hover:not(:disabled){background:var(--gold2);transform:translateY(-1px)}
+    .btn-update:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+    .g-alert{border-radius:10px;padding:11px 14px;font-size:12.5px;font-weight:500;display:none;align-items:center;gap:9px;margin-bottom:12px}
+    .g-alert.show{display:flex}
+    .g-alert.a-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+    .g-alert.a-ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86efac}
+
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .spin{width:16px;height:16px;border:2.5px solid rgba(7,17,43,.3);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+
+    @media(max-width:1100px){.page-layout{grid-template-columns:1fr}.detail-panel{position:static}}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0}.main{margin-left:0}
+      .tb-menu{display:block}
+      .content{padding:18px 14px 40px}
+      .stats-row{grid-template-columns:repeat(3,1fr)}
+      .um-name{display:none}
+    }
+  </style>
+</head>
+<body>
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+    <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Admin Panel</div></div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section-label">Main</div>
+    <a href="admin-dashboard.html" class="sb-link"><i class="bi bi-grid-fill"></i>Dashboard</a>
+    <a href="admin-rooms.html" class="sb-link"><i class="bi bi-door-open-fill"></i>Rooms</a>
+    <a href="admin-bookings.html" class="sb-link"><i class="bi bi-house-check-fill"></i>Bookings</a>
+    <a href="admin-complaints.html" class="sb-link active"><i class="bi bi-tools"></i>Complaints</a>
+    <a href="admin-visitors.html" class="sb-link"><i class="bi bi-people-fill"></i>Visitors</a>
+    <div class="sb-section-label">Management</div>
+    <a href="admin-students.html" class="sb-link"><i class="bi bi-mortarboard-fill"></i>Students</a>
+    <a href="admin-reports.html" class="sb-link"><i class="bi bi-bar-chart-fill"></i>Reports</a>
+    <div class="sb-section-label">System</div>
+    <a href="admin-settings.html" class="sb-link"><i class="bi bi-gear-fill"></i>Settings</a>
+    <a href="admin-login.html" class="sb-link" id="sideSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-admin">
+      <div class="sb-admin-ava" id="sbAva">A</div>
+      <div><div class="sb-admin-name" id="sbName">Admin</div><div class="sb-admin-role">Hostel Admin</div></div>
+      <button class="sb-signout" id="sbSignOut"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-left">
+    <button class="tb-menu" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+    <div class="tb-title">Manage Complaints</div>
+  </div>
+  <div class="tb-right">
+    <div style="position:relative">
+      <div class="user-menu-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="um-ava" id="umAva">A</div>
+        <span class="um-name" id="umName">Admin</span>
+        <i class="bi bi-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </div>
+      <div class="dropdown-menu-hms" id="userDropdown">
+        <a href="admin-dashboard.html" class="dm-item"><i class="bi bi-grid-fill"></i>Dashboard</a>
+        <div class="dm-divider"></div>
+        <div class="dm-item danger" id="dropSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="content fade-up">
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-mini sm-gold"><div class="sm-icon smi-gold">📋</div><div><div class="sm-num" id="sTot">—</div><div class="sm-label">Total</div></div></div>
+      <div class="stat-mini sm-blue"><div class="sm-icon smi-blue">📥</div><div><div class="sm-num" id="sReceived">—</div><div class="sm-label">Received</div></div></div>
+      <div class="stat-mini sm-amber"><div class="sm-icon smi-amber">⚙️</div><div><div class="sm-num" id="sProgress">—</div><div class="sm-label">In Progress</div></div></div>
+      <div class="stat-mini sm-purple"><div class="sm-icon smi-purple">👤</div><div><div class="sm-num" id="sAssigned">—</div><div class="sm-label">Assigned</div></div></div>
+      <div class="stat-mini sm-green"><div class="sm-icon smi-green">✅</div><div><div class="sm-num" id="sResolved">—</div><div class="sm-label">Resolved</div></div></div>
+    </div>
+
+    <div class="page-layout">
+
+      <!-- LEFT: complaint list -->
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title"><i class="bi bi-tools" style="color:var(--gold)"></i>All Complaints</span>
+            <span style="font-size:12px;color:var(--muted)" id="listCount">Loading...</span>
+          </div>
+          <div class="toolbar">
+            <div class="search-wrap">
+              <i class="bi bi-search"></i>
+              <input type="text" class="search-input" id="searchInput" placeholder="Search student, title, category..." oninput="applyFilters()"/>
+            </div>
+            <select class="filter-sel" id="catFilter" onchange="applyFilters()">
+              <option value="">All Categories</option>
+              <option>Electrical</option><option>Plumbing</option><option>Structural / Building</option>
+              <option>Furniture / Fittings</option><option>Water Supply</option><option>Power Supply</option>
+              <option>Sanitation / Hygiene</option><option>Security</option><option>Noise / Disturbance</option>
+              <option>Roommate Issue</option><option>Other</option>
+            </select>
+            <select class="filter-sel" id="prioFilter" onchange="applyFilters()">
+              <option value="">All Priority</option>
+              <option value="urgent">🚨 Urgent</option>
+              <option value="high">🔴 High</option>
+              <option value="medium">🟡 Medium</option>
+              <option value="low">🟢 Low</option>
+            </select>
+          </div>
+          <div class="filter-tabs">
+            <button class="ftab active" onclick="filterStatus('all',this)">All <span class="ftab-ct" id="ct-all">0</span></button>
+            <button class="ftab" onclick="filterStatus('received',this)">Received <span class="ftab-ct" id="ct-received">0</span></button>
+            <button class="ftab" onclick="filterStatus('assigned',this)">Assigned <span class="ftab-ct" id="ct-assigned">0</span></button>
+            <button class="ftab" onclick="filterStatus('in_progress',this)">In Progress <span class="ftab-ct" id="ct-progress">0</span></button>
+            <button class="ftab" onclick="filterStatus('resolved',this)">Resolved <span class="ftab-ct" id="ct-resolved">0</span></button>
+          </div>
+          <div class="complaints-list" id="complaintsList">
+            <div style="padding:14px 20px">
+              <div class="skeleton" style="height:68px;border-radius:10px;margin-bottom:8px"></div>
+              <div class="skeleton" style="height:68px;border-radius:10px;margin-bottom:8px"></div>
+              <div class="skeleton" style="height:68px;border-radius:10px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: detail + manage panel -->
+      <div class="detail-panel">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title"><i class="bi bi-info-circle-fill" style="color:var(--gold)"></i>Complaint Details</span>
+          </div>
+          <div class="detail-placeholder" id="detailPlaceholder">
+            <span class="empty-icon">🔍</span>
+            <p style="font-size:13.5px">Select a complaint from the list to view details and update its status.</p>
+          </div>
+          <div class="detail-content" id="detailContent"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, doc, query, where,
+    getDocs, updateDoc, addDoc, onSnapshot,
+    orderBy, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg={apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app=initializeApp(cfg);
+  const db=getFirestore(app);
+  const auth=getAuth(app);
+
+  let adminData=null, allComplaints=[], maintenanceStaff=[], selectedStatus="all", selectedComplaintId=null;
+
+  // ── AUTH ──
+  onAuthStateChanged(auth,async user=>{
+    if(!user){window.location.href="admin-login.html";return;}
+    const ps=await getDocs(query(collection(db,"users"),where("uid","==",user.uid)));
+    if(ps.empty||ps.docs[0].data().role==="student"){await signOut(auth);window.location.href="admin-login.html";return;}
+    adminData=ps.docs[0].data();
+    if(!["hostel_admin","super_admin"].includes(adminData.role)){await signOut(auth);window.location.href="admin-login.html";return;}
+    renderAdminUI(adminData);
+    loadMaintenanceStaff();
+    listenComplaints();
+  });
+
+  function renderAdminUI(a){
+    const init=(a.fullName||"A").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    ["sbAva","umAva"].forEach(id=>{const el=document.getElementById(id);if(!el)return;if(a.photoURL)el.innerHTML=`<img src="${a.photoURL}"/>`;else el.textContent=init;});
+    document.getElementById("sbName").textContent=a.fullName||"Admin";
+    document.getElementById("umName").textContent=(a.fullName||"Admin").split(" ")[0];
+  }
+
+  // load maintenance staff for assignment dropdown
+  async function loadMaintenanceStaff(){
+    const snap=await getDocs(query(collection(db,"users"),where("role","==","maintenance")));
+    maintenanceStaff=snap.docs.map(d=>({id:d.id,...d.data()}));
+  }
+
+  // ── REAL-TIME LISTENER ──
+  function listenComplaints(){
+    onSnapshot(query(collection(db,"complaints"),orderBy("createdAt","desc")),snap=>{
+      allComplaints=snap.docs.map(d=>({id:d.id,...d.data()}));
+      updateStats();
+      applyFilters();
+      // re-render selected detail if open
+      if(selectedComplaintId){
+        const updated=allComplaints.find(c=>c.id===selectedComplaintId);
+        if(updated) renderDetail(updated);
+      }
+    });
+  }
+
+  function updateStats(){
+    const tot=allComplaints.length;
+    const recv=allComplaints.filter(c=>c.status==="received").length;
+    const prog=allComplaints.filter(c=>c.status==="in_progress").length;
+    const asgn=allComplaints.filter(c=>c.status==="assigned").length;
+    const res=allComplaints.filter(c=>c.status==="resolved"||c.status==="closed").length;
+    document.getElementById("sTot").textContent=tot;
+    document.getElementById("sReceived").textContent=recv;
+    document.getElementById("sProgress").textContent=prog;
+    document.getElementById("sAssigned").textContent=asgn;
+    document.getElementById("sResolved").textContent=res;
+    ["all","received","assigned","progress","resolved"].forEach(k=>{
+      const el=document.getElementById(`ct-${k}`);
+      if(!el)return;
+      const map={all:tot,received:recv,assigned:asgn,progress:prog,resolved:res};
+      el.textContent=map[k]??0;
+    });
+  }
+
+  window.filterStatus=function(s,btn){
+    selectedStatus=s;
+    document.querySelectorAll(".ftab").forEach(t=>t.classList.remove("active"));
+    btn.classList.add("active");
+    applyFilters();
+  };
+
+  window.applyFilters=function(){
+    const search=document.getElementById("searchInput").value.toLowerCase();
+    const cat=document.getElementById("catFilter").value;
+    const prio=document.getElementById("prioFilter").value;
+    let data=allComplaints.filter(c=>{
+      const st=c.status||"received";
+      if(selectedStatus==="in_progress"&&st!=="in_progress")return false;
+      if(selectedStatus!=="all"&&selectedStatus!=="in_progress"&&st!==selectedStatus)return false;
+      if(search&&!`${c.studentName} ${c.title} ${c.category} ${c.location}`.toLowerCase().includes(search))return false;
+      if(cat&&c.category!==cat)return false;
+      if(prio&&c.priority!==prio)return false;
+      return true;
+    });
+    // sort: urgent first, then high, then by date
+    const prioOrder={urgent:0,high:1,medium:2,low:3};
+    data.sort((a,b)=>(prioOrder[a.priority]??4)-(prioOrder[b.priority]??4)||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    document.getElementById("listCount").textContent=`${data.length} complaint${data.length!==1?"s":""}`;
+    renderList(data);
+  };
+
+  // ── RENDER LIST ──
+  const catIcons={Electrical:"⚡",Plumbing:"🔧","Structural / Building":"🏗","Furniture / Fittings":"🪑","Water Supply":"💧","Power Supply":"🔌","Sanitation / Hygiene":"🧹",Security:"🔐","Noise / Disturbance":"📢","Roommate Issue":"👥",Other:"📋"};
+  const catBg={Electrical:"rgba(245,166,35,.12)",Plumbing:"rgba(59,130,246,.12)","Structural / Building":"rgba(168,85,247,.12)","Water Supply":"rgba(59,130,246,.12)","Power Supply":"rgba(245,166,35,.12)","Sanitation / Hygiene":"rgba(34,197,94,.12)",Security:"rgba(239,68,68,.12)","Noise / Disturbance":"rgba(239,68,68,.12)","Roommate Issue":"rgba(168,85,247,.12)",Other:"rgba(255,255,255,.06)"};
+  const statusBadge={received:`<span class="sbadge sb-received">Received</span>`,assigned:`<span class="sbadge sb-assigned">Assigned</span>`,in_progress:`<span class="sbadge sb-progress">In Progress</span>`,resolved:`<span class="sbadge sb-resolved">Resolved</span>`,closed:`<span class="sbadge sb-closed">Closed</span>`};
+  const prioClass={low:"pd-low",medium:"pd-medium",high:"pd-high",urgent:"pd-urgent"};
+  const timeAgo=ts=>{if(!ts)return"";const d=ts.toDate?ts.toDate():new Date(ts);const diff=(Date.now()-d)/1000;if(diff<60)return"just now";if(diff<3600)return`${Math.floor(diff/60)}m ago`;if(diff<86400)return`${Math.floor(diff/3600)}h ago`;return`${Math.floor(diff/86400)}d ago`;};
+
+  function renderList(data){
+    const list=document.getElementById("complaintsList");
+    if(data.length===0){list.innerHTML=`<div class="empty-state"><span class="empty-icon">🔧</span><div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:6px">No complaints found</div><div style="font-size:13px">Adjust your filters to see more.</div></div>`;return;}
+    list.innerHTML=data.map(c=>`
+      <div class="c-item${c.id===selectedComplaintId?" active-item":""}" id="ci-${c.id}" onclick="selectComplaint('${c.id}')">
+        <div class="c-priority-dot ${prioClass[c.priority]||"pd-low"}"></div>
+        <div class="c-icon" style="background:${catBg[c.category]||"rgba(255,255,255,.06)"}">${catIcons[c.category]||"📋"}</div>
+        <div style="flex:1;min-width:0">
+          <div class="c-title">${c.title||"Complaint"}</div>
+          <div class="c-meta">${c.studentName||"—"} · ${c.category||"General"} ${statusBadge[c.status||"received"]||""}</div>
+          <div class="c-preview">${c.description||""}</div>
+        </div>
+        <div class="c-time">${timeAgo(c.createdAt)}<br/><span style="font-size:9.5px;opacity:.6">${c.location||""}</span></div>
+      </div>`).join("");
+  }
+
+  // ── SELECT COMPLAINT ──
+  window.selectComplaint=function(id){
+    selectedComplaintId=id;
+    const c=allComplaints.find(x=>x.id===id);
+    if(!c)return;
+    document.querySelectorAll(".c-item").forEach(el=>el.classList.remove("active-item"));
+    document.getElementById(`ci-${id}`)?.classList.add("active-item");
+    renderDetail(c);
+  };
+
+  // ── RENDER DETAIL ──
+  function renderDetail(c){
+    document.getElementById("detailPlaceholder").style.display="none";
+    document.getElementById("detailContent").style.display="block";
+    const dateStr=ts=>{if(!ts)return"—";const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleDateString("en-NG",{day:"numeric",month:"short",year:"numeric"})+" "+d.toLocaleTimeString("en-NG",{hour:"2-digit",minute:"2-digit"});};
+    const prioLabel={low:"🟢 Low",medium:"🟡 Medium",high:"🔴 High",urgent:"🚨 Urgent"};
+    const currentStatus=c.status||"received";
+    const statuses=["received","assigned","in_progress","resolved"];
+
+    // build maintenance staff options
+    const staffOpts=maintenanceStaff.length
+      ?maintenanceStaff.map(s=>`<option value="${s.uid||s.id}" ${c.assignedTo===s.uid||c.assignedTo===s.id?"selected":""}>${s.fullName||"Staff"}</option>`).join("")
+      :"<option value=''>No maintenance staff registered</option>";
+
+    document.getElementById("detailContent").innerHTML=`
+      <div class="cd-header">
+        <div class="cd-title">${c.title||"Complaint"}</div>
+        <div class="cd-badges">
+          ${statusBadge[currentStatus]||""}
+          <span class="sbadge" style="background:rgba(255,255,255,.06);color:var(--muted);border:1px solid rgba(255,255,255,.1)">${c.category||"General"}</span>
+          <span class="sbadge" style="background:rgba(255,255,255,.06);color:var(--muted);border:1px solid rgba(255,255,255,.1)">${prioLabel[c.priority]||"Low"}</span>
+        </div>
+      </div>
+      <div class="cd-desc">${c.description||"No description provided."}</div>
+      ${c.photos?.length?`<div class="cd-photos">${c.photos.map(p=>`<img src="${p}" class="cd-photo" onclick="window.open('${p}','_blank')">`).join("")}</div>`:""}
+      <div class="cd-info">
+        <div class="cd-info-row"><span class="cd-info-label">Student</span><span class="cd-info-value">${c.studentName||"—"}</span></div>
+        <div class="cd-info-row"><span class="cd-info-label">Matric No.</span><span class="cd-info-value" style="font-family:monospace;font-size:12px">${c.matricNo||"—"}</span></div>
+        <div class="cd-info-row"><span class="cd-info-label">Department</span><span class="cd-info-value">${c.department||"—"}</span></div>
+        <div class="cd-info-row"><span class="cd-info-label">Location</span><span class="cd-info-value">${c.location||"—"}</span></div>
+        <div class="cd-info-row"><span class="cd-info-label">Filed On</span><span class="cd-info-value">${dateStr(c.createdAt)}</span></div>
+        <div class="cd-info-row"><span class="cd-info-label">Last Updated</span><span class="cd-info-value">${dateStr(c.updatedAt)}</span></div>
+        ${c.assignedToName?`<div class="cd-info-row"><span class="cd-info-label">Assigned To</span><span class="cd-info-value" style="color:var(--gold)">${c.assignedToName}</span></div>`:""}
+      </div>
+      ${c.adminReply?`<div style="padding:14px 22px;border-bottom:1px solid var(--border)"><div style="font-size:12px;font-weight:700;color:#93c5fd;margin-bottom:8px"><i class="bi bi-chat-left-dots-fill"></i> Your Previous Reply</div><div style="font-size:13px;color:rgba(255,255,255,.8);background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:10px;padding:11px 14px;line-height:1.65">${c.adminReply}</div></div>`:""}
+      <div class="status-update">
+        <div class="su-title"><i class="bi bi-arrow-repeat"></i>Update Status</div>
+        <div class="status-steps">
+          ${statuses.map(s=>`<button class="status-step${s===currentStatus?" active-step":statuses.indexOf(s)<statuses.indexOf(currentStatus)?" step-done":""}" onclick="selectStep('${s}',this)">${s==="in_progress"?"In Progress":s.charAt(0).toUpperCase()+s.slice(1)}</button>`).join("")}
+        </div>
+        <div class="assign-wrap">
+          <div class="assign-label">Assign to Maintenance Staff</div>
+          <select class="hms-select" id="assignSelect">
+            <option value="">-- Unassigned --</option>
+            ${staffOpts}
+          </select>
+        </div>
+        <div class="assign-label" style="margin-top:12px;margin-bottom:6px">Reply / Note to Student</div>
+        <textarea class="hms-textarea" id="adminReplyText" placeholder="Write a reply or update note for the student...">${c.adminReply||""}</textarea>
+        <div class="g-alert" id="updateAlert"><i class="bi" id="updateAlertIcon"></i><span id="updateAlertMsg"></span></div>
+        <button class="btn-update" id="updateBtn" onclick="updateComplaint('${c.id}','${c.studentUid||""}')">
+          <span id="updateBtnText"><i class="bi bi-check-lg"></i> Save Update</span>
+        </button>
+      </div>`;
+
+    window._selectedStep=currentStatus;
+  }
+
+  // ── SELECT STATUS STEP ──
+  window.selectStep=function(s,btn){
+    window._selectedStep=s;
+    document.querySelectorAll(".status-step").forEach(b=>b.classList.remove("active-step"));
+    btn.classList.add("active-step");
+  };
+
+  // ── UPDATE COMPLAINT ──
+  window.updateComplaint=async function(complaintId,studentUid){
+    const newStatus=window._selectedStep||"received";
+    const assignSelect=document.getElementById("assignSelect");
+    const assignedUid=assignSelect?.value||"";
+    const assignedName=assignedUid?maintenanceStaff.find(s=>(s.uid||s.id)===assignedUid)?.fullName||"Staff":"";
+    const reply=document.getElementById("adminReplyText")?.value.trim()||"";
+
+    const btn=document.getElementById("updateBtn");
+    btn.disabled=true;
+    document.getElementById("updateBtnText").innerHTML=`<div class="spin"></div> Saving...`;
+
+    try{
+      const updateData={
+        status:newStatus,
+        adminReply:reply,
+        updatedAt:serverTimestamp(),
+      };
+      if(assignedUid){updateData.assignedTo=assignedUid;updateData.assignedToName=assignedName;}
+
+      await updateDoc(doc(db,"complaints",complaintId),updateData);
+
+      // notify student
+      if(studentUid){
+        const notifMsg=newStatus==="resolved"
+          ?`✅ Your complaint "${allComplaints.find(c=>c.id===complaintId)?.title||"complaint"}" has been resolved! ${reply?"Admin note: "+reply:""}`
+          :`📋 Your complaint has been updated to: ${newStatus.replace("_"," ")}. ${reply?"Admin: "+reply:""}`;
+        await addDoc(collection(db,"notifications"),{
+          studentUid,type:"complaint",message:notifMsg,
+          read:false,createdAt:serverTimestamp()
+        });
+      }
+
+      showUpdateAlert("Complaint updated and student notified!","a-ok");
+    }catch(e){
+      console.error(e);
+      showUpdateAlert("Failed to update complaint.","a-err");
+    }finally{
+      btn.disabled=false;
+      document.getElementById("updateBtnText").innerHTML=`<i class="bi bi-check-lg"></i> Save Update`;
+    }
+  };
+
+  function showUpdateAlert(msg,cls){
+    const el=document.getElementById("updateAlert");if(!el)return;
+    el.className=`g-alert ${cls} show`;
+    document.getElementById("updateAlertIcon").className=cls==="a-err"?"bi bi-exclamation-circle-fill":"bi bi-check-circle-fill";
+    document.getElementById("updateAlertMsg").textContent=msg;
+    setTimeout(()=>el.className="g-alert",4000);
+  }
+
+  ["sideSignOut","sbSignOut","dropSignOut"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener("click",async e=>{e.preventDefault();await signOut(auth);window.location.href="admin-login.html";});
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleSidebar(){document.getElementById("sidebar").classList.toggle("open");document.getElementById("sbOverlay").classList.toggle("show");}
+  function toggleUserMenu(){document.getElementById("userDropdown").classList.toggle("open");}
+  document.addEventListener("click",e=>{if(!e.target.closest("#userMenuBtn")&&!e.target.closest("#userDropdown"))document.getElementById("userDropdown").classList.remove("open");});
+</script>
+</body>
+</html>

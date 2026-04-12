@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>System Settings — Super Admin | FUTBabura HMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.2);
+      --white:#fff;--muted:rgba(255,255,255,.5);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.085);
+      --ok:#22c55e;--err:#ef4444;--warn:#f59e0b;--info:#3b82f6;
+      --sidebar-w:280px;--topbar-h:70px;--radius:16px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:rgba(245,166,35,.4);border-radius:3px}
+
+    /* ── SIDEBAR ── */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#050e20 0%,#07112b 100%);border-right:1px solid rgba(245,166,35,.12);display:flex;flex-direction:column;z-index:200;transition:transform .3s ease}
+    .sb-logo{display:flex;align-items:center;gap:12px;padding:22px 24px;border-bottom:1px solid rgba(245,166,35,.15);text-decoration:none}
+    .sb-logo-img{width:42px;height:42px;border-radius:50%;border:2.5px solid var(--gold);overflow:hidden;box-shadow:0 0 20px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+    .sb-nav{flex:1;padding:20px 16px;overflow-y:auto}
+    .sb-section-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 12px;margin:20px 0 10px}
+    .sb-section-label:first-child{margin-top:0}
+    .sb-link{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:11px;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:500;transition:all .22s;margin-bottom:3px}
+    .sb-link i{font-size:17px;width:22px;text-align:center;flex-shrink:0}
+    .sb-link:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .sb-link.active{background:linear-gradient(135deg,rgba(245,166,35,.15),rgba(245,166,35,.05));color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+    .sb-bottom{padding:18px 16px;border-top:1px solid rgba(245,166,35,.1)}
+    .sb-admin{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.12)}
+    .sb-admin-ava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:var(--navy);flex-shrink:0;overflow:hidden}
+    .sb-admin-ava img{width:100%;height:100%;object-fit:cover}
+    .sb-admin-name{font-size:13px;font-weight:700;line-height:1.2}
+    .sb-admin-role{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px}
+    .sb-signout{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);font-size:17px;cursor:pointer;padding:4px;transition:color .2s}
+    .sb-signout:hover{color:var(--err)}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:199}
+    .sb-overlay.show{display:block}
+
+    /* ── TOPBAR ── */
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(7,17,43,.98);backdrop-filter:blur(20px);border-bottom:1px solid rgba(245,166,35,.1);display:flex;align-items:center;justify-content:space-between;padding:0 32px;z-index:150}
+    .tb-left{display:flex;align-items:center;gap:16px}
+    .tb-menu{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;display:none;padding:4px}
+    .tb-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+    .tb-right{display:flex;align-items:center;gap:16px}
+    .user-menu-btn{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:6px 14px 6px 8px;cursor:pointer;transition:all .22s}
+    .user-menu-btn:hover{background:rgba(255,255,255,.07)}
+    .um-ava{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--navy);overflow:hidden;flex-shrink:0}
+    .um-name{font-size:13.5px;font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dropdown-menu-hms{position:absolute;top:calc(100% + 10px);right:0;background:#0c1a3d;border:1px solid rgba(245,166,35,.15);border-radius:14px;padding:8px;min-width:200px;box-shadow:0 20px 40px rgba(0,0,0,.5);z-index:500;display:none;animation:slideDown .2s ease}
+    .dropdown-menu-hms.open{display:block}
+    .dm-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:9px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none}
+    .dm-item:hover{background:rgba(255,255,255,.06);color:var(--white)}
+    .dm-item.danger{color:rgba(239,68,68,.8)}
+    .dm-item.danger:hover{background:rgba(239,68,68,.08);color:var(--err)}
+
+    /* ── MAIN ── */
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh}
+    .content{padding:28px 32px 50px}
+
+    /* ── PAGE HEADER ── */
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px}
+    .ph-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:900}
+    .btn-primary{padding:12px 22px;border-radius:11px;background:var(--gold);color:var(--navy);font-size:13.5px;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:'Plus Jakarta Sans',sans-serif;transition:all .25s;box-shadow:0 4px 14px var(--glow)}
+    .btn-primary:hover{background:var(--gold2);transform:translateY(-2px)}
+
+    /* ── SETTINGS LAYOUT ── */
+    .settings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+    .settings-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .card-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+    .card-header i{font-size:20px;color:var(--gold)}
+    .card-title{font-size:15px;font-weight:700}
+    .card-body{padding:22px}
+    .full-width{grid-column:span 2}
+
+    .field-wrap{margin-bottom:18px}
+    .field-label{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.72);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+    .req{color:var(--gold)}
+    .hms-input{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:11px;padding:11px 14px;color:var(--white);font-size:13.5px;outline:none}
+    .hms-input:focus{border-color:var(--gold)}
+    .hms-input:disabled{background:rgba(255,255,255,.02);color:var(--muted);cursor:not-allowed}
+    .hms-textarea{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:11px;padding:11px 14px;color:var(--white);font-size:13.5px;outline:none;resize:vertical;min-height:80px}
+    .hms-textarea:focus{border-color:var(--gold)}
+    .hms-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='rgba(255,255,255,.4)' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:12px;padding-right:38px}
+    .hms-select option{background:#0c1a3d}
+    .row-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+    /* toggle switch */
+    .toggle-switch{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
+    .toggle-label{font-size:13.5px;font-weight:500}
+    .toggle-desc{font-size:11.5px;color:var(--muted);margin-top:2px}
+    .toggle-btn{width:48px;height:24px;background:rgba(255,255,255,.1);border-radius:100px;position:relative;cursor:pointer;transition:background .3s;border:1.5px solid var(--border)}
+    .toggle-btn.active{background:var(--ok);border-color:var(--ok)}
+    .toggle-btn::after{content:'';position:absolute;width:18px;height:18px;background:var(--white);border-radius:50%;top:2px;left:2px;transition:transform .3s}
+    .toggle-btn.active::after{transform:translateX(24px)}
+
+    /* maintenance banner */
+    .maintenance-banner{background:rgba(239,68,68,.1);border:1.5px solid rgba(239,68,68,.3);border-radius:12px;padding:16px 20px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .mb-left{display:flex;align-items:center;gap:12px}
+    .mb-icon{font-size:24px;color:var(--err)}
+    .mb-text{font-size:14px;font-weight:600;color:#fca5a5}
+    .mb-desc{font-size:12px;color:var(--muted)}
+    .btn-danger-small{padding:8px 16px;border-radius:8px;background:rgba(239,68,68,.15);border:1.5px solid rgba(239,68,68,.3);color:var(--err);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .2s}
+    .btn-danger-small:hover{background:rgba(239,68,68,.25)}
+
+    /* action buttons */
+    .action-bar{display:flex;gap:12px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+    .btn-save{padding:12px 28px;border-radius:11px;background:var(--gold);color:var(--navy);font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .25s;box-shadow:0 4px 14px var(--glow)}
+    .btn-save:hover{background:var(--gold2);transform:translateY(-2px)}
+    .btn-cancel{padding:12px 28px;border-radius:11px;background:transparent;border:1.5px solid var(--border);color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;transition:all .25s}
+    .btn-cancel:hover{background:rgba(255,255,255,.05);color:var(--white)}
+
+    .success-message{background:rgba(34,197,94,.1);border:1.5px solid rgba(34,197,94,.3);border-radius:11px;padding:12px 18px;color:#86efac;font-size:13px;display:none;align-items:center;gap:10px;margin-bottom:20px}
+    .success-message.show{display:flex}
+
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+
+    @media(max-width:1050px){.settings-grid{grid-template-columns:1fr}.full-width{grid-column:span 1}}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0}.main{margin-left:0}
+      .tb-menu{display:block}
+      .content{padding:18px 16px 40px}
+      .um-name{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar" id="sidebar">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+    <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Super Admin</div></div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section-label">MAIN</div>
+    <a href="superadmin-dashboard.html" class="sb-link"><i class="bi bi-grid-fill"></i>Dashboard</a>
+    <a href="superadmin-admins.html" class="sb-link"><i class="bi bi-shield-lock-fill"></i>Admin Management</a>
+    <a href="superadmin-students.html" class="sb-link"><i class="bi bi-people-fill"></i>Students</a>
+    <div class="sb-section-label">HOSTEL MANAGEMENT</div>
+    <a href="superadmin-hostels.html" class="sb-link"><i class="bi bi-building"></i>Hostels</a>
+    <a href="superadmin-rooms.html" class="sb-link"><i class="bi bi-door-open-fill"></i>Rooms</a>
+    <a href="superadmin-bookings.html" class="sb-link"><i class="bi bi-house-check-fill"></i>All Bookings</a>
+    <div class="sb-section-label">FINANCE</div>
+    <a href="superadmin-payments.html" class="sb-link"><i class="bi bi-cash-stack"></i>Payments</a>
+    <a href="superadmin-reports.html" class="sb-link"><i class="bi bi-bar-chart-fill"></i>Reports</a>
+    <div class="sb-section-label">SYSTEM</div>
+    <a href="superadmin-settings.html" class="sb-link active"><i class="bi bi-gear-fill"></i>Settings</a>
+    <a href="superadmin-audit.html" class="sb-link"><i class="bi bi-journal-text"></i>Audit Logs</a>
+    <div class="sb-section-label">ACCOUNT</div>
+    <a href="admin-login.html" class="sb-link" id="sideSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-admin">
+      <div class="sb-admin-ava" id="sbAva">SA</div>
+      <div><div class="sb-admin-name" id="sbName">Loading...</div><div class="sb-admin-role">SUPER ADMIN</div></div>
+      <button class="sb-signout" id="sbSignOut"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar" id="topbar">
+  <div class="tb-left">
+    <button class="tb-menu" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+    <div class="tb-title">System Settings</div>
+  </div>
+  <div class="tb-right">
+    <div style="position:relative">
+      <div class="user-menu-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="um-ava" id="umAva">SA</div>
+        <span class="um-name" id="umName">Super Admin</span>
+        <i class="bi bi-chevron-down" style="font-size:12px;color:var(--muted)"></i>
+      </div>
+      <div class="dropdown-menu-hms" id="userDropdown">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);margin-bottom:6px">
+          <div style="font-size:13px;font-weight:700" id="ddName">Super Admin</div>
+          <div style="font-size:11px;color:var(--gold)">System Administrator</div>
+        </div>
+        <div class="dm-item danger" id="dropSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main" id="main">
+  <div class="content fade-up">
+
+    <!-- SUCCESS MESSAGE -->
+    <div class="success-message" id="successMessage">
+      <i class="bi bi-check-circle-fill"></i>
+      <span>Settings saved successfully!</span>
+    </div>
+
+    <!-- MAINTENANCE MODE BANNER (shown when active) -->
+    <div class="maintenance-banner" id="maintenanceBanner" style="display:none">
+      <div class="mb-left">
+        <i class="bi bi-exclamation-triangle-fill mb-icon"></i>
+        <div>
+          <div class="mb-text">Maintenance Mode is ACTIVE</div>
+          <div class="mb-desc">Students cannot access the system. Only admins can log in.</div>
+        </div>
+      </div>
+      <button class="btn-danger-small" onclick="toggleMaintenanceMode()"><i class="bi bi-x-circle"></i> Disable Maintenance Mode</button>
+    </div>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <h1 class="ph-title">System Configuration</h1>
+      <button class="btn-primary" onclick="saveAllSettings()"><i class="bi bi-check-lg"></i>Save All Changes</button>
+    </div>
+
+    <!-- SETTINGS GRID -->
+    <div class="settings-grid">
+
+      <!-- GENERAL SETTINGS -->
+      <div class="settings-card">
+        <div class="card-header">
+          <i class="bi bi-building"></i>
+          <span class="card-title">General Information</span>
+        </div>
+        <div class="card-body">
+          <div class="field-wrap">
+            <label class="field-label">Institution Name</label>
+            <input type="text" class="hms-input" id="institutionName" placeholder="Federal University of Technology Babura" value="Federal University of Technology Babura">
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">System Name</label>
+            <input type="text" class="hms-input" id="systemName" placeholder="FUTBabura HMS" value="FUTBabura HMS">
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Contact Email</label>
+            <input type="email" class="hms-input" id="contactEmail" placeholder="admin@futbabura.edu.ng" value="admin@futbabura.edu.ng">
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Contact Phone</label>
+            <input type="tel" class="hms-input" id="contactPhone" placeholder="+234 800 000 0000" value="+234 800 000 0000">
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Address</label>
+            <textarea class="hms-textarea" id="address" placeholder="Institution address...">Babura, Jigawa State, Nigeria</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACADEMIC SESSION -->
+      <div class="settings-card">
+        <div class="card-header">
+          <i class="bi bi-calendar-range"></i>
+          <span class="card-title">Academic Session</span>
+        </div>
+        <div class="card-body">
+          <div class="field-wrap">
+            <label class="field-label">Current Session <span class="req">*</span></label>
+            <input type="text" class="hms-input" id="currentSession" placeholder="2024/2025" value="2024/2025">
+          </div>
+          <div class="row-fields">
+            <div class="field-wrap">
+              <label class="field-label">Session Start</label>
+              <input type="date" class="hms-input" id="sessionStart" value="2024-09-01">
+            </div>
+            <div class="field-wrap">
+              <label class="field-label">Session End</label>
+              <input type="date" class="hms-input" id="sessionEnd" value="2025-08-31">
+            </div>
+          </div>
+          <div class="row-fields">
+            <div class="field-wrap">
+              <label class="field-label">Booking Opens</label>
+              <input type="date" class="hms-input" id="bookingOpens" value="2024-08-01">
+            </div>
+            <div class="field-wrap">
+              <label class="field-label">Booking Closes</label>
+              <input type="date" class="hms-input" id="bookingCloses" value="2024-10-31">
+            </div>
+          </div>
+          <div class="toggle-switch">
+            <div>
+              <div class="toggle-label">Allow New Bookings</div>
+              <div class="toggle-desc">Students can make new room bookings</div>
+            </div>
+            <div class="toggle-btn active" id="allowBookingsToggle" onclick="toggleSetting('allowBookings')"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRICING DEFAULTS -->
+      <div class="settings-card">
+        <div class="card-header">
+          <i class="bi bi-cash-coin"></i>
+          <span class="card-title">Default Pricing</span>
+        </div>
+        <div class="card-body">
+          <div class="field-wrap">
+            <label class="field-label">Standard Room (₦/slot)</label>
+            <input type="number" class="hms-input" id="priceStandard" placeholder="50000" value="50000">
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Premium Room (₦/slot)</label>
+            <input type="number" class="hms-input" id="pricePremium" placeholder="75000" value="75000">
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Executive Room (₦/slot)</label>
+            <input type="number" class="hms-input" id="priceExecutive" placeholder="100000" value="100000">
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Late Payment Fee (₦)</label>
+            <input type="number" class="hms-input" id="lateFee" placeholder="5000" value="5000">
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATION SETTINGS -->
+      <div class="settings-card">
+        <div class="card-header">
+          <i class="bi bi-bell-fill"></i>
+          <span class="card-title">Notifications</span>
+        </div>
+        <div class="card-body">
+          <div class="toggle-switch">
+            <div>
+              <div class="toggle-label">Email Notifications</div>
+              <div class="toggle-desc">Send email for important events</div>
+            </div>
+            <div class="toggle-btn active" id="emailNotificationsToggle" onclick="toggleSetting('emailNotifications')"></div>
+          </div>
+          <div class="toggle-switch">
+            <div>
+              <div class="toggle-label">Booking Confirmations</div>
+              <div class="toggle-desc">Notify students when booking is confirmed</div>
+            </div>
+            <div class="toggle-btn active" id="bookingConfirmationsToggle" onclick="toggleSetting('bookingConfirmations')"></div>
+          </div>
+          <div class="toggle-switch">
+            <div>
+              <div class="toggle-label">Payment Reminders</div>
+              <div class="toggle-desc">Send reminders for pending payments</div>
+            </div>
+            <div class="toggle-btn active" id="paymentRemindersToggle" onclick="toggleSetting('paymentReminders')"></div>
+          </div>
+          <div class="toggle-switch">
+            <div>
+              <div class="toggle-label">Complaint Updates</div>
+              <div class="toggle-desc">Notify students on complaint status changes</div>
+            </div>
+            <div class="toggle-btn active" id="complaintUpdatesToggle" onclick="toggleSetting('complaintUpdates')"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECURITY SETTINGS -->
+      <div class="settings-card">
+        <div class="card-header">
+          <i class="bi bi-shield-check"></i>
+          <span class="card-title">Security</span>
+        </div>
+        <div class="card-body">
+          <div class="toggle-switch">
+            <div>
+              <div class="toggle-label">Two-Factor Authentication (2FA)</div>
+              <div class="toggle-desc">Require 2FA for all admin accounts</div>
+            </div>
+            <div class="toggle-btn" id="require2FAToggle" onclick="toggleSetting('require2FA')"></div>
+          </div>
+          <div class="toggle-switch">
+            <div>
+              <div class="toggle-label">Session Timeout</div>
+              <div class="toggle-desc">Auto logout after inactivity</div>
+            </div>
+            <div class="toggle-btn active" id="sessionTimeoutToggle" onclick="toggleSetting('sessionTimeout')"></div>
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Max Login Attempts</label>
+            <input type="number" class="hms-input" id="maxLoginAttempts" placeholder="5" value="5">
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Lockout Duration (minutes)</label>
+            <input type="number" class="hms-input" id="lockoutDuration" placeholder="15" value="15">
+          </div>
+        </div>
+      </div>
+
+      <!-- MAINTENANCE MODE -->
+      <div class="settings-card">
+        <div class="card-header">
+          <i class="bi bi-tools"></i>
+          <span class="card-title">Maintenance Mode</span>
+        </div>
+        <div class="card-body">
+          <div class="toggle-switch">
+            <div>
+              <div class="toggle-label">Maintenance Mode</div>
+              <div class="toggle-desc">Disable student access for maintenance</div>
+            </div>
+            <div class="toggle-btn" id="maintenanceModeToggle" onclick="toggleMaintenanceMode()"></div>
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Maintenance Message</label>
+            <textarea class="hms-textarea" id="maintenanceMessage" placeholder="Message to display to students...">The system is currently undergoing scheduled maintenance. Please check back later.</textarea>
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Expected Completion</label>
+            <input type="datetime-local" class="hms-input" id="maintenanceEndTime">
+          </div>
+        </div>
+      </div>
+
+      <!-- BACKUP & RESTORE (Full Width) -->
+      <div class="settings-card full-width">
+        <div class="card-header">
+          <i class="bi bi-cloud-arrow-up-fill"></i>
+          <span class="card-title">Backup & Restore</span>
+        </div>
+        <div class="card-body">
+          <div style="display:flex;gap:16px;flex-wrap:wrap">
+            <button class="btn-primary" onclick="createBackup()"><i class="bi bi-cloud-upload"></i> Create Backup Now</button>
+            <button class="btn-cancel" onclick="exportAllData()"><i class="bi bi-download"></i> Export All Data (JSON)</button>
+            <button class="btn-cancel" onclick="document.getElementById('restoreFile').click()"><i class="bi bi-upload"></i> Restore from Backup</button>
+            <input type="file" id="restoreFile" accept=".json" style="display:none" onchange="restoreFromFile(this)">
+          </div>
+          <div style="margin-top:16px;font-size:12px;color:var(--muted)">
+            <i class="bi bi-info-circle"></i> Last backup: <span id="lastBackup">Never</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ACTION BAR -->
+    <div class="action-bar">
+      <button class="btn-save" onclick="saveAllSettings()"><i class="bi bi-check-lg"></i> Save All Settings</button>
+      <button class="btn-cancel" onclick="resetForm()">Reset Changes</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, query, where, getDocs, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg={apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app=initializeApp(cfg);
+  const db=getFirestore(app);
+  const auth=getAuth(app);
+
+  let adminData=null, settings={};
+
+  onAuthStateChanged(auth, async user=>{
+    if(!user){window.location.href="admin-login.html";return;}
+    try{
+      const ps=await getDocs(query(collection(db,"users"),where("uid","==",user.uid)));
+      if(ps.empty||ps.docs[0].data().role!=="super_admin"){await signOut(auth);window.location.href="admin-login.html";return;}
+      adminData=ps.docs[0].data();
+      renderAdminUI(adminData);
+      await loadSettings();
+    }catch(e){console.error(e);}
+  });
+
+  function renderAdminUI(a){
+    const initials=(a.fullName||"SA").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    ["sbAva","umAva"].forEach(id=>{const el=document.getElementById(id);if(el){if(a.photoURL)el.innerHTML=`<img src="${a.photoURL}" alt=""/>`;else el.textContent=initials;}});
+    document.getElementById("sbName").textContent=a.fullName||"Super Admin";
+    document.getElementById("umName").textContent=(a.fullName||"Super Admin").split(" ")[0];
+    document.getElementById("ddName").textContent=a.fullName||"Super Admin";
+  }
+
+  async function loadSettings(){
+    const snap=await getDocs(collection(db,"settings"));
+    if(!snap.empty){
+      settings=snap.docs[0].data();
+      populateForm(settings);
+      updateMaintenanceBanner();
+    }
+  }
+
+  function populateForm(s){
+    document.getElementById("institutionName").value=s.institutionName||"Federal University of Technology Babura";
+    document.getElementById("systemName").value=s.systemName||"FUTBabura HMS";
+    document.getElementById("contactEmail").value=s.contactEmail||"admin@futbabura.edu.ng";
+    document.getElementById("contactPhone").value=s.contactPhone||"+234 800 000 0000";
+    document.getElementById("address").value=s.address||"Babura, Jigawa State, Nigeria";
+    document.getElementById("currentSession").value=s.currentSession||"2024/2025";
+    document.getElementById("sessionStart").value=s.sessionStart||"2024-09-01";
+    document.getElementById("sessionEnd").value=s.sessionEnd||"2025-08-31";
+    document.getElementById("bookingOpens").value=s.bookingOpens||"2024-08-01";
+    document.getElementById("bookingCloses").value=s.bookingCloses||"2024-10-31";
+    document.getElementById("priceStandard").value=s.priceStandard||50000;
+    document.getElementById("pricePremium").value=s.pricePremium||75000;
+    document.getElementById("priceExecutive").value=s.priceExecutive||100000;
+    document.getElementById("lateFee").value=s.lateFee||5000;
+    document.getElementById("maxLoginAttempts").value=s.maxLoginAttempts||5;
+    document.getElementById("lockoutDuration").value=s.lockoutDuration||15;
+    document.getElementById("maintenanceMessage").value=s.maintenanceMessage||"The system is currently undergoing scheduled maintenance.";
+    document.getElementById("maintenanceEndTime").value=s.maintenanceEndTime||"";
+    document.getElementById("lastBackup").textContent=s.lastBackup?.toDate?.().toLocaleString()||"Never";
+
+    setToggleState("allowBookingsToggle",s.allowBookings!==false);
+    setToggleState("emailNotificationsToggle",s.emailNotifications!==false);
+    setToggleState("bookingConfirmationsToggle",s.bookingConfirmations!==false);
+    setToggleState("paymentRemindersToggle",s.paymentReminders!==false);
+    setToggleState("complaintUpdatesToggle",s.complaintUpdates!==false);
+    setToggleState("require2FAToggle",s.require2FA===true);
+    setToggleState("sessionTimeoutToggle",s.sessionTimeout!==false);
+    setToggleState("maintenanceModeToggle",s.maintenanceMode===true);
+  }
+
+  function setToggleState(id,active){
+    const el=document.getElementById(id);
+    if(active)el.classList.add("active");else el.classList.remove("active");
+  }
+
+  function updateMaintenanceBanner(){
+    const toggle=document.getElementById("maintenanceModeToggle");
+    const banner=document.getElementById("maintenanceBanner");
+    if(toggle.classList.contains("active"))banner.style.display="flex";else banner.style.display="none";
+  }
+
+  window.toggleSetting=function(setting){
+    const toggle=document.getElementById(setting+"Toggle");
+    toggle.classList.toggle("active");
+    if(setting==="maintenanceMode")updateMaintenanceBanner();
+  };
+
+  window.toggleMaintenanceMode=function(){
+    const toggle=document.getElementById("maintenanceModeToggle");
+    toggle.classList.toggle("active");
+    updateMaintenanceBanner();
+    saveAllSettings();
+  };
+
+  window.saveAllSettings=async function(){
+    const data={
+      institutionName:document.getElementById("institutionName").value,
+      systemName:document.getElementById("systemName").value,
+      contactEmail:document.getElementById("contactEmail").value,
+      contactPhone:document.getElementById("contactPhone").value,
+      address:document.getElementById("address").value,
+      currentSession:document.getElementById("currentSession").value,
+      sessionStart:document.getElementById("sessionStart").value,
+      sessionEnd:document.getElementById("sessionEnd").value,
+      bookingOpens:document.getElementById("bookingOpens").value,
+      bookingCloses:document.getElementById("bookingCloses").value,
+      priceStandard:parseFloat(document.getElementById("priceStandard").value)||50000,
+      pricePremium:parseFloat(document.getElementById("pricePremium").value)||75000,
+      priceExecutive:parseFloat(document.getElementById("priceExecutive").value)||100000,
+      lateFee:parseFloat(document.getElementById("lateFee").value)||5000,
+      maxLoginAttempts:parseInt(document.getElementById("maxLoginAttempts").value)||5,
+      lockoutDuration:parseInt(document.getElementById("lockoutDuration").value)||15,
+      maintenanceMessage:document.getElementById("maintenanceMessage").value,
+      maintenanceEndTime:document.getElementById("maintenanceEndTime").value,
+      allowBookings:document.getElementById("allowBookingsToggle").classList.contains("active"),
+      emailNotifications:document.getElementById("emailNotificationsToggle").classList.contains("active"),
+      bookingConfirmations:document.getElementById("bookingConfirmationsToggle").classList.contains("active"),
+      paymentReminders:document.getElementById("paymentRemindersToggle").classList.contains("active"),
+      complaintUpdates:document.getElementById("complaintUpdatesToggle").classList.contains("active"),
+      require2FA:document.getElementById("require2FAToggle").classList.contains("active"),
+      sessionTimeout:document.getElementById("sessionTimeoutToggle").classList.contains("active"),
+      maintenanceMode:document.getElementById("maintenanceModeToggle").classList.contains("active"),
+      updatedAt:serverTimestamp(),
+      updatedBy:adminData?.fullName
+    };
+
+    try{
+      await setDoc(doc(db,"settings","app"),data,{merge:true});
+      settings=data;
+      document.getElementById("successMessage").classList.add("show");
+      setTimeout(()=>document.getElementById("successMessage").classList.remove("show"),3000);
+    }catch(e){alert("Error saving settings: "+e.message);}
+  };
+
+  window.resetForm=function(){if(settings)populateForm(settings);else loadSettings();};
+
+  window.createBackup=async function(){
+    const collections=["users","hostels","rooms","bookings","complaints","visitors","notifications","inventory","settings"];
+    const backup={timestamp:new Date().toISOString(),data:{}};
+    for(const col of collections){
+      const snap=await getDocs(collection(db,col));
+      backup.data[col]=snap.docs.map(d=>({id:d.id,...d.data()}));
+    }
+    const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`backup_${new Date().toISOString().split('T')[0]}.json`;a.click();
+    await setDoc(doc(db,"settings","app"),{lastBackup:serverTimestamp()},{merge:true});
+    document.getElementById("lastBackup").textContent=new Date().toLocaleString();
+  };
+
+  window.exportAllData=function(){createBackup();};
+
+  window.restoreFromFile=function(input){
+    const file=input.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=async e=>{
+      try{
+        const backup=JSON.parse(e.target.result);
+        if(!confirm("Restoring will overwrite current data. Continue?"))return;
+        alert("Restore functionality would be implemented with batch writes.");
+      }catch(err){alert("Invalid backup file");}
+    };
+    reader.readAsText(file);
+  };
+
+  async function doSignOut(){await signOut(auth);window.location.href="admin-login.html";}
+  ["sideSignOut","sbSignOut","dropSignOut"].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener("click",async e=>{e.preventDefault();doSignOut();});});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleSidebar(){document.getElementById("sidebar").classList.toggle("open");document.getElementById("sbOverlay").classList.toggle("show");}
+  function toggleUserMenu(){document.getElementById("userDropdown").classList.toggle("open");}
+  document.addEventListener("click",e=>{if(!e.target.closest("#userMenuBtn")&&!e.target.closest("#userDropdown"))document.getElementById("userDropdown").classList.remove("open");});
+</script>
+</body>
+</html>

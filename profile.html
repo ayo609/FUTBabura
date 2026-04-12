@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile — FUTBabura HMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.2);
+      --white:#fff;--muted:rgba(255,255,255,.5);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.085);
+      --ok:#22c55e;--err:#ef4444;
+      --sidebar-w:260px;--topbar-h:68px;--radius:14px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(245,166,35,.4);border-radius:3px}
+
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#060f24 0%,#0a1535 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:200;transition:transform .3s ease}
+    .sb-logo{display:flex;align-items:center;gap:11px;padding:20px 22px;border-bottom:1px solid var(--border);text-decoration:none}
+    .sb-logo-img{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;box-shadow:0 0 14px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:1.6px;text-transform:uppercase}
+    .sb-nav{flex:1;padding:18px 14px;overflow-y:auto}
+    .sb-section-label{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 10px;margin:18px 0 8px}
+    .sb-section-label:first-child{margin-top:0}
+    .sb-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:500;transition:all .22s;margin-bottom:2px}
+    .sb-link i{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+    .sb-link:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .sb-link.active{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.18)}
+    .sb-bottom{padding:16px 14px;border-top:1px solid var(--border)}
+    .sb-user{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--border)}
+    .sb-user-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy);flex-shrink:0;overflow:hidden}
+    .sb-user-ava img{width:100%;height:100%;object-fit:cover}
+    .sb-user-name{font-size:12.5px;font-weight:700}
+    .sb-user-role{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+    .sb-signout{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);font-size:16px;cursor:pointer;padding:4px;transition:color .2s}
+    .sb-signout:hover{color:var(--err)}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199}
+    .sb-overlay.show{display:block}
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(7,17,43,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:150}
+    .tb-left{display:flex;align-items:center;gap:14px}
+    .tb-menu{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;display:none;padding:4px}
+    .tb-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}
+    .tb-right{display:flex;align-items:center;gap:14px}
+    .notif-btn{position:relative;background:var(--card);border:1px solid var(--border);border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all .22s}
+    .notif-btn:hover{background:rgba(255,255,255,.08);color:var(--white)}
+    .user-menu-btn{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px 12px 6px 6px;cursor:pointer;transition:all .22s}
+    .user-menu-btn:hover{background:rgba(255,255,255,.07)}
+    .um-ava{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--navy);overflow:hidden;flex-shrink:0}
+    .um-ava img{width:100%;height:100%;object-fit:cover}
+    .um-name{font-size:13px;font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dropdown-menu-hms{position:absolute;top:calc(100% + 8px);right:0;background:#0c1a3d;border:1px solid var(--border);border-radius:12px;padding:8px;min-width:180px;box-shadow:0 16px 40px rgba(0,0,0,.4);z-index:500;display:none;animation:slideDown .2s ease}
+    .dropdown-menu-hms.open{display:block}
+    .dm-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none}
+    .dm-item:hover{background:rgba(255,255,255,.06);color:var(--white)}
+    .dm-item.danger{color:rgba(239,68,68,.8)}
+    .dm-item.danger:hover{background:rgba(239,68,68,.08);color:var(--err)}
+    .dm-divider{height:1px;background:var(--border);margin:6px 0}
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh}
+    .content{padding:28px 28px 50px}
+
+    /* ── PROFILE HERO ── */
+    .profile-hero{
+      background:linear-gradient(135deg,#0c1a3d 0%,#112060 60%,#0a1840 100%);
+      border:1px solid rgba(245,166,35,.13);border-radius:20px;
+      padding:32px;margin-bottom:24px;
+      display:flex;align-items:center;gap:28px;
+      position:relative;overflow:hidden;
+    }
+    .ph-glow{position:absolute;right:-5%;top:-40%;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.1) 0%,transparent 68%);pointer-events:none}
+    .ph-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+
+    .photo-wrap{position:relative;flex-shrink:0;z-index:2}
+    .photo-circle{
+      width:96px;height:96px;border-radius:50%;
+      border:3px solid var(--gold);
+      overflow:hidden;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Playfair Display',serif;font-size:32px;font-weight:900;color:var(--navy);
+      box-shadow:0 0 0 6px rgba(245,166,35,.12),0 8px 28px var(--glow);
+      cursor:pointer;position:relative;
+    }
+    .photo-circle img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+    .photo-edit-btn{
+      position:absolute;bottom:0;right:0;
+      width:28px;height:28px;border-radius:50%;
+      background:var(--gold);color:var(--navy);
+      display:flex;align-items:center;justify-content:center;
+      font-size:13px;cursor:pointer;border:2px solid var(--navy);
+      transition:all .2s;
+    }
+    .photo-edit-btn:hover{background:var(--gold2);transform:scale(1.1)}
+
+    .ph-info{flex:1;z-index:2}
+    .ph-name{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;line-height:1.1;margin-bottom:5px}
+    .ph-matric{font-size:13px;color:var(--gold);font-weight:600;margin-bottom:8px;letter-spacing:.5px}
+    .ph-tags{display:flex;flex-wrap:wrap;gap:7px}
+    .ph-tag{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);padding:4px 11px;border-radius:7px}
+    .ph-tag i{color:var(--gold);font-size:12px}
+
+    .ph-right{flex-shrink:0;z-index:2;text-align:center}
+    .verified-badge{display:flex;flex-direction:column;align-items:center;gap:5px}
+    .vb-icon{width:52px;height:52px;border-radius:50%;background:rgba(34,197,94,.12);border:2px solid rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;font-size:22px}
+    .vb-text{font-size:10.5px;color:var(--ok);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+    .joined-text{font-size:11px;color:var(--muted);margin-top:8px}
+
+    /* ── PAGE GRID ── */
+    .page-grid{display:grid;grid-template-columns:1fr 320px;gap:22px;align-items:start}
+
+    /* ── CARD ── */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
+    .card:last-child{margin-bottom:0}
+    .card-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .card-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:9px}
+    .card-body{padding:22px}
+
+    /* ── SECTION TABS ── */
+    .section-tabs{display:flex;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02)}
+    .stab{padding:14px 20px;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .22s;background:none;border-top:none;border-left:none;border-right:none;font-family:'Plus Jakarta Sans',sans-serif}
+    .stab:hover{color:var(--white)}
+    .stab.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+    /* ── INFO GRID ── */
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .info-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:13px 16px}
+    .ii-label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.9px;margin-bottom:4px}
+    .ii-value{font-size:14px;font-weight:600}
+    .ii-value.readonly{color:rgba(255,255,255,.7)}
+
+    /* ── FORM ── */
+    .field-wrap{margin-bottom:18px}
+    .field-label{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.72);margin-bottom:7px;display:flex;align-items:center;gap:5px}
+    .req{color:var(--gold);font-size:14px}
+    .input-rel{position:relative}
+    .fi{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;color:rgba(255,255,255,.3);pointer-events:none;z-index:1}
+    .hms-input{width:100%;background:rgba(255,255,255,.048);border:1.5px solid rgba(255,255,255,.1);border-radius:11px;padding:11px 13px 11px 38px;color:var(--white);font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .25s,box-shadow .25s}
+    .hms-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,166,35,.11)}
+    .hms-input::placeholder{color:rgba(255,255,255,.25)}
+    .hms-input.err{border-color:var(--err)!important}
+    .hms-input:disabled{opacity:.5;cursor:not-allowed}
+    .hms-select{appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='rgba(255,255,255,.4)' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;background-size:11px;cursor:pointer}
+    .hms-select option{background:#0c1a3d}
+    .ferr{font-size:11.5px;color:var(--err);margin-top:5px;display:none;align-items:center;gap:4px}
+    .ferr.show{display:flex}
+    .readonly-note{font-size:11px;color:rgba(255,255,255,.28);margin-top:4px;display:flex;align-items:center;gap:4px}
+
+    .btn-save{padding:12px 28px;border-radius:11px;background:var(--gold);color:var(--navy);font-size:14px;font-weight:700;border:none;cursor:pointer;box-shadow:0 6px 20px var(--glow);transition:all .3s;font-family:'Plus Jakarta Sans',sans-serif;display:inline-flex;align-items:center;gap:8px}
+    .btn-save:hover:not(:disabled){background:var(--gold2);transform:translateY(-2px)}
+    .btn-save:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+    /* ── PASSWORD SECTION ── */
+    .pwd-strength{display:flex;gap:4px;margin-top:8px}
+    .ps-seg{height:3px;flex:1;border-radius:100px;background:rgba(255,255,255,.1);transition:background .3s}
+    .pwd-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.3);font-size:16px;cursor:pointer;padding:0;transition:color .2s}
+    .pwd-toggle:hover{color:var(--white)}
+
+    /* ── RIGHT SIDEBAR ── */
+    .side-panel{position:sticky;top:calc(var(--topbar-h) + 20px)}
+
+    /* account summary */
+    .acc-summary{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:18px}
+    .acc-summary-header{padding:16px 20px;border-bottom:1px solid var(--border)}
+    .acc-summary-title{font-size:14px;font-weight:700}
+    .acc-item{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.04)}
+    .acc-item:last-child{border-bottom:none}
+    .acc-item-label{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px}
+    .acc-item-label i{color:var(--gold);font-size:13px}
+    .acc-item-value{font-size:12.5px;font-weight:700}
+
+    /* danger zone */
+    .danger-zone{background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.18);border-radius:var(--radius);padding:18px 20px}
+    .dz-title{font-size:13px;font-weight:700;color:var(--err);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+    .dz-desc{font-size:12.5px;color:var(--muted);line-height:1.65;margin-bottom:14px}
+    .btn-danger{width:100%;padding:10px;border-radius:10px;background:rgba(239,68,68,.1);border:1.5px solid rgba(239,68,68,.25);color:var(--err);font-size:13px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:7px}
+    .btn-danger:hover{background:rgba(239,68,68,.18);border-color:var(--err)}
+
+    /* alert */
+    .g-alert{border-radius:11px;padding:12px 16px;font-size:13px;font-weight:500;display:none;align-items:center;gap:10px;margin-bottom:16px}
+    .g-alert.show{display:flex}
+    .g-alert.a-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+    .g-alert.a-ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86efac}
+    .g-alert.a-warn{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);color:#fde68a}
+
+    /* skeleton */
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .spin{width:17px;height:17px;border:2.5px solid rgba(7,17,43,.35);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+
+    /* tab panels */
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+
+    @media(max-width:1050px){.page-grid{grid-template-columns:1fr}.side-panel{position:static}}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0}.main{margin-left:0}
+      .tb-menu{display:block}
+      .content{padding:18px 14px 40px}
+      .profile-hero{flex-direction:column;text-align:center}
+      .ph-tags{justify-content:center}
+      .info-grid{grid-template-columns:1fr}
+      .um-name{display:none}
+      .ph-right{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+    <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Student Portal</div></div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section-label">Main Menu</div>
+    <a href="dashboard.html" class="sb-link"><i class="bi bi-grid-fill"></i>Dashboard</a>
+    <a href="browse-rooms.html" class="sb-link"><i class="bi bi-door-open-fill"></i>Browse Rooms</a>
+    <a href="my-booking.html" class="sb-link"><i class="bi bi-house-check-fill"></i>My Booking</a>
+    <div class="sb-section-label">Services</div>
+    <a href="complaints.html" class="sb-link"><i class="bi bi-tools"></i>Complaints</a>
+    <a href="visitors.html" class="sb-link"><i class="bi bi-people-fill"></i>Visitors</a>
+    <div class="sb-section-label">Account</div>
+    <a href="profile.html" class="sb-link active"><i class="bi bi-person-fill"></i>My Profile</a>
+    <a href="#" class="sb-link" id="sideSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-user-ava" id="sbAva">S</div>
+      <div><div class="sb-user-name" id="sbName">Loading...</div><div class="sb-user-role">Student</div></div>
+      <button class="sb-signout" id="sbSignOut"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-left">
+    <button class="tb-menu" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+    <div class="tb-title">My Profile</div>
+  </div>
+  <div class="tb-right">
+    <div class="notif-btn" onclick="window.location.href='dashboard.html'"><i class="bi bi-bell-fill"></i></div>
+    <div style="position:relative">
+      <div class="user-menu-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="um-ava" id="umAva">S</div>
+        <span class="um-name" id="umName">Student</span>
+        <i class="bi bi-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </div>
+      <div class="dropdown-menu-hms" id="userDropdown">
+        <a href="dashboard.html" class="dm-item"><i class="bi bi-grid-fill"></i>Dashboard</a>
+        <div class="dm-divider"></div>
+        <div class="dm-item danger" id="dropSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="content fade-up">
+
+    <!-- loading -->
+    <div id="loadingSkel">
+      <div class="skeleton" style="height:148px;border-radius:20px;margin-bottom:22px"></div>
+      <div style="display:grid;grid-template-columns:1fr 320px;gap:22px">
+        <div class="skeleton" style="height:460px;border-radius:14px"></div>
+        <div class="skeleton" style="height:460px;border-radius:14px"></div>
+      </div>
+    </div>
+
+    <div id="mainContent" style="display:none">
+
+      <!-- Profile Hero -->
+      <div class="profile-hero" id="profileHero">
+        <div class="ph-glow"></div><div class="ph-dots"></div>
+        <div class="photo-wrap">
+          <div class="photo-circle" id="photoCircle" onclick="document.getElementById('photoFileInput').click()">
+            <span id="photoInitials">S</span>
+          </div>
+          <div class="photo-edit-btn" onclick="document.getElementById('photoFileInput').click()">
+            <i class="bi bi-camera-fill"></i>
+          </div>
+          <input type="file" id="photoFileInput" accept="image/*" style="display:none" onchange="handlePhotoChange(this)"/>
+        </div>
+        <div class="ph-info">
+          <div class="ph-name" id="phName">Loading...</div>
+          <div class="ph-matric" id="phMatric">—</div>
+          <div class="ph-tags" id="phTags"></div>
+        </div>
+        <div class="ph-right">
+          <div class="verified-badge">
+            <div class="vb-icon" id="verifiedIcon">✅</div>
+            <div class="vb-text" id="verifiedText">Verified</div>
+          </div>
+          <div class="joined-text" id="joinedText">Member since —</div>
+        </div>
+      </div>
+
+      <!-- Page Grid -->
+      <div class="page-grid">
+
+        <!-- LEFT: tabs & forms -->
+        <div>
+          <div class="card" style="margin-bottom:0">
+            <!-- Tabs -->
+            <div class="section-tabs">
+              <button class="stab active" onclick="switchTab('personal',this)"><i class="bi bi-person-fill"></i> Personal Info</button>
+              <button class="stab" onclick="switchTab('academic',this)"><i class="bi bi-mortarboard-fill"></i> Academic</button>
+              <button class="stab" onclick="switchTab('security',this)"><i class="bi bi-shield-lock-fill"></i> Security</button>
+            </div>
+
+            <!-- Tab: Personal Info -->
+            <div class="tab-panel active card-body" id="tab-personal">
+              <div class="g-alert" id="personalAlert"><i class="bi" id="paIcon"></i><span id="paMsg"></span></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div class="field-wrap">
+                  <label class="field-label">Full Name <span class="req">*</span></label>
+                  <div class="input-rel">
+                    <input type="text" class="hms-input" id="pFullName" placeholder="Your full name"/>
+                    <i class="bi bi-person-fill fi"></i>
+                  </div>
+                  <div class="ferr" id="pNameErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+                </div>
+                <div class="field-wrap">
+                  <label class="field-label">Phone Number <span class="req">*</span></label>
+                  <div class="input-rel">
+                    <input type="tel" class="hms-input" id="pPhone" placeholder="e.g. 08012345678" maxlength="11"/>
+                    <i class="bi bi-telephone-fill fi"></i>
+                  </div>
+                  <div class="ferr" id="pPhoneErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div class="field-wrap">
+                  <label class="field-label">Date of Birth</label>
+                  <div class="input-rel">
+                    <input type="date" class="hms-input" id="pDob" style="color-scheme:dark" disabled/>
+                    <i class="bi bi-calendar-fill fi"></i>
+                  </div>
+                  <div class="readonly-note"><i class="bi bi-lock-fill"></i>Contact admin to update DOB</div>
+                </div>
+                <div class="field-wrap">
+                  <label class="field-label">Gender</label>
+                  <div class="input-rel">
+                    <input type="text" class="hms-input" id="pGender" disabled/>
+                    <i class="bi bi-gender-ambiguous fi"></i>
+                  </div>
+                  <div class="readonly-note"><i class="bi bi-lock-fill"></i>Contact admin to update gender</div>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div class="field-wrap">
+                  <label class="field-label">State of Origin <span class="req">*</span></label>
+                  <div class="input-rel">
+                    <select class="hms-input hms-select" id="pState">
+                      <option value="">Select state</option>
+                      <option>Abia</option><option>Adamawa</option><option>Akwa Ibom</option><option>Anambra</option><option>Bauchi</option><option>Bayelsa</option><option>Benue</option><option>Borno</option><option>Cross River</option><option>Delta</option><option>Ebonyi</option><option>Edo</option><option>Ekiti</option><option>Enugu</option><option>FCT Abuja</option><option>Gombe</option><option>Imo</option><option>Jigawa</option><option>Kaduna</option><option>Kano</option><option>Katsina</option><option>Kebbi</option><option>Kogi</option><option>Kwara</option><option>Lagos</option><option>Nasarawa</option><option>Niger</option><option>Ogun</option><option>Ondo</option><option>Osun</option><option>Oyo</option><option>Plateau</option><option>Rivers</option><option>Sokoto</option><option>Taraba</option><option>Yobe</option><option>Zamfara</option>
+                    </select>
+                    <i class="bi bi-geo-alt-fill fi"></i>
+                  </div>
+                </div>
+                <div class="field-wrap">
+                  <label class="field-label">Email Address</label>
+                  <div class="input-rel">
+                    <input type="email" class="hms-input" id="pEmail" disabled/>
+                    <i class="bi bi-envelope-fill fi"></i>
+                  </div>
+                  <div class="readonly-note"><i class="bi bi-lock-fill"></i>Email cannot be changed</div>
+                </div>
+              </div>
+              <button class="btn-save" id="savePersonalBtn" onclick="savePersonal()">
+                <span id="savePersonalText"><i class="bi bi-check-lg"></i> Save Changes</span>
+              </button>
+            </div>
+
+            <!-- Tab: Academic -->
+            <div class="tab-panel card-body" id="tab-academic">
+              <div class="g-alert a-warn show" style="margin-bottom:20px">
+                <i class="bi bi-info-circle-fill"></i>
+                <span>Academic information can only be updated by contacting the hostel admin. These details are tied to your official university records.</span>
+              </div>
+              <div class="info-grid">
+                <div class="info-item"><div class="ii-label">Matriculation Number</div><div class="ii-value readonly" id="aiMatric">—</div></div>
+                <div class="info-item"><div class="ii-label">Faculty</div><div class="ii-value readonly" id="aiFaculty">—</div></div>
+                <div class="info-item"><div class="ii-label">Department</div><div class="ii-value readonly" id="aiDept">—</div></div>
+                <div class="info-item"><div class="ii-label">Current Level</div><div class="ii-value readonly" id="aiLevel">—</div></div>
+                <div class="info-item"><div class="ii-label">Mode of Entry</div><div class="ii-value readonly" id="aiMode">—</div></div>
+                <div class="info-item"><div class="ii-label">Gender</div><div class="ii-value readonly" id="aiGender">—</div></div>
+              </div>
+              <div style="margin-top:18px;padding:14px 16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px">
+                <p style="font-size:13px;color:var(--muted);line-height:1.7">Need to update your academic details? Visit the Hostel Admin Office with your official university ID and a letter from your department registrar.</p>
+              </div>
+            </div>
+
+            <!-- Tab: Security -->
+            <div class="tab-panel card-body" id="tab-security">
+              <div class="g-alert" id="secAlert"><i class="bi" id="saIcon"></i><span id="saMsg"></span></div>
+              <h4 style="font-size:15px;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:8px"><i class="bi bi-key-fill" style="color:var(--gold)"></i>Change Password</h4>
+
+              <div class="field-wrap">
+                <label class="field-label">Current Password <span class="req">*</span></label>
+                <div class="input-rel">
+                  <input type="password" class="hms-input" id="currentPwd" placeholder="Enter your current password"/>
+                  <i class="bi bi-lock-fill fi"></i>
+                  <button class="pwd-toggle" onclick="togglePwd('currentPwd','eye1')" type="button"><i class="bi bi-eye-fill" id="eye1"></i></button>
+                </div>
+                <div class="ferr" id="curPwdErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div class="field-wrap">
+                  <label class="field-label">New Password <span class="req">*</span></label>
+                  <div class="input-rel">
+                    <input type="password" class="hms-input" id="newPwd" placeholder="Min. 8 characters" oninput="checkStrength(this.value)"/>
+                    <i class="bi bi-lock-fill fi"></i>
+                    <button class="pwd-toggle" onclick="togglePwd('newPwd','eye2')" type="button"><i class="bi bi-eye-fill" id="eye2"></i></button>
+                  </div>
+                  <div class="pwd-strength"><div class="ps-seg" id="ps1"></div><div class="ps-seg" id="ps2"></div><div class="ps-seg" id="ps3"></div><div class="ps-seg" id="ps4"></div></div>
+                  <div class="ferr" id="newPwdErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+                </div>
+                <div class="field-wrap">
+                  <label class="field-label">Confirm New Password <span class="req">*</span></label>
+                  <div class="input-rel">
+                    <input type="password" class="hms-input" id="confirmPwd" placeholder="Re-enter new password" oninput="checkMatch()"/>
+                    <i class="bi bi-lock-fill fi"></i>
+                    <button class="pwd-toggle" onclick="togglePwd('confirmPwd','eye3')" type="button"><i class="bi bi-eye-fill" id="eye3"></i></button>
+                  </div>
+                  <div class="ferr" id="confPwdErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+                </div>
+              </div>
+
+              <button class="btn-save" id="savePwdBtn" onclick="changePassword()">
+                <span id="savePwdText"><i class="bi bi-shield-check"></i> Update Password</span>
+              </button>
+
+              <hr style="border-color:rgba(255,255,255,.07);margin:28px 0"/>
+
+              <h4 style="font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px"><i class="bi bi-envelope-check-fill" style="color:var(--gold)"></i>Email Verification</h4>
+              <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:14px 16px">
+                <div>
+                  <div style="font-size:13.5px;font-weight:600" id="emailVerifStatus">Checking...</div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px" id="emailVerifEmail"></div>
+                </div>
+                <button class="btn-save" style="padding:8px 18px;font-size:13px" id="resendVerifBtn" onclick="resendVerification()" style="display:none">Resend</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- RIGHT sidebar -->
+        <div class="side-panel">
+
+          <!-- Account Summary -->
+          <div class="acc-summary">
+            <div class="acc-summary-header"><div class="acc-summary-title">Account Summary</div></div>
+            <div class="acc-item">
+              <span class="acc-item-label"><i class="bi bi-house-fill"></i>Booking Status</span>
+              <span class="acc-item-value" id="accBooking">Loading...</span>
+            </div>
+            <div class="acc-item">
+              <span class="acc-item-label"><i class="bi bi-tools"></i>Open Complaints</span>
+              <span class="acc-item-value" id="accComplaints">—</span>
+            </div>
+            <div class="acc-item">
+              <span class="acc-item-label"><i class="bi bi-people-fill"></i>Visitors Today</span>
+              <span class="acc-item-value" id="accVisitors">—</span>
+            </div>
+            <div class="acc-item">
+              <span class="acc-item-label"><i class="bi bi-calendar3"></i>Session</span>
+              <span class="acc-item-value" id="accSession">—</span>
+            </div>
+            <div class="acc-item">
+              <span class="acc-item-label"><i class="bi bi-person-badge-fill"></i>Role</span>
+              <span class="acc-item-value" style="color:var(--gold)">Student</span>
+            </div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="danger-zone">
+            <div class="dz-title"><i class="bi bi-exclamation-triangle-fill"></i>Danger Zone</div>
+            <div class="dz-desc">Signing out will end your current session. You will need to sign back in to access your dashboard.</div>
+            <button class="btn-danger" onclick="doSignOut()"><i class="bi bi-box-arrow-left"></i>Sign Out of Account</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, doc, query, where,
+    getDocs, updateDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+  import {
+    getAuth, onAuthStateChanged, signOut,
+    updatePassword, reauthenticateWithCredential,
+    EmailAuthProvider, sendEmailVerification
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg={apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app  = initializeApp(cfg);
+  const db   = getFirestore(app);
+  const store= getStorage(app);
+  const auth = getAuth(app);
+
+  let currentUser=null, studentData=null, studentDocId=null;
+
+  onAuthStateChanged(auth, async user=>{
+    if(!user||!user.emailVerified){await signOut(auth);window.location.href="login.html";return;}
+    currentUser=user;
+    await boot(user);
+  });
+
+  async function boot(user){
+    try{
+      const ps=await getDocs(query(collection(db,"users"),where("uid","==",user.uid)));
+      if(ps.empty||ps.docs[0].data().role!=="student"){await signOut(auth);window.location.href="login.html";return;}
+      studentDocId=ps.docs[0].id;
+      studentData=ps.docs[0].data();
+
+      document.getElementById("loadingSkel").style.display="none";
+      document.getElementById("mainContent").style.display="block";
+
+      renderHero(studentData,user);
+      populateForms(studentData,user);
+      loadSummary(user,studentData);
+    }catch(e){console.error(e);}
+  }
+
+  // ── RENDER HERO ──
+  function renderHero(s,user){
+    const initials=(s.fullName||"S").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    const pc=document.getElementById("photoCircle");
+    if(s.photoURL){pc.innerHTML=`<img src="${s.photoURL}" alt="${s.fullName}"/><div class="photo-edit-btn" onclick="document.getElementById('photoFileInput').click()"><i class="bi bi-camera-fill"></i></div>`;}
+    else{document.getElementById("photoInitials").textContent=initials;}
+
+    document.getElementById("phName").textContent=s.fullName||"Student";
+    document.getElementById("phMatric").textContent=s.matricNo||"—";
+    document.getElementById("sbName").textContent=s.fullName||"Student";
+    document.getElementById("umName").textContent=(s.fullName||"Student").split(" ")[0];
+
+    // avatar in topbar + sidebar
+    ["sbAva","umAva"].forEach(id=>{
+      const el=document.getElementById(id);if(!el)return;
+      if(s.photoURL)el.innerHTML=`<img src="${s.photoURL}" alt=""/>`;else el.textContent=initials;
+    });
+
+    // tags
+    const tags=[
+      {icon:"bi-mortarboard-fill",text:s.department||"—"},
+      {icon:"bi-bar-chart-fill",text:s.level||"—"},
+      {icon:"bi-geo-alt-fill",text:s.stateOrigin||"—"},
+      {icon:"bi-gender-ambiguous",text:s.gender||"—"},
+    ];
+    document.getElementById("phTags").innerHTML=tags.map(t=>`<span class="ph-tag"><i class="bi ${t.icon}"></i>${t.text}</span>`).join("");
+
+    // verified badge
+    const isVerified=user.emailVerified;
+    document.getElementById("verifiedIcon").textContent=isVerified?"✅":"❌";
+    document.getElementById("verifiedText").textContent=isVerified?"Verified":"Unverified";
+    document.getElementById("verifiedText").style.color=isVerified?"var(--ok)":"var(--err)";
+
+    // joined date
+    if(s.createdAt){
+      const d=s.createdAt.toDate?s.createdAt.toDate():new Date(s.createdAt);
+      document.getElementById("joinedText").textContent="Member since "+d.toLocaleDateString("en-NG",{month:"long",year:"numeric"});
+    }
+  }
+
+  // ── POPULATE FORMS ──
+  function populateForms(s,user){
+    document.getElementById("pFullName").value=s.fullName||"";
+    document.getElementById("pPhone").value=s.phone||"";
+    document.getElementById("pDob").value=s.dob||"";
+    document.getElementById("pGender").value=s.gender||"";
+    document.getElementById("pEmail").value=user.email||"";
+    document.getElementById("pState").value=s.stateOrigin||"";
+
+    // academic tab
+    document.getElementById("aiMatric").textContent=s.matricNo||"—";
+    document.getElementById("aiFaculty").textContent=s.faculty||"—";
+    document.getElementById("aiDept").textContent=s.department||"—";
+    document.getElementById("aiLevel").textContent=s.level||"—";
+    document.getElementById("aiMode").textContent=s.modeOfEntry||"—";
+    document.getElementById("aiGender").textContent=s.gender||"—";
+
+    // email verification status
+    document.getElementById("emailVerifStatus").textContent=user.emailVerified?"✅ Email Verified":"⚠️ Email Not Verified";
+    document.getElementById("emailVerifStatus").style.color=user.emailVerified?"var(--ok)":"var(--warn)";
+    document.getElementById("emailVerifEmail").textContent=user.email||"";
+    document.getElementById("resendVerifBtn").style.display=user.emailVerified?"none":"inline-flex";
+  }
+
+  // ── LOAD ACCOUNT SUMMARY ──
+  async function loadSummary(user,s){
+    try{
+      const ss=await getDocs(collection(db,"settings"));
+      const settings=ss.empty?{}:ss.docs[0].data();
+      document.getElementById("accSession").textContent=settings.currentSession||"2024/2025";
+
+      const session=settings.currentSession||"2024/2025";
+      const bs=await getDocs(query(collection(db,"bookings"),where("studentUid","==",user.uid),where("session","==",session)));
+      const booking=bs.empty?null:bs.docs[0].data();
+      const statusMap={active:"✅ Active",pending_payment:"💳 Pending Payment",expired:"❌ Expired"};
+      document.getElementById("accBooking").textContent=booking?statusMap[booking.status]||booking.status:"No Booking";
+      document.getElementById("accBooking").style.color=booking?.status==="active"?"var(--ok)":booking?.status==="pending_payment"?"var(--gold)":"var(--muted)";
+
+      const cs=await getDocs(query(collection(db,"complaints"),where("studentUid","==",user.uid),where("status","!=","resolved")));
+      document.getElementById("accComplaints").textContent=cs.size;
+
+      const today=new Date(); today.setHours(0,0,0,0);
+      const tomorrow=new Date(today); tomorrow.setDate(tomorrow.getDate()+1);
+      const vs=await getDocs(query(collection(db,"visitors"),where("studentUid","==",user.uid)));
+      let todayV=0;
+      vs.forEach(d=>{
+        const vd=d.data().visitDate?.toDate?d.data().visitDate.toDate():new Date(d.data().visitDate);
+        const vDay=new Date(vd);vDay.setHours(0,0,0,0);
+        if(vDay.getTime()===today.getTime())todayV++;
+      });
+      document.getElementById("accVisitors").textContent=todayV;
+    }catch(e){console.error(e);}
+  }
+
+  // ── PHOTO CHANGE ──
+  window.handlePhotoChange=async function(input){
+    const file=input.files[0];
+    if(!file)return;
+    if(file.size>2*1024*1024){alert("Photo must be under 2MB");return;}
+    try{
+      const sRef=ref(store,`profile_photos/${currentUser.uid}`);
+      await uploadBytes(sRef,file);
+      const url=await getDownloadURL(sRef);
+      await updateDoc(doc(db,"users",studentDocId),{photoURL:url});
+      // update UI
+      const pc=document.getElementById("photoCircle");
+      pc.innerHTML=`<img src="${url}" alt="${studentData.fullName}"/><div class="photo-edit-btn" onclick="document.getElementById('photoFileInput').click()"><i class="bi bi-camera-fill"></i></div>`;
+      ["sbAva","umAva"].forEach(id=>{
+        const el=document.getElementById(id);if(el)el.innerHTML=`<img src="${url}" alt=""/>`;
+      });
+      studentData.photoURL=url;
+      showAlert("personalAlert","paIcon","paMsg","Profile photo updated!","a-ok");
+    }catch(e){showAlert("personalAlert","paIcon","paMsg","Failed to update photo. Try again.","a-err");}
+  };
+
+  // ── SAVE PERSONAL ──
+  window.savePersonal=async function(){
+    const name=document.getElementById("pFullName").value.trim();
+    const phone=document.getElementById("pPhone").value.trim();
+    const state=document.getElementById("pState").value;
+    let valid=true;
+
+    if(!name||name.split(" ").length<2){showFieldErr("pFullName","pNameErr","Enter your full name (first and last)");valid=false;}
+    if(!phone||!/^0[7-9][0-1]\d{8}$/.test(phone)){showFieldErr("pPhone","pPhoneErr","Enter a valid Nigerian phone number");valid=false;}
+    if(!valid)return;
+
+    const btn=document.getElementById("savePersonalBtn");
+    btn.disabled=true;
+    document.getElementById("savePersonalText").innerHTML=`<div class="spin"></div> Saving...`;
+
+    try{
+      await updateDoc(doc(db,"users",studentDocId),{
+        fullName:name, phone, stateOrigin:state, updatedAt:serverTimestamp()
+      });
+      studentData.fullName=name;
+      studentData.phone=phone;
+      studentData.stateOrigin=state;
+      document.getElementById("phName").textContent=name;
+      document.getElementById("sbName").textContent=name;
+      document.getElementById("umName").textContent=name.split(" ")[0];
+      showAlert("personalAlert","paIcon","paMsg","Profile updated successfully!","a-ok");
+    }catch(e){showAlert("personalAlert","paIcon","paMsg","Failed to save. Please try again.","a-err");}
+    finally{
+      btn.disabled=false;
+      document.getElementById("savePersonalText").innerHTML=`<i class="bi bi-check-lg"></i> Save Changes`;
+    }
+  };
+
+  // ── CHANGE PASSWORD ──
+  window.changePassword=async function(){
+    const cur=document.getElementById("currentPwd").value;
+    const nw=document.getElementById("newPwd").value;
+    const cf=document.getElementById("confirmPwd").value;
+    let valid=true;
+    if(!cur){showFieldErr("currentPwd","curPwdErr","Current password is required");valid=false;}
+    if(!nw||nw.length<8){showFieldErr("newPwd","newPwdErr","New password must be at least 8 characters");valid=false;}
+    if(nw!==cf){showFieldErr("confirmPwd","confPwdErr","Passwords do not match");valid=false;}
+    if(!valid)return;
+
+    const btn=document.getElementById("savePwdBtn");
+    btn.disabled=true;
+    document.getElementById("savePwdText").innerHTML=`<div class="spin"></div> Updating...`;
+
+    try{
+      const cred=EmailAuthProvider.credential(currentUser.email,cur);
+      await reauthenticateWithCredential(currentUser,cred);
+      await updatePassword(currentUser,nw);
+      document.getElementById("currentPwd").value="";
+      document.getElementById("newPwd").value="";
+      document.getElementById("confirmPwd").value="";
+      ["ps1","ps2","ps3","ps4"].forEach(id=>document.getElementById(id).style.background="rgba(255,255,255,.1)");
+      showAlert("secAlert","saIcon","saMsg","Password updated successfully!","a-ok");
+    }catch(e){
+      let msg="Failed to update password. Please try again.";
+      if(e.code==="auth/wrong-password"||e.code==="auth/invalid-credential")msg="Current password is incorrect.";
+      else if(e.code==="auth/weak-password")msg="New password is too weak.";
+      showAlert("secAlert","saIcon","saMsg",msg,"a-err");
+    }finally{
+      btn.disabled=false;
+      document.getElementById("savePwdText").innerHTML=`<i class="bi bi-shield-check"></i> Update Password`;
+    }
+  };
+
+  // ── RESEND VERIFICATION ──
+  window.resendVerification=async function(){
+    try{
+      await sendEmailVerification(currentUser);
+      showAlert("secAlert","saIcon","saMsg","Verification email sent! Check your inbox.","a-ok");
+    }catch(e){showAlert("secAlert","saIcon","saMsg","Failed to send verification email.","a-err");}
+  };
+
+  function showFieldErr(inputId,errId,msg){
+    document.getElementById(inputId)?.classList.add("err");
+    const e=document.getElementById(errId);if(e){e.classList.add("show");e.querySelector("span").textContent=msg;}
+  }
+  function showAlert(alertId,iconId,msgId,msg,cls){
+    const el=document.getElementById(alertId);el.className=`g-alert ${cls} show`;
+    document.getElementById(iconId).className=cls==="a-err"?"bi bi-exclamation-circle-fill":cls==="a-ok"?"bi bi-check-circle-fill":"bi bi-info-circle-fill";
+    document.getElementById(msgId).textContent=msg;
+    el.scrollIntoView({behavior:"smooth",block:"nearest"});
+    setTimeout(()=>el.className="g-alert",5000);
+  }
+
+  window.doSignOut=async function(){await signOut(auth);window.location.href="login.html";};
+  ["sideSignOut","sbSignOut","dropSignOut"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener("click",async e=>{e.preventDefault();await signOut(auth);window.location.href="login.html";});
+  });
+
+  ["pFullName","pPhone"].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.addEventListener("input",()=>el.classList.remove("err"));
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleSidebar(){
+    document.getElementById("sidebar").classList.toggle("open");
+    document.getElementById("sbOverlay").classList.toggle("show");
+  }
+  function toggleUserMenu(){document.getElementById("userDropdown").classList.toggle("open");}
+  document.addEventListener("click",e=>{
+    if(!e.target.closest("#userMenuBtn")&&!e.target.closest("#userDropdown"))
+      document.getElementById("userDropdown").classList.remove("open");
+  });
+
+  // Tab switching
+  function switchTab(name,btn){
+    document.querySelectorAll(".stab").forEach(t=>t.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-"+name).classList.add("active");
+  }
+  window.switchTab=switchTab;
+
+  // Password strength
+  function checkStrength(pwd){
+    const segs=["ps1","ps2","ps3","ps4"];
+    const colors=["","var(--err)","var(--warn)","#84cc16","var(--ok)"];
+    let score=0;
+    if(pwd.length>=8)score++;
+    if(/[A-Z]/.test(pwd))score++;
+    if(/[0-9]/.test(pwd))score++;
+    if(/[^A-Za-z0-9]/.test(pwd))score++;
+    segs.forEach((id,i)=>document.getElementById(id).style.background=i<score?colors[score]:"rgba(255,255,255,.1)");
+  }
+  window.checkStrength=checkStrength;
+
+  // Confirm match
+  function checkMatch(){
+    const n=document.getElementById("newPwd").value;
+    const c=document.getElementById("confirmPwd").value;
+    const err=document.getElementById("confPwdErr");
+    if(c&&n!==c){err.classList.add("show");err.querySelector("span").textContent="Passwords do not match";}
+    else err.classList.remove("show");
+  }
+  window.checkMatch=checkMatch;
+
+  // Toggle password visibility
+  function togglePwd(id,iconId){
+    const inp=document.getElementById(id);
+    inp.type=inp.type==="password"?"text":"password";
+    document.getElementById(iconId).className=inp.type==="password"?"bi bi-eye-fill":"bi bi-eye-slash-fill";
+  }
+  window.togglePwd=togglePwd;
+</script>
+</body>
+</html>

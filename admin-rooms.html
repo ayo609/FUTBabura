@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Rooms — FUTBabura HMS Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.2);
+      --white:#fff;--muted:rgba(255,255,255,.5);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.085);
+      --ok:#22c55e;--err:#ef4444;--warn:#f59e0b;--info:#3b82f6;
+      --sidebar-w:260px;--topbar-h:68px;--radius:14px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(245,166,35,.4);border-radius:3px}
+
+    /* sidebar */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#060f24 0%,#07112b 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:200;transition:transform .3s}
+    .sb-logo{display:flex;align-items:center;gap:11px;padding:20px 22px;border-bottom:1px solid var(--border);text-decoration:none}
+    .sb-logo-img{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;box-shadow:0 0 14px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:1.6px;text-transform:uppercase}
+    .sb-nav{flex:1;padding:18px 14px;overflow-y:auto}
+    .sb-section-label{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 10px;margin:18px 0 8px}
+    .sb-section-label:first-child{margin-top:0}
+    .sb-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:500;transition:all .22s;margin-bottom:2px}
+    .sb-link i{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+    .sb-link:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .sb-link.active{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.18)}
+    .sb-bottom{padding:16px 14px;border-top:1px solid var(--border)}
+    .sb-admin{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--border)}
+    .sb-admin-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#c53030,#991b1b);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--white);flex-shrink:0;overflow:hidden}
+    .sb-admin-ava img{width:100%;height:100%;object-fit:cover}
+    .sb-admin-name{font-size:12.5px;font-weight:700}
+    .sb-admin-role{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+    .sb-signout{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);font-size:16px;cursor:pointer;padding:4px;transition:color .2s}
+    .sb-signout:hover{color:var(--err)}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199}
+    .sb-overlay.show{display:block}
+
+    /* topbar */
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(7,17,43,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:150}
+    .tb-left{display:flex;align-items:center;gap:14px}
+    .tb-menu{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;display:none;padding:4px}
+    .tb-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}
+    .tb-right{display:flex;align-items:center;gap:12px}
+    .user-menu-btn{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px 12px 6px 6px;cursor:pointer;transition:all .22s}
+    .user-menu-btn:hover{background:rgba(255,255,255,.07)}
+    .um-ava{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#c53030,#991b1b);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--white);overflow:hidden;flex-shrink:0}
+    .um-ava img{width:100%;height:100%;object-fit:cover}
+    .um-name{font-size:13px;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dropdown-menu-hms{position:absolute;top:calc(100% + 8px);right:0;background:#0c1a3d;border:1px solid var(--border);border-radius:12px;padding:8px;min-width:180px;box-shadow:0 16px 40px rgba(0,0,0,.4);z-index:500;display:none;animation:slideDown .2s ease}
+    .dropdown-menu-hms.open{display:block}
+    .dm-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none}
+    .dm-item:hover{background:rgba(255,255,255,.06);color:var(--white)}
+    .dm-item.danger{color:rgba(239,68,68,.8)}
+    .dm-item.danger:hover{background:rgba(239,68,68,.08);color:var(--err)}
+    .dm-divider{height:1px;background:var(--border);margin:6px 0}
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh}
+    .content{padding:28px 28px 50px}
+
+    /* stats */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+    .stat-mini{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;gap:14px;transition:all .25s}
+    .stat-mini:hover{border-color:rgba(245,166,35,.25);transform:translateY(-2px)}
+    .sm-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .smi-gold{background:rgba(245,166,35,.12)}
+    .smi-red{background:rgba(239,68,68,.12)}
+    .smi-green{background:rgba(34,197,94,.12)}
+    .smi-blue{background:rgba(59,130,246,.12)}
+    .sm-num{font-family:'Playfair Display',serif;font-size:24px;font-weight:900;line-height:1}
+    .sm-label{font-size:11.5px;color:var(--muted);margin-top:2px}
+
+    /* toolbar */
+    .toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+    .btn-add{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:10px;background:var(--gold);color:var(--navy);font-size:13.5px;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 16px var(--glow);transition:all .25s;font-family:'Plus Jakarta Sans',sans-serif}
+    .btn-add:hover{background:var(--gold2);transform:translateY(-1px)}
+    .search-wrap{position:relative;flex:1;min-width:200px}
+    .search-wrap i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.3);font-size:14px;pointer-events:none}
+    .search-input{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:10px 13px 10px 36px;color:var(--white);font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .2s}
+    .search-input:focus{border-color:var(--gold)}
+    .search-input::placeholder{color:rgba(255,255,255,.25)}
+    .filter-sel{background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:10px 32px 10px 12px;color:var(--white);font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;cursor:pointer;transition:border-color .2s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='rgba(255,255,255,.4)' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-size:11px;min-width:130px}
+    .filter-sel:focus{border-color:var(--gold)}
+    .filter-sel option{background:#0c1a3d}
+    .view-toggle{display:flex;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+    .vt-btn{padding:9px 13px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;transition:all .22s}
+    .vt-btn.active{background:rgba(245,166,35,.12);color:var(--gold)}
+
+    /* block tabs */
+    .block-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+    .btab{padding:7px 18px;border-radius:100px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid rgba(255,255,255,.1);background:transparent;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;transition:all .22s}
+    .btab:hover{border-color:rgba(245,166,35,.35);color:var(--white)}
+    .btab.active{background:rgba(245,166,35,.12);border-color:rgba(245,166,35,.4);color:var(--gold)}
+
+    /* GRID VIEW */
+    .rooms-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+    .room-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .3s;position:relative}
+    .room-card:hover{border-color:rgba(245,166,35,.3);transform:translateY(-4px);box-shadow:0 14px 36px rgba(0,0,0,.25)}
+    .rc-ribbon{height:3px;width:100%}
+    .rib-green{background:linear-gradient(90deg,var(--ok),#16a34a)}
+    .rib-amber{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+    .rib-red{background:linear-gradient(90deg,var(--err),#dc2626)}
+    .rib-gray{background:rgba(255,255,255,.1)}
+    .rc-head{padding:14px 16px 10px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid rgba(255,255,255,.05)}
+    .rc-num{font-family:'Playfair Display',serif;font-size:20px;font-weight:900}
+    .rc-block{font-size:11px;color:var(--muted);margin-top:1px}
+    .rc-status{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;text-transform:uppercase}
+    .rs-av{background:rgba(34,197,94,.12);color:var(--ok);border:1px solid rgba(34,197,94,.2)}
+    .rs-few{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+    .rs-full{background:rgba(239,68,68,.1);color:var(--err);border:1px solid rgba(239,68,68,.18)}
+    .rs-maint{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid rgba(255,255,255,.1)}
+    .rc-body{padding:12px 16px}
+    .rc-type{font-size:12px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    .rc-amenities{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+    .amenity-tag{font-size:10.5px;color:var(--muted);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);padding:2px 8px;border-radius:5px;display:flex;align-items:center;gap:3px}
+    .amenity-tag i{color:var(--gold);font-size:10px}
+    .rc-slots{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:10px}
+    .slots-bar{flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden}
+    .slots-fill{height:100%;border-radius:100px;transition:width 1s ease}
+    .sf-green{background:linear-gradient(90deg,var(--ok),#16a34a)}
+    .sf-amber{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+    .sf-red{background:linear-gradient(90deg,var(--err),#dc2626)}
+    .rc-price{font-family:'Playfair Display',serif;font-size:17px;font-weight:900;color:var(--gold)}
+    .rc-price-sub{font-size:10px;color:var(--muted)}
+    .rc-footer{padding:10px 16px;border-top:1px solid rgba(255,255,255,.05);display:flex;gap:8px}
+    .btn-rc{flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:all .22s;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px}
+    .brc-edit{background:rgba(59,130,246,.1);color:#93c5fd;border:1px solid rgba(59,130,246,.2)}
+    .brc-edit:hover{background:rgba(59,130,246,.2)}
+    .brc-maint{background:rgba(245,166,35,.08);color:var(--gold);border:1px solid rgba(245,166,35,.18)}
+    .brc-maint:hover{background:rgba(245,166,35,.18)}
+    .brc-del{background:rgba(239,68,68,.08);color:var(--err);border:1px solid rgba(239,68,68,.15)}
+    .brc-del:hover{background:rgba(239,68,68,.18)}
+
+    /* LIST VIEW */
+    .rooms-list{display:none}
+    .admin-table{width:100%;border-collapse:collapse}
+    .admin-table th{padding:11px 16px;font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);text-align:left;background:rgba(255,255,255,.02)}
+    .admin-table td{padding:13px 16px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+    .admin-table tr:last-child td{border-bottom:none}
+    .admin-table tr:hover td{background:rgba(255,255,255,.025)}
+    .tbl-action{display:flex;gap:6px}
+    .btn-tbl{padding:5px 11px;border-radius:7px;font-size:11.5px;font-weight:600;border:none;cursor:pointer;transition:all .22s;font-family:'Plus Jakarta Sans',sans-serif;display:inline-flex;align-items:center;gap:4px}
+    .bt-edit{background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.2)}
+    .bt-edit:hover{background:rgba(59,130,246,.22)}
+    .bt-del{background:rgba(239,68,68,.1);color:var(--err);border:1px solid rgba(239,68,68,.18)}
+    .bt-del:hover{background:rgba(239,68,68,.2)}
+    .bt-maint{background:rgba(245,166,35,.1);color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+    .bt-maint:hover{background:rgba(245,166,35,.2)}
+
+    /* results count */
+    .results-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .results-count{font-size:12.5px;color:var(--muted)}
+
+    /* empty */
+    .empty-state{text-align:center;padding:56px 20px;color:var(--muted)}
+    .empty-icon{font-size:52px;display:block;margin-bottom:14px;opacity:.45}
+
+    /* skeleton */
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:1000;display:none;align-items:flex-start;justify-content:center;padding:30px 16px;overflow-y:auto}
+    .modal-overlay.open{display:flex}
+    .modal-box{background:#0c1a3d;border:1px solid rgba(245,166,35,.18);border-radius:20px;padding:30px;width:100%;max-width:560px;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.6);animation:modalIn .3s ease;margin:auto}
+    @keyframes modalIn{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
+    .modal-close{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;transition:color .2s}
+    .modal-close:hover{color:var(--white)}
+    .modal-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:5px}
+    .modal-sub{font-size:13px;color:var(--muted);margin-bottom:22px}
+
+    /* form inside modal */
+    .field-wrap{margin-bottom:16px}
+    .field-label{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.72);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+    .req{color:var(--gold);font-size:14px}
+    .input-rel{position:relative}
+    .fi{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;color:rgba(255,255,255,.3);pointer-events:none}
+    .hms-input{width:100%;background:rgba(255,255,255,.048);border:1.5px solid rgba(255,255,255,.1);border-radius:11px;padding:11px 13px 11px 38px;color:var(--white);font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .25s,box-shadow .25s}
+    .hms-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,166,35,.11)}
+    .hms-input::placeholder{color:rgba(255,255,255,.25)}
+    .hms-input.err{border-color:var(--err)!important}
+    .hms-select{appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='rgba(255,255,255,.4)' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;background-size:11px;cursor:pointer}
+    .hms-select option{background:#0c1a3d}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .amenities-check{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+    .amen-cb{display:flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;font-size:12.5px;transition:all .22s;user-select:none}
+    .amen-cb:hover{border-color:rgba(245,166,35,.3)}
+    .amen-cb.checked{background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.3);color:var(--gold)}
+    .amen-cb input{display:none}
+
+    .g-alert{border-radius:11px;padding:11px 15px;font-size:13px;font-weight:500;display:none;align-items:center;gap:9px;margin-bottom:14px}
+    .g-alert.show{display:flex}
+    .g-alert.a-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+    .g-alert.a-ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86efac}
+
+    .btn-submit{width:100%;padding:13px;border-radius:11px;background:var(--gold);color:var(--navy);font-size:14.5px;font-weight:700;border:none;cursor:pointer;box-shadow:0 6px 20px var(--glow);transition:all .3s;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}
+    .btn-submit:hover:not(:disabled){background:var(--gold2);transform:translateY(-2px)}
+    .btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .btn-cancel-modal{width:100%;margin-top:8px;padding:11px;border-radius:11px;background:transparent;border:1.5px solid rgba(255,255,255,.12);color:var(--muted);font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .25s}
+    .btn-cancel-modal:hover{border-color:rgba(255,255,255,.28);color:var(--white)}
+
+    /* delete confirm modal */
+    .del-modal-box{background:#0c1a3d;border:1px solid rgba(239,68,68,.2);border-radius:20px;padding:30px;width:100%;max-width:400px;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.6);animation:modalIn .3s ease;text-align:center;margin:auto}
+    .btn-del-confirm{width:100%;padding:12px;border-radius:11px;background:var(--err);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .25s}
+    .btn-del-confirm:hover{background:#dc2626}
+
+    .spin{width:17px;height:17px;border:2.5px solid rgba(7,17,43,.35);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0}.main{margin-left:0}
+      .tb-menu{display:block}
+      .content{padding:18px 14px 40px}
+      .stats-row{grid-template-columns:1fr 1fr}
+      .um-name{display:none}
+      .two-col{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+    <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Admin Panel</div></div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section-label">Main</div>
+    <a href="admin-dashboard.html" class="sb-link"><i class="bi bi-grid-fill"></i>Dashboard</a>
+    <a href="admin-rooms.html" class="sb-link active"><i class="bi bi-door-open-fill"></i>Rooms</a>
+    <a href="admin-bookings.html" class="sb-link"><i class="bi bi-house-check-fill"></i>Bookings</a>
+    <a href="admin-complaints.html" class="sb-link"><i class="bi bi-tools"></i>Complaints</a>
+    <a href="admin-visitors.html" class="sb-link"><i class="bi bi-people-fill"></i>Visitors</a>
+    <div class="sb-section-label">Management</div>
+    <a href="admin-students.html" class="sb-link"><i class="bi bi-mortarboard-fill"></i>Students</a>
+    <a href="admin-reports.html" class="sb-link"><i class="bi bi-bar-chart-fill"></i>Reports</a>
+    <div class="sb-section-label">System</div>
+    <a href="admin-settings.html" class="sb-link"><i class="bi bi-gear-fill"></i>Settings</a>
+    <a href="admin-login.html" class="sb-link" id="sideSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-admin">
+      <div class="sb-admin-ava" id="sbAva">A</div>
+      <div><div class="sb-admin-name" id="sbName">Admin</div><div class="sb-admin-role">Hostel Admin</div></div>
+      <button class="sb-signout" id="sbSignOut"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-left">
+    <button class="tb-menu" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+    <div class="tb-title">Manage Rooms</div>
+  </div>
+  <div class="tb-right">
+    <div style="position:relative">
+      <div class="user-menu-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="um-ava" id="umAva">A</div>
+        <span class="um-name" id="umName">Admin</span>
+        <i class="bi bi-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </div>
+      <div class="dropdown-menu-hms" id="userDropdown">
+        <a href="admin-dashboard.html" class="dm-item"><i class="bi bi-grid-fill"></i>Dashboard</a>
+        <div class="dm-divider"></div>
+        <div class="dm-item danger" id="dropSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="content fade-up">
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-mini"><div class="sm-icon smi-gold">🏠</div><div><div class="sm-num" id="sTot">—</div><div class="sm-label">Total Rooms</div></div></div>
+      <div class="stat-mini"><div class="sm-icon smi-green">🟢</div><div><div class="sm-num" id="sAv">—</div><div class="sm-label">Available</div></div></div>
+      <div class="stat-mini"><div class="sm-icon smi-red">🔴</div><div><div class="sm-num" id="sOcc">—</div><div class="sm-label">Occupied</div></div></div>
+      <div class="stat-mini"><div class="sm-icon smi-blue">🔧</div><div><div class="sm-num" id="sMaint">—</div><div class="sm-label">Maintenance</div></div></div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button class="btn-add" onclick="openAddModal()"><i class="bi bi-plus-lg"></i>Add New Room</button>
+      <div class="search-wrap">
+        <i class="bi bi-search"></i>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search room number or block..." oninput="applyFilters()"/>
+      </div>
+      <select class="filter-sel" id="typeFilter" onchange="applyFilters()">
+        <option value="">All Types</option>
+        <option>Single</option><option>Double</option><option>Triple</option><option>Self-Contained</option><option>Bunk</option>
+      </select>
+      <select class="filter-sel" id="statusFilter" onchange="applyFilters()">
+        <option value="">All Status</option>
+        <option value="available">Available</option>
+        <option value="few">Few Slots</option>
+        <option value="full">Full</option>
+        <option value="maintenance">Maintenance</option>
+      </select>
+      <select class="filter-sel" id="genderFilter" onchange="applyFilters()">
+        <option value="">All Gender</option>
+        <option>Male</option><option>Female</option><option>Mixed</option>
+      </select>
+      <div class="view-toggle">
+        <button class="vt-btn active" id="gridBtn" onclick="setView('grid')" title="Grid view"><i class="bi bi-grid-3x3-gap-fill"></i></button>
+        <button class="vt-btn" id="listBtn" onclick="setView('list')" title="List view"><i class="bi bi-list-ul"></i></button>
+      </div>
+    </div>
+
+    <!-- Block Tabs -->
+    <div class="block-tabs" id="blockTabs">
+      <button class="btab active" onclick="filterBlock('all',this)">All Blocks</button>
+    </div>
+
+    <!-- Results count -->
+    <div class="results-row">
+      <span class="results-count" id="resultsCount">Loading rooms...</span>
+    </div>
+
+    <!-- Grid view -->
+    <div class="rooms-grid" id="roomsGrid">
+      <div class="skeleton" style="height:220px;border-radius:14px"></div>
+      <div class="skeleton" style="height:220px;border-radius:14px"></div>
+      <div class="skeleton" style="height:220px;border-radius:14px"></div>
+      <div class="skeleton" style="height:220px;border-radius:14px"></div>
+    </div>
+
+    <!-- List view -->
+    <div class="rooms-list" id="roomsList">
+      <div style="overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)">
+        <table class="admin-table" id="roomsTable">
+          <thead>
+            <tr>
+              <th>Room No.</th><th>Block</th><th>Type</th><th>Gender</th>
+              <th>Capacity</th><th>Available</th><th>Price</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="roomsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD / EDIT ROOM MODAL -->
+<div class="modal-overlay" id="roomModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('roomModal')"><i class="bi bi-x-lg"></i></button>
+    <h3 class="modal-title" id="modalTitle">Add New Room</h3>
+    <p class="modal-sub" id="modalSub">Fill in the details below to add a new room to the system.</p>
+    <div class="g-alert" id="modalAlert"><i class="bi" id="modalAlertIcon"></i><span id="modalAlertMsg"></span></div>
+
+    <div class="two-col">
+      <div class="field-wrap">
+        <label class="field-label">Room Number <span class="req">*</span></label>
+        <div class="input-rel">
+          <input type="text" class="hms-input" id="fRoomNum" placeholder="e.g. 101"/>
+          <i class="bi bi-hash fi"></i>
+        </div>
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Block Name <span class="req">*</span></label>
+        <div class="input-rel">
+          <input type="text" class="hms-input" id="fBlock" placeholder="e.g. Block A"/>
+          <i class="bi bi-building fi"></i>
+        </div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="field-wrap">
+        <label class="field-label">Room Type <span class="req">*</span></label>
+        <div class="input-rel">
+          <select class="hms-input hms-select" id="fType">
+            <option value="">Select type</option>
+            <option>Single</option><option>Double</option><option>Triple</option><option>Self-Contained</option><option>Bunk</option>
+          </select>
+          <i class="bi bi-house-fill fi"></i>
+        </div>
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Gender <span class="req">*</span></label>
+        <div class="input-rel">
+          <select class="hms-input hms-select" id="fGender">
+            <option value="">Select gender</option>
+            <option>Male</option><option>Female</option><option>Mixed</option>
+          </select>
+          <i class="bi bi-gender-ambiguous fi"></i>
+        </div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="field-wrap">
+        <label class="field-label">Total Slots (Capacity) <span class="req">*</span></label>
+        <div class="input-rel">
+          <input type="number" class="hms-input" id="fSlots" placeholder="e.g. 2" min="1" max="10"/>
+          <i class="bi bi-people-fill fi"></i>
+        </div>
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Price (₦) per Session <span class="req">*</span></label>
+        <div class="input-rel">
+          <input type="number" class="hms-input" id="fPrice" placeholder="e.g. 45000" min="0"/>
+          <i class="bi bi-cash fi"></i>
+        </div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="field-wrap">
+        <label class="field-label">Floor</label>
+        <div class="input-rel">
+          <input type="text" class="hms-input" id="fFloor" placeholder="e.g. Ground Floor"/>
+          <i class="bi bi-layers-fill fi"></i>
+        </div>
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Status</label>
+        <div class="input-rel">
+          <select class="hms-input hms-select" id="fStatus">
+            <option value="available">Available</option>
+            <option value="maintenance">Under Maintenance</option>
+            <option value="full">Full</option>
+          </select>
+          <i class="bi bi-toggle-on fi"></i>
+        </div>
+      </div>
+    </div>
+    <div class="field-wrap">
+      <label class="field-label">Amenities</label>
+      <div class="amenities-check" id="amenitiesCheck">
+        <label class="amen-cb" onclick="toggleAmen(this)"><input type="checkbox" value="Water"/><i class="bi bi-droplet-fill"></i>Water</label>
+        <label class="amen-cb" onclick="toggleAmen(this)"><input type="checkbox" value="Power"/><i class="bi bi-lightning-fill"></i>Power</label>
+        <label class="amen-cb" onclick="toggleAmen(this)"><input type="checkbox" value="Fan"/><i class="bi bi-fan"></i>Fan</label>
+        <label class="amen-cb" onclick="toggleAmen(this)"><input type="checkbox" value="Toilet"/><i class="bi bi-door-closed-fill"></i>Toilet</label>
+        <label class="amen-cb" onclick="toggleAmen(this)"><input type="checkbox" value="WiFi"/><i class="bi bi-wifi"></i>WiFi</label>
+        <label class="amen-cb" onclick="toggleAmen(this)"><input type="checkbox" value="Security"/><i class="bi bi-shield-check"></i>Security</label>
+        <label class="amen-cb" onclick="toggleAmen(this)"><input type="checkbox" value="AC"/><i class="bi bi-thermometer-snow"></i>AC</label>
+      </div>
+    </div>
+
+    <button class="btn-submit" id="saveRoomBtn" onclick="saveRoom()">
+      <span id="saveRoomText"><i class="bi bi-check-lg"></i> Save Room</span>
+    </button>
+    <button class="btn-cancel-modal" onclick="closeModal('roomModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="del-modal-box">
+    <button class="modal-close" onclick="closeModal('deleteModal')"><i class="bi bi-x-lg"></i></button>
+    <div style="font-size:48px;margin-bottom:14px">🗑️</div>
+    <h3 style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:8px">Delete Room?</h3>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:22px">Are you sure you want to delete <strong id="deleteRoomName"></strong>? This action cannot be undone and will remove all associated data.</p>
+    <div class="g-alert" id="deleteAlert"><i class="bi" id="deleteAlertIcon"></i><span id="deleteAlertMsg"></span></div>
+    <button class="btn-del-confirm" id="confirmDelBtn" onclick="confirmDelete()">
+      <span id="delBtnText"><i class="bi bi-trash-fill"></i> Yes, Delete Room</span>
+    </button>
+    <button class="btn-cancel-modal" onclick="closeModal('deleteModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, doc, query, where,
+    getDocs, addDoc, updateDoc, deleteDoc,
+    onSnapshot, orderBy, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg={apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app=initializeApp(cfg);
+  const db=getFirestore(app);
+  const auth=getAuth(app);
+
+  let adminData=null, allRooms=[], activeBlock="all", editingId=null, deletingId=null;
+
+  // ── AUTH GUARD ──
+  onAuthStateChanged(auth,async user=>{
+    if(!user){window.location.href="admin-login.html";return;}
+    const ps=await getDocs(query(collection(db,"users"),where("uid","==",user.uid)));
+    if(ps.empty||ps.docs[0].data().role==="student"){await signOut(auth);window.location.href="admin-login.html";return;}
+    adminData=ps.docs[0].data();
+    if(!["hostel_admin","super_admin"].includes(adminData.role)){await signOut(auth);window.location.href="admin-login.html";return;}
+    renderAdminUI(adminData);
+    listenRooms();
+  });
+
+  function renderAdminUI(a){
+    const init=(a.fullName||"A").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    ["sbAva","umAva"].forEach(id=>{const el=document.getElementById(id);if(!el)return;if(a.photoURL)el.innerHTML=`<img src="${a.photoURL}"/>`;else el.textContent=init;});
+    document.getElementById("sbName").textContent=a.fullName||"Admin";
+    document.getElementById("umName").textContent=(a.fullName||"Admin").split(" ")[0];
+  }
+
+  // ── REAL-TIME ROOMS ──
+  function listenRooms(){
+    onSnapshot(query(collection(db,"rooms"),orderBy("blockName"),orderBy("roomNumber")),snap=>{
+      allRooms=snap.docs.map(d=>({id:d.id,...d.data()}));
+      updateStats();
+      buildBlockTabs();
+      applyFilters();
+    });
+  }
+
+  function updateStats(){
+    let tot=0,av=0,occ=0,maint=0;
+    allRooms.forEach(r=>{
+      tot++;
+      if(r.status==="maintenance")maint++;
+      else if(r.status==="available"||r.status==="few") av++;
+      else occ++;
+    });
+    document.getElementById("sTot").textContent=tot;
+    document.getElementById("sAv").textContent=av;
+    document.getElementById("sOcc").textContent=occ;
+    document.getElementById("sMaint").textContent=maint;
+  }
+
+  function buildBlockTabs(){
+    const blocks=["all",...new Set(allRooms.map(r=>r.blockName).filter(Boolean).sort())];
+    document.getElementById("blockTabs").innerHTML=blocks.map(b=>`<button class="btab${b===activeBlock?" active":""}" onclick="filterBlock('${b}',this)">${b==="all"?"All Blocks":b}</button>`).join("");
+  }
+
+  window.filterBlock=function(b,btn){
+    activeBlock=b;
+    document.querySelectorAll(".btab").forEach(t=>t.classList.remove("active"));
+    btn.classList.add("active");
+    applyFilters();
+  };
+
+  window.applyFilters=function(){
+    const search=document.getElementById("searchInput").value.toLowerCase();
+    const type=document.getElementById("typeFilter").value;
+    const status=document.getElementById("statusFilter").value;
+    const gender=document.getElementById("genderFilter").value;
+    let data=allRooms.filter(r=>{
+      if(activeBlock!=="all"&&r.blockName!==activeBlock)return false;
+      if(search&&!`${r.roomNumber} ${r.blockName}`.toLowerCase().includes(search))return false;
+      if(type&&r.type!==type)return false;
+      if(status&&r.status!==status)return false;
+      if(gender&&r.gender!==gender)return false;
+      return true;
+    });
+    document.getElementById("resultsCount").textContent=`${data.length} room${data.length!==1?"s":""} found`;
+    renderGrid(data);
+    renderTable(data);
+  };
+
+  // ── RENDER GRID ──
+  const amenIcons={"Water":"bi-droplet-fill","Power":"bi-lightning-fill","Fan":"bi-fan","Toilet":"bi-door-closed-fill","WiFi":"bi-wifi","Security":"bi-shield-check","AC":"bi-thermometer-snow"};
+  function renderGrid(rooms){
+    const grid=document.getElementById("roomsGrid");
+    if(rooms.length===0){grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:56px;color:var(--muted)"><span style="font-size:52px;display:block;margin-bottom:14px;opacity:.4">🏠</span><div style="font-size:16px;font-weight:700;color:var(--white);margin-bottom:8px">No rooms found</div><div style="font-size:13.5px">Try adjusting your filters or add a new room.</div></div>`;return;}
+    grid.innerHTML=rooms.map(r=>{
+      const st=r.status||"available";
+      const slots=r.slotsLeft!==undefined?r.slotsLeft:(r.totalSlots||1);
+      const total=r.totalSlots||1;
+      const pct=Math.round(((total-slots)/total)*100);
+      const ribCls=st==="available"?"rib-green":st==="few"?"rib-amber":st==="maintenance"?"rib-gray":"rib-red";
+      const stCls=st==="available"?"rs-av":st==="few"?"rs-few":st==="maintenance"?"rs-maint":"rs-full";
+      const stLabel=st==="available"?"Available":st==="few"?`${slots} Left`:st==="maintenance"?"Maintenance":"Full";
+      const slotFill=pct<60?"sf-green":pct<85?"sf-amber":"sf-red";
+      const amenities=(r.amenities||[]).slice(0,4);
+      return `<div class="room-card">
+        <div class="rc-ribbon ${ribCls}"></div>
+        <div class="rc-head">
+          <div>
+            <div class="rc-num">Room ${r.roomNumber||"—"}</div>
+            <div class="rc-block">${r.blockName||"—"} · ${r.floor||"Ground"} Floor</div>
+          </div>
+          <span class="rc-status ${stCls}">${stLabel}</span>
+        </div>
+        <div class="rc-body">
+          <div class="rc-type">🛏 ${r.type||"Room"} · ${r.gender||"Mixed"}</div>
+          <div class="rc-amenities">${amenities.map(a=>`<span class="amenity-tag"><i class="bi ${amenIcons[a]||"bi-check"}"></i>${a}</span>`).join("")}</div>
+          <div class="rc-slots">
+            <span>${slots}/${total} slots</span>
+            <div class="slots-bar"><div class="slots-fill ${slotFill}" style="width:${pct}%"></div></div>
+          </div>
+          <div class="rc-price">₦${r.price?Number(r.price).toLocaleString():"—"}<span class="rc-price-sub"> /session</span></div>
+        </div>
+        <div class="rc-footer">
+          <button class="btn-rc brc-edit" onclick='editRoom(${JSON.stringify(r).replace(/'/g,"&#39;")})'>
+            <i class="bi bi-pencil-fill"></i>Edit
+          </button>
+          <button class="btn-rc brc-maint" onclick="toggleMaintenance('${r.id}','${st}')">
+            <i class="bi bi-${st==="maintenance"?"check-circle":"tools"}"></i>${st==="maintenance"?"Restore":"Maint."}
+          </button>
+          <button class="btn-rc brc-del" onclick="openDelete('${r.id}','${r.blockName} Rm ${r.roomNumber}')">
+            <i class="bi bi-trash-fill"></i>
+          </button>
+        </div>
+      </div>`;
+    }).join("");
+    // animate slot bars
+    setTimeout(()=>{document.querySelectorAll(".slots-fill").forEach(el=>{const w=el.style.width;el.style.width="0";setTimeout(()=>el.style.width=w,50);});},100);
+  }
+
+  // ── RENDER TABLE ──
+  function renderTable(rooms){
+    const tbody=document.getElementById("roomsTableBody");
+    if(rooms.length===0){tbody.innerHTML=`<tr><td colspan="9" class="tbl-empty" style="padding:36px;text-align:center;color:var(--muted)">No rooms found</td></tr>`;return;}
+    const stMap={available:{cls:"rs-av",lbl:"Available"},few:{cls:"rs-few",lbl:"Few Left"},full:{cls:"rs-full",lbl:"Full"},maintenance:{cls:"rs-maint",lbl:"Maintenance"}};
+    tbody.innerHTML=rooms.map(r=>{
+      const sm=stMap[r.status]||stMap.available;
+      return `<tr>
+        <td><strong>Room ${r.roomNumber||"—"}</strong></td>
+        <td>${r.blockName||"—"}</td>
+        <td>${r.type||"—"}</td>
+        <td>${r.gender||"—"}</td>
+        <td>${r.totalSlots||1}</td>
+        <td style="color:var(--ok);font-weight:700">${r.slotsLeft!==undefined?r.slotsLeft:(r.totalSlots||1)}</td>
+        <td style="color:var(--gold);font-weight:700">₦${r.price?Number(r.price).toLocaleString():"—"}</td>
+        <td><span class="rc-status ${sm.cls}">${sm.lbl}</span></td>
+        <td><div class="tbl-action">
+          <button class="btn-tbl bt-edit" onclick='editRoom(${JSON.stringify(r).replace(/'/g,"&#39;")})'>
+            <i class="bi bi-pencil-fill"></i>Edit
+          </button>
+          <button class="btn-tbl bt-maint" onclick="toggleMaintenance('${r.id}','${r.status||"available"}')">
+            <i class="bi bi-tools"></i>${r.status==="maintenance"?"Restore":"Maint"}
+          </button>
+          <button class="btn-tbl bt-del" onclick="openDelete('${r.id}','${r.blockName} Rm ${r.roomNumber}')">
+            <i class="bi bi-trash-fill"></i>
+          </button>
+        </div></td>
+      </tr>`;
+    }).join("");
+  }
+
+  // ── OPEN ADD MODAL ──
+  window.openAddModal=function(){
+    editingId=null;
+    document.getElementById("modalTitle").textContent="Add New Room";
+    document.getElementById("modalSub").textContent="Fill in the details to add a room to the system.";
+    document.getElementById("saveRoomText").innerHTML=`<i class="bi bi-plus-lg"></i> Add Room`;
+    ["fRoomNum","fBlock","fFloor"].forEach(id=>document.getElementById(id).value="");
+    ["fType","fGender","fStatus"].forEach(id=>document.getElementById(id).value="");
+    document.getElementById("fSlots").value="";
+    document.getElementById("fPrice").value="";
+    document.querySelectorAll(".amen-cb").forEach(cb=>{cb.classList.remove("checked");cb.querySelector("input").checked=false;});
+    document.getElementById("fStatus").value="available";
+    document.getElementById("modalAlert").className="g-alert";
+    document.getElementById("roomModal").classList.add("open");
+  };
+
+  // ── EDIT ROOM ──
+  window.editRoom=function(r){
+    editingId=r.id;
+    document.getElementById("modalTitle").textContent="Edit Room";
+    document.getElementById("modalSub").textContent=`Editing ${r.blockName} — Room ${r.roomNumber}`;
+    document.getElementById("saveRoomText").innerHTML=`<i class="bi bi-check-lg"></i> Save Changes`;
+    document.getElementById("fRoomNum").value=r.roomNumber||"";
+    document.getElementById("fBlock").value=r.blockName||"";
+    document.getElementById("fType").value=r.type||"";
+    document.getElementById("fGender").value=r.gender||"";
+    document.getElementById("fSlots").value=r.totalSlots||"";
+    document.getElementById("fPrice").value=r.price||"";
+    document.getElementById("fFloor").value=r.floor||"";
+    document.getElementById("fStatus").value=r.status||"available";
+    // amenities
+    const amenities=r.amenities||[];
+    document.querySelectorAll(".amen-cb").forEach(cb=>{
+      const val=cb.querySelector("input").value;
+      const checked=amenities.includes(val);
+      cb.classList.toggle("checked",checked);
+      cb.querySelector("input").checked=checked;
+    });
+    document.getElementById("modalAlert").className="g-alert";
+    document.getElementById("roomModal").classList.add("open");
+  };
+
+  // ── SAVE ROOM ──
+  window.saveRoom=async function(){
+    const roomNum=document.getElementById("fRoomNum").value.trim();
+    const block=document.getElementById("fBlock").value.trim();
+    const type=document.getElementById("fType").value;
+    const gender=document.getElementById("fGender").value;
+    const slots=parseInt(document.getElementById("fSlots").value);
+    const price=parseFloat(document.getElementById("fPrice").value);
+    const floor=document.getElementById("fFloor").value.trim();
+    const status=document.getElementById("fStatus").value||"available";
+    const amenities=[...document.querySelectorAll(".amen-cb.checked")].map(cb=>cb.querySelector("input").value);
+
+    if(!roomNum||!block||!type||!gender||!slots||!price){
+      showModalAlert("Please fill in all required fields.","a-err");return;
+    }
+
+    const btn=document.getElementById("saveRoomBtn");
+    btn.disabled=true;
+    document.getElementById("saveRoomText").innerHTML=`<div class="spin"></div> Saving...`;
+
+    try{
+      const data={
+        roomNumber:roomNum, blockName:block, type, gender,
+        totalSlots:slots, price, floor:floor||"Ground Floor",
+        status, amenities,
+        updatedAt:serverTimestamp()
+      };
+
+      if(editingId){
+        // preserve slotsLeft if editing
+        const existing=allRooms.find(r=>r.id===editingId);
+        if(existing){
+          const diff=slots-(existing.totalSlots||1);
+          data.slotsLeft=Math.max(0,(existing.slotsLeft!==undefined?existing.slotsLeft:(existing.totalSlots||1))+diff);
+        }
+        await updateDoc(doc(db,"rooms",editingId),data);
+        showModalAlert("Room updated successfully!","a-ok");
+      }else{
+        data.slotsLeft=slots;
+        data.createdAt=serverTimestamp();
+        await addDoc(collection(db,"rooms"),data);
+        showModalAlert("Room added successfully!","a-ok");
+      }
+      setTimeout(()=>closeModal("roomModal"),1200);
+    }catch(e){console.error(e);showModalAlert("Failed to save room. Try again.","a-err");}
+    finally{btn.disabled=false;document.getElementById("saveRoomText").innerHTML=editingId?`<i class="bi bi-check-lg"></i> Save Changes`:`<i class="bi bi-plus-lg"></i> Add Room`;}
+  };
+
+  // ── TOGGLE MAINTENANCE ──
+  window.toggleMaintenance=async function(id,currentStatus){
+    const newStatus=currentStatus==="maintenance"?"available":"maintenance";
+    try{await updateDoc(doc(db,"rooms",id),{status:newStatus,updatedAt:serverTimestamp()});}
+    catch(e){alert("Failed to update status.");}
+  };
+
+  // ── DELETE ──
+  window.openDelete=function(id,name){
+    deletingId=id;
+    document.getElementById("deleteRoomName").textContent=name;
+    document.getElementById("deleteAlert").className="g-alert";
+    document.getElementById("deleteModal").classList.add("open");
+  };
+  window.confirmDelete=async function(){
+    if(!deletingId)return;
+    const btn=document.getElementById("confirmDelBtn");
+    btn.disabled=true;
+    document.getElementById("delBtnText").innerHTML=`<div class="spin" style="border-top-color:#fff"></div> Deleting...`;
+    try{
+      await deleteDoc(doc(db,"rooms",deletingId));
+      closeModal("deleteModal");
+    }catch(e){
+      const al=document.getElementById("deleteAlert");al.className="g-alert a-err show";
+      document.getElementById("deleteAlertIcon").className="bi bi-exclamation-circle-fill";
+      document.getElementById("deleteAlertMsg").textContent="Failed to delete room.";
+      btn.disabled=false;document.getElementById("delBtnText").innerHTML=`<i class="bi bi-trash-fill"></i> Yes, Delete Room`;
+    }
+  };
+
+  function showModalAlert(msg,cls){
+    const el=document.getElementById("modalAlert");el.className=`g-alert ${cls} show`;
+    document.getElementById("modalAlertIcon").className=cls==="a-err"?"bi bi-exclamation-circle-fill":"bi bi-check-circle-fill";
+    document.getElementById("modalAlertMsg").textContent=msg;
+  }
+
+  window.closeModal=function(id){
+    document.getElementById(id).classList.remove("open");
+    editingId=null;deletingId=null;
+  };
+
+  window.toggleAmen=function(el){el.classList.toggle("checked");el.querySelector("input").checked=el.classList.contains("checked");};
+
+  ["sideSignOut","sbSignOut","dropSignOut"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener("click",async e=>{e.preventDefault();await signOut(auth);window.location.href="admin-login.html";});
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleSidebar(){document.getElementById("sidebar").classList.toggle("open");document.getElementById("sbOverlay").classList.toggle("show");}
+  function toggleUserMenu(){document.getElementById("userDropdown").classList.toggle("open");}
+  document.addEventListener("click",e=>{if(!e.target.closest("#userMenuBtn")&&!e.target.closest("#userDropdown"))document.getElementById("userDropdown").classList.remove("open");});
+
+  let currentView="grid";
+  function setView(v){
+    currentView=v;
+    document.getElementById("roomsGrid").style.display=v==="grid"?"grid":"none";
+    document.getElementById("roomsList").style.display=v==="list"?"block":"none";
+    document.getElementById("gridBtn").classList.toggle("active",v==="grid");
+    document.getElementById("listBtn").classList.toggle("active",v==="list");
+  }
+  window.setView=setView;
+</script>
+</body>
+</html>

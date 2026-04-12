@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Management — Super Admin | FUTBabura HMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.2);
+      --white:#fff;--muted:rgba(255,255,255,.5);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.085);
+      --ok:#22c55e;--err:#ef4444;--warn:#f59e0b;--info:#3b82f6;--purple:#a855f7;
+      --sidebar-w:280px;--topbar-h:70px;--radius:16px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:rgba(245,166,35,.4);border-radius:3px}
+
+    /* ── SIDEBAR ── */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#050e20 0%,#07112b 100%);border-right:1px solid rgba(245,166,35,.12);display:flex;flex-direction:column;z-index:200;transition:transform .3s ease}
+    .sb-logo{display:flex;align-items:center;gap:12px;padding:22px 24px;border-bottom:1px solid rgba(245,166,35,.15);text-decoration:none}
+    .sb-logo-img{width:42px;height:42px;border-radius:50%;border:2.5px solid var(--gold);overflow:hidden;box-shadow:0 0 20px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+    .sb-nav{flex:1;padding:20px 16px;overflow-y:auto}
+    .sb-section-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 12px;margin:20px 0 10px}
+    .sb-section-label:first-child{margin-top:0}
+    .sb-link{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:11px;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:500;transition:all .22s;margin-bottom:3px}
+    .sb-link i{font-size:17px;width:22px;text-align:center;flex-shrink:0}
+    .sb-link:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .sb-link.active{background:linear-gradient(135deg,rgba(245,166,35,.15),rgba(245,166,35,.05));color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+    .sb-badge{margin-left:auto;background:var(--err);color:var(--white);font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px}
+    .sb-bottom{padding:18px 16px;border-top:1px solid rgba(245,166,35,.1)}
+    .sb-admin{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.12)}
+    .sb-admin-ava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:var(--navy);flex-shrink:0;overflow:hidden}
+    .sb-admin-ava img{width:100%;height:100%;object-fit:cover}
+    .sb-admin-name{font-size:13px;font-weight:700;line-height:1.2}
+    .sb-admin-role{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px}
+    .sb-signout{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);font-size:17px;cursor:pointer;padding:4px;transition:color .2s}
+    .sb-signout:hover{color:var(--err)}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:199}
+    .sb-overlay.show{display:block}
+
+    /* ── TOPBAR ── */
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(7,17,43,.98);backdrop-filter:blur(20px);border-bottom:1px solid rgba(245,166,35,.1);display:flex;align-items:center;justify-content:space-between;padding:0 32px;z-index:150}
+    .tb-left{display:flex;align-items:center;gap:16px}
+    .tb-menu{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;display:none;padding:4px}
+    .tb-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+    .tb-breadcrumb{font-size:12px;color:var(--muted);margin-left:8px}
+    .tb-right{display:flex;align-items:center;gap:16px}
+    .user-menu-btn{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:6px 14px 6px 8px;cursor:pointer;transition:all .22s}
+    .user-menu-btn:hover{background:rgba(255,255,255,.07)}
+    .um-ava{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--navy);overflow:hidden;flex-shrink:0}
+    .um-name{font-size:13.5px;font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dropdown-menu-hms{position:absolute;top:calc(100% + 10px);right:0;background:#0c1a3d;border:1px solid rgba(245,166,35,.15);border-radius:14px;padding:8px;min-width:200px;box-shadow:0 20px 40px rgba(0,0,0,.5);z-index:500;display:none;animation:slideDown .2s ease}
+    .dropdown-menu-hms.open{display:block}
+    .dm-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:9px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none}
+    .dm-item:hover{background:rgba(255,255,255,.06);color:var(--white)}
+    .dm-item.danger{color:rgba(239,68,68,.8)}
+    .dm-item.danger:hover{background:rgba(239,68,68,.08);color:var(--err)}
+
+    /* ── MAIN ── */
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh}
+    .content{padding:28px 32px 50px}
+
+    /* ── PAGE HEADER ── */
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px}
+    .ph-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:900}
+    .ph-actions{display:flex;gap:12px}
+    .btn-primary{padding:12px 22px;border-radius:11px;background:var(--gold);color:var(--navy);font-size:13.5px;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:'Plus Jakarta Sans',sans-serif;transition:all .25s;box-shadow:0 4px 14px var(--glow)}
+    .btn-primary:hover{background:var(--gold2);transform:translateY(-2px)}
+    .btn-outline{padding:12px 22px;border-radius:11px;background:transparent;border:1.5px solid var(--border);color:var(--muted);font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .25s}
+    .btn-outline:hover{background:rgba(255,255,255,.05);color:var(--white)}
+
+    /* ── STATS ROW ── */
+    .stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px}
+    .stat-label{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+    .stat-value{font-family:'Playfair Display',serif;font-size:26px;font-weight:900}
+
+    /* ── FILTER BAR ── */
+    .filter-bar{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .search-wrap{flex:1;min-width:250px;position:relative}
+    .search-input{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 16px 11px 44px;color:var(--white);font-size:13.5px;outline:none}
+    .search-input:focus{border-color:var(--gold)}
+    .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px}
+    .filter-select{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 32px 11px 14px;color:var(--white);font-size:13px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='rgba(255,255,255,.4)' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:11px}
+    .filter-select option{background:#0c1a3d}
+    .btn-reset{padding:11px 20px;border-radius:10px;background:transparent;border:1.5px solid var(--border);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .25s}
+    .btn-reset:hover{background:rgba(255,255,255,.05);color:var(--white)}
+
+    /* ── TABLE ── */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .card-header{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .card-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:9px}
+    .table-wrapper{overflow-x:auto}
+    .admin-table{width:100%;border-collapse:collapse;min-width:1400px}
+    .admin-table th{padding:13px 16px;font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);text-align:left;background:rgba(255,255,255,.02)}
+    .admin-table td{padding:14px 16px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+    .admin-table tr:hover td{background:rgba(255,255,255,.02)}
+
+    /* badges */
+    .student-ava{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--info),#1d4ed8);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--white);overflow:hidden;flex-shrink:0}
+    .student-ava img{width:100%;height:100%;object-fit:cover}
+    .status-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;text-transform:uppercase;white-space:nowrap}
+    .status-active{background:rgba(34,197,94,.12);color:var(--ok)}
+    .status-inactive{background:rgba(239,68,68,.12);color:var(--err)}
+    .status-pending{background:rgba(245,166,35,.12);color:var(--gold)}
+    .booking-badge{font-size:10px;padding:3px 10px;border-radius:100px;font-weight:700;white-space:nowrap}
+    .booking-active{background:rgba(34,197,94,.12);color:var(--ok)}
+    .booking-pending{background:rgba(245,166,35,.12);color:var(--gold)}
+    .booking-none{background:rgba(255,255,255,.06);color:var(--muted)}
+
+    /* action buttons */
+    .action-group{display:flex;gap:6px}
+    .btn-icon{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:6px 8px;border-radius:7px;transition:all .2s}
+    .btn-icon:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .btn-icon.view:hover{color:var(--info)}
+    .btn-icon.edit:hover{color:var(--gold)}
+    .btn-icon.toggle:hover{color:var(--ok)}
+    .btn-icon.booking:hover{color:var(--purple)}
+
+    /* pagination */
+    .pagination-wrap{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-top:1px solid var(--border)}
+    .pagination{display:flex;gap:6px}
+    .page-btn{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
+    .page-btn:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .page-btn.active{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+    .page-btn:disabled{opacity:.4;cursor:not-allowed}
+
+    /* ── MODAL ── */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:center;justify-content:center}
+    .modal-overlay.show{display:flex}
+    .modal{background:#0c1a3d;border:1px solid rgba(245,166,35,.2);border-radius:18px;width:90%;max-width:700px;max-height:85vh;overflow-y:auto;animation:slideDown .2s ease}
+    .modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+    .modal-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer}
+    .modal-body{padding:24px}
+    .modal-footer{padding:18px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:12px}
+    .btn-modal{padding:10px 22px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;border:none;transition:all .2s}
+    .btn-modal-primary{background:var(--gold);color:var(--navy)}
+    .btn-modal-primary:hover{background:var(--gold2)}
+    .btn-modal-secondary{background:transparent;border:1.5px solid var(--border);color:var(--muted)}
+    .btn-modal-secondary:hover{background:rgba(255,255,255,.05);color:var(--white)}
+
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .detail-item{margin-bottom:12px}
+    .detail-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+    .detail-value{font-size:14px;font-weight:500}
+
+    .tbl-empty{text-align:center;padding:40px;color:var(--muted)}
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+
+    @media(max-width:1400px){.stats-row{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0}.main{margin-left:0}
+      .tb-menu{display:block}
+      .content{padding:18px 16px 40px}
+      .stats-row{grid-template-columns:repeat(2,1fr)}
+      .um-name{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar" id="sidebar">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+    <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Super Admin</div></div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section-label">MAIN</div>
+    <a href="superadmin-dashboard.html" class="sb-link"><i class="bi bi-grid-fill"></i>Dashboard</a>
+    <a href="superadmin-admins.html" class="sb-link"><i class="bi bi-shield-lock-fill"></i>Admin Management</a>
+    <a href="superadmin-students.html" class="sb-link active"><i class="bi bi-people-fill"></i>Students</a>
+    <div class="sb-section-label">HOSTEL MANAGEMENT</div>
+    <a href="superadmin-hostels.html" class="sb-link"><i class="bi bi-building"></i>Hostels</a>
+    <a href="superadmin-rooms.html" class="sb-link"><i class="bi bi-door-open-fill"></i>Rooms</a>
+    <a href="superadmin-bookings.html" class="sb-link"><i class="bi bi-house-check-fill"></i>All Bookings</a>
+    <div class="sb-section-label">FINANCE</div>
+    <a href="superadmin-payments.html" class="sb-link"><i class="bi bi-cash-stack"></i>Payments</a>
+    <a href="superadmin-reports.html" class="sb-link"><i class="bi bi-bar-chart-fill"></i>Reports</a>
+    <div class="sb-section-label">SYSTEM</div>
+    <a href="superadmin-settings.html" class="sb-link"><i class="bi bi-gear-fill"></i>Settings</a>
+    <a href="superadmin-audit.html" class="sb-link"><i class="bi bi-journal-text"></i>Audit Logs</a>
+    <div class="sb-section-label">ACCOUNT</div>
+    <a href="admin-login.html" class="sb-link" id="sideSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-admin">
+      <div class="sb-admin-ava" id="sbAva">SA</div>
+      <div><div class="sb-admin-name" id="sbName">Loading...</div><div class="sb-admin-role">SUPER ADMIN</div></div>
+      <button class="sb-signout" id="sbSignOut"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar" id="topbar">
+  <div class="tb-left">
+    <button class="tb-menu" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+    <div class="tb-title">Student Management</div>
+    <span class="tb-breadcrumb">/ All Students</span>
+  </div>
+  <div class="tb-right">
+    <div style="position:relative">
+      <div class="user-menu-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="um-ava" id="umAva">SA</div>
+        <span class="um-name" id="umName">Super Admin</span>
+        <i class="bi bi-chevron-down" style="font-size:12px;color:var(--muted)"></i>
+      </div>
+      <div class="dropdown-menu-hms" id="userDropdown">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);margin-bottom:6px">
+          <div style="font-size:13px;font-weight:700" id="ddName">Super Admin</div>
+          <div style="font-size:11px;color:var(--gold)">System Administrator</div>
+        </div>
+        <div class="dm-item danger" id="dropSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main" id="main">
+  <div class="content fade-up">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <h1 class="ph-title">Registered Students</h1>
+      <div class="ph-actions">
+        <button class="btn-outline" onclick="exportStudents()"><i class="bi bi-download"></i>Export CSV</button>
+      </div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Total Students</div><div class="stat-value" id="stTotal">0</div></div>
+      <div class="stat-card"><div class="stat-label">Active Bookings</div><div class="stat-value" id="stActiveBookings" style="color:var(--ok)">0</div></div>
+      <div class="stat-card"><div class="stat-label">Pending Bookings</div><div class="stat-value" id="stPendingBookings" style="color:var(--gold)">0</div></div>
+      <div class="stat-card"><div class="stat-label">No Booking</div><div class="stat-value" id="stNoBooking" style="color:var(--muted)">0</div></div>
+      <div class="stat-card"><div class="stat-label">New This Month</div><div class="stat-value" id="stNewMonth" style="color:var(--info)">0</div></div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search by name, matric, email, phone, or department..." onkeyup="applyFilters()">
+      </div>
+      <select class="filter-select" id="filterFaculty" onchange="applyFilters()">
+        <option value="all">All Faculties</option>
+        <option value="Engineering Technology">Engineering Technology</option>
+        <option value="Agriculture & Agricultural Technology">Agriculture</option>
+        <option value="Environmental Technology">Environmental</option>
+        <option value="Management Technology">Management</option>
+        <option value="Science & Science Education">Science</option>
+        <option value="Computing & Information Technology">Computing</option>
+      </select>
+      <select class="filter-select" id="filterLevel" onchange="applyFilters()">
+        <option value="all">All Levels</option>
+        <option value="100 Level">100 Level</option>
+        <option value="200 Level">200 Level</option>
+        <option value="300 Level">300 Level</option>
+        <option value="400 Level">400 Level</option>
+        <option value="500 Level">500 Level</option>
+      </select>
+      <select class="filter-select" id="filterGender" onchange="applyFilters()">
+        <option value="all">All Genders</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+      <select class="filter-select" id="filterBooking" onchange="applyFilters()">
+        <option value="all">All Booking Status</option>
+        <option value="active">Active Booking</option>
+        <option value="pending">Pending Booking</option>
+        <option value="none">No Booking</option>
+      </select>
+      <select class="filter-select" id="filterStatus" onchange="applyFilters()">
+        <option value="all">All Status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+      <button class="btn-reset" onclick="resetFilters()"><i class="bi bi-arrow-counterclockwise"></i>Reset</button>
+    </div>
+
+    <!-- STUDENTS TABLE -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="bi bi-people-fill" style="color:var(--gold)"></i>Student Directory</span>
+        <span id="resultCount">0 results</span>
+      </div>
+      <div class="table-wrapper">
+        <table class="admin-table" id="studentsTable">
+          <thead>
+            <tr><th>Student</th><th>Matric No.</th><th>Email</th><th>Phone</th><th>Department</th><th>Level</th><th>Gender</th><th>Booking</th><th>Status</th><th>Registered</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td colspan="11" class="tbl-empty"><div class="skeleton" style="height:40px;margin-bottom:8px"></div><div class="skeleton" style="height:40px"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination-wrap">
+        <div>Showing <span id="showingStart">1</span>-<span id="showingEnd">10</span> of <span id="totalCount">0</span></div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- STUDENT DETAIL MODAL -->
+<div class="modal-overlay" id="detailModal" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title"><i class="bi bi-person-badge" style="color:var(--gold);margin-right:8px"></i>Student Details</span>
+      <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secondary" onclick="closeDetailModal()">Close</button>
+      <button class="btn-modal btn-modal-primary" id="detailActionBtn" onclick="toggleStudentStatus()">Toggle Status</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, query, where, getDocs, orderBy, onSnapshot, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg={apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app=initializeApp(cfg);
+  const db=getFirestore(app);
+  const auth=getAuth(auth);
+
+  let adminData=null, allStudents=[], filteredStudents=[], bookings=[], settings={};
+  let currentPage=1, pageSize=10, currentStudentId=null;
+
+  onAuthStateChanged(auth, async user=>{
+    if(!user){window.location.href="admin-login.html";return;}
+    try{
+      const ps=await getDocs(query(collection(db,"users"),where("uid","==",user.uid)));
+      if(ps.empty||ps.docs[0].data().role!=="super_admin"){await signOut(auth);window.location.href="admin-login.html";return;}
+      adminData=ps.docs[0].data();
+      renderAdminUI(adminData);
+      await loadSettings();
+      await loadBookings();
+      listenStudents();
+    }catch(e){console.error(e);}
+  });
+
+  function renderAdminUI(a){
+    const initials=(a.fullName||"SA").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    ["sbAva","umAva"].forEach(id=>{const el=document.getElementById(id);if(el){if(a.photoURL)el.innerHTML=`<img src="${a.photoURL}" alt=""/>`;else el.textContent=initials;}});
+    document.getElementById("sbName").textContent=a.fullName||"Super Admin";
+    document.getElementById("umName").textContent=(a.fullName||"Super Admin").split(" ")[0];
+    document.getElementById("ddName").textContent=a.fullName||"Super Admin";
+  }
+
+  async function loadSettings(){
+    const ss=await getDocs(collection(db,"settings"));
+    settings=ss.empty?{}:ss.docs[0].data();
+  }
+
+  async function loadBookings(){
+    const session=settings.currentSession||"2024/2025";
+    const snap=await getDocs(query(collection(db,"bookings"),where("session","==",session)));
+    bookings=snap.docs.map(d=>({id:d.id,...d.data()}));
+  }
+
+  function listenStudents(){
+    const q=query(collection(db,"users"),where("role","==","student"),orderBy("createdAt","desc"));
+    onSnapshot(q,snap=>{
+      allStudents=snap.docs.map(d=>({id:d.id,...d.data()}));
+      updateStats();
+      applyFilters();
+    });
+  }
+
+  function updateStats(){
+    const total=allStudents.length;
+    const activeBookings=allStudents.filter(s=>s.bookingStatus==="active").length;
+    const pendingBookings=allStudents.filter(s=>s.bookingStatus==="pending").length;
+    const noBooking=allStudents.filter(s=>!s.bookingStatus||s.bookingStatus==="none").length;
+    const newMonth=allStudents.filter(s=>s.createdAt?.toDate?.().getMonth()===new Date().getMonth()).length;
+
+    document.getElementById("stTotal").textContent=total;
+    document.getElementById("stActiveBookings").textContent=activeBookings;
+    document.getElementById("stPendingBookings").textContent=pendingBookings;
+    document.getElementById("stNoBooking").textContent=noBooking;
+    document.getElementById("stNewMonth").textContent=newMonth;
+  }
+
+  window.applyFilters=function(){
+    const search=document.getElementById("searchInput").value.toLowerCase();
+    const faculty=document.getElementById("filterFaculty").value;
+    const level=document.getElementById("filterLevel").value;
+    const gender=document.getElementById("filterGender").value;
+    const booking=document.getElementById("filterBooking").value;
+    const status=document.getElementById("filterStatus").value;
+
+    filteredStudents=allStudents.filter(s=>{
+      if(faculty!=="all"&&s.faculty!==faculty)return false;
+      if(level!=="all"&&s.level!==level)return false;
+      if(gender!=="all"&&s.gender!==gender)return false;
+      if(booking==="active"&&s.bookingStatus!=="active")return false;
+      if(booking==="pending"&&s.bookingStatus!=="pending")return false;
+      if(booking==="none"&&s.bookingStatus&&s.bookingStatus!=="none")return false;
+      if(status==="active"&&s.isActive===false)return false;
+      if(status==="inactive"&&s.isActive!==false)return false;
+      if(search){const haystack=`${s.fullName||""} ${s.matricNo||""} ${s.email||""} ${s.phone||""} ${s.department||""}`.toLowerCase();if(!haystack.includes(search))return false;}
+      return true;
+    });
+    currentPage=1;
+    renderTable();
+  };
+
+  window.resetFilters=function(){
+    document.getElementById("searchInput").value="";
+    document.getElementById("filterFaculty").value="all";
+    document.getElementById("filterLevel").value="all";
+    document.getElementById("filterGender").value="all";
+    document.getElementById("filterBooking").value="all";
+    document.getElementById("filterStatus").value="all";
+    applyFilters();
+  };
+
+  function renderTable(){
+    const total=filteredStudents.length;
+    const totalPages=Math.ceil(total/pageSize);
+    const start=(currentPage-1)*pageSize;
+    const end=Math.min(start+pageSize,total);
+    const pageData=filteredStudents.slice(start,end);
+
+    document.getElementById("resultCount").textContent=`${total} student${total!==1?'s':''}`;
+    document.getElementById("showingStart").textContent=total?start+1:0;
+    document.getElementById("showingEnd").textContent=end;
+    document.getElementById("totalCount").textContent=total;
+
+    const tbody=document.getElementById("tableBody");
+    if(pageData.length===0){tbody.innerHTML=`<tr><td colspan="11" class="tbl-empty"><i class="bi bi-people" style="font-size:32px;opacity:.3;display:block;margin-bottom:8px"></i>No students found</td></tr>`;renderPagination(totalPages);return;}
+
+    tbody.innerHTML=pageData.map(s=>{
+      const initials=(s.fullName||"S").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+      const bookingBadge=s.bookingStatus==="active"?`<span class="booking-badge booking-active">Active</span>`:s.bookingStatus==="pending"?`<span class="booking-badge booking-pending">Pending</span>`:`<span class="booking-badge booking-none">None</span>`;
+      return `<tr>
+        <td><div style="display:flex;align-items:center;gap:12px"><div class="student-ava">${s.photoURL?`<img src="${s.photoURL}">`:initials}</div><div><div style="font-weight:600">${s.fullName||"—"}</div></div></div></td>
+        <td>${s.matricNo||"—"}</td>
+        <td style="font-size:12px">${s.email||"—"}</td>
+        <td>${s.phone||"—"}</td>
+        <td>${s.department||"—"}</td>
+        <td>${s.level||"—"}</td>
+        <td>${s.gender||"—"}</td>
+        <td>${bookingBadge}</td>
+        <td><span class="status-badge ${s.isActive!==false?'status-active':'status-inactive'}"><i class="bi bi-${s.isActive!==false?'check-circle-fill':'x-circle-fill'}"></i>${s.isActive!==false?'Active':'Inactive'}</span></td>
+        <td style="font-size:12px">${s.createdAt?.toDate?.().toLocaleDateString()||"—"}</td>
+        <td><div class="action-group">
+          <button class="btn-icon view" onclick="openDetailModal('${s.id}')" title="View Details"><i class="bi bi-eye-fill"></i></button>
+          <button class="btn-icon toggle" onclick="toggleStudentStatus('${s.id}')" title="${s.isActive!==false?'Deactivate':'Activate'}"><i class="bi bi-${s.isActive!==false?'toggle-on':'toggle-off'}"></i></button>
+          <button class="btn-icon booking" onclick="manageBooking('${s.id}')" title="Manage Booking"><i class="bi bi-house-fill"></i></button>
+        </div></td>
+      </tr>`;
+    }).join("");
+    renderPagination(totalPages);
+  }
+
+  function renderPagination(totalPages){
+    const pg=document.getElementById("pagination");
+    if(totalPages<=1){pg.innerHTML="";return;}
+    let html=`<button class="page-btn" onclick="goToPage(${currentPage-1})" ${currentPage===1?'disabled':''}><i class="bi bi-chevron-left"></i></button>`;
+    for(let i=1;i<=totalPages;i++){
+      if(i===1||i===totalPages||(i>=currentPage-2&&i<=currentPage+2)){
+        html+=`<button class="page-btn ${i===currentPage?'active':''}" onclick="goToPage(${i})">${i}</button>`;
+      }else if(i===currentPage-3||i===currentPage+3){
+        html+=`<span style="color:var(--muted);padding:7px 5px">...</span>`;
+      }
+    }
+    html+=`<button class="page-btn" onclick="goToPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}><i class="bi bi-chevron-right"></i></button>`;
+    pg.innerHTML=html;
+  }
+
+  window.goToPage=function(page){if(page>=1&&page<=Math.ceil(filteredStudents.length/pageSize)){currentPage=page;renderTable();}};
+
+  // ── DETAIL MODAL ──
+  window.openDetailModal=function(id){
+    const student=allStudents.find(s=>s.id===id);if(!student)return;
+    currentStudentId=id;
+    const booking=bookings.find(b=>b.studentUid===student.uid);
+    document.getElementById("detailBody").innerHTML=`
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+        <div class="student-ava" style="width:60px;height:60px;font-size:20px">${student.photoURL?`<img src="${student.photoURL}">`:(student.fullName||"S").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2)}</div>
+        <div><div style="font-size:18px;font-weight:700">${student.fullName||"—"}</div><div style="color:var(--muted)">${student.matricNo||""}</div></div>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">${student.email||"—"}</div></div>
+        <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-value">${student.phone||"—"}</div></div>
+        <div class="detail-item"><div class="detail-label">Gender</div><div class="detail-value">${student.gender||"—"}</div></div>
+        <div class="detail-item"><div class="detail-label">Date of Birth</div><div class="detail-value">${student.dob||"—"}</div></div>
+        <div class="detail-item"><div class="detail-label">State of Origin</div><div class="detail-value">${student.stateOrigin||"—"}</div></div>
+        <div class="detail-item"><div class="detail-label">Faculty</div><div class="detail-value">${student.faculty||"—"}</div></div>
+        <div class="detail-item"><div class="detail-label">Department</div><div class="detail-value">${student.department||"—"}</div></div>
+        <div class="detail-item"><div class="detail-label">Level</div><div class="detail-value">${student.level||"—"}</div></div>
+        <div class="detail-item"><div class="detail-label">Mode of Entry</div><div class="detail-value">${student.modeOfEntry||"—"}</div></div>
+        <div class="detail-item"><div class="detail-label">Status</div><div class="detail-value"><span class="status-badge ${student.isActive!==false?'status-active':'status-inactive'}">${student.isActive!==false?'Active':'Inactive'}</span></div></div>
+      </div>
+      ${booking?`
+      <div style="margin-top:20px;padding:16px;background:rgba(245,166,35,.06);border-radius:12px;border:1px solid rgba(245,166,35,.15)">
+        <div style="font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px"><i class="bi bi-house-fill" style="color:var(--gold)"></i>Current Booking</div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-label">Hostel</div><div class="detail-value">${booking.blockName||"—"}</div></div>
+          <div class="detail-item"><div class="detail-label">Room</div><div class="detail-value">${booking.roomNumber||"—"}</div></div>
+          <div class="detail-item"><div class="detail-label">Status</div><div class="detail-value"><span class="booking-badge booking-${booking.status}">${booking.status||"—"}</span></div></div>
+          <div class="detail-item"><div class="detail-label">Amount</div><div class="detail-value">₦${(booking.amount||0).toLocaleString()}</div></div>
+        </div>
+      </div>`:''}
+    `;
+    document.getElementById("detailActionBtn").textContent=student.isActive!==false?"Deactivate Student":"Activate Student";
+    document.getElementById("detailModal").classList.add("show");
+  };
+
+  window.closeDetailModal=function(){document.getElementById("detailModal").classList.remove("show");currentStudentId=null;};
+  window.closeModalOnOverlay=function(e){if(e.target.classList.contains("modal-overlay"))closeDetailModal();};
+
+  // ── TOGGLE STATUS ──
+  window.toggleStudentStatus=async function(id){
+    const studentId=id||currentStudentId;
+    if(!studentId)return;
+    const student=allStudents.find(s=>s.id===studentId);
+    if(!student)return;
+    await updateDoc(doc(db,"users",studentId),{isActive:student.isActive===false?true:false});
+    if(id)closeDetailModal();
+  };
+
+  window.manageBooking=function(id){
+    alert("Manage booking for student: "+id+"\nThis would open a modal to assign/change room.");
+  };
+
+  window.exportStudents=function(){
+    const headers=["Full Name","Matric No","Email","Phone","Gender","Faculty","Department","Level","State","Status","Booking Status","Registered"];
+    const rows=filteredStudents.map(s=>[s.fullName||"",s.matricNo||"",s.email||"",s.phone||"",s.gender||"",s.faculty||"",s.department||"",s.level||"",s.stateOrigin||"",s.isActive!==false?"Active":"Inactive",s.bookingStatus||"None",s.createdAt?.toDate?.().toLocaleDateString()||""]);
+    const csv=[headers.join(","),...rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(","))].join("\n");
+    const blob=new Blob([csv],{type:"text/csv"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`students_${new Date().toISOString().split('T')[0]}.csv`;a.click();
+  };
+
+  async function doSignOut(){await signOut(auth);window.location.href="admin-login.html";}
+  ["sideSignOut","sbSignOut","dropSignOut"].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener("click",async e=>{e.preventDefault();doSignOut();});});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleSidebar(){document.getElementById("sidebar").classList.toggle("open");document.getElementById("sbOverlay").classList.toggle("show");}
+  function toggleUserMenu(){document.getElementById("userDropdown").classList.toggle("open");}
+  document.addEventListener("click",e=>{if(!e.target.closest("#userMenuBtn")&&!e.target.closest("#userDropdown"))document.getElementById("userDropdown").classList.remove("open");});
+</script>
+</body>
+</html>

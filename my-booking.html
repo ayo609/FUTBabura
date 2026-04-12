@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Booking — FUTBabura HMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.2);
+      --white:#fff;--muted:rgba(255,255,255,.5);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.085);
+      --ok:#22c55e;--err:#ef4444;--warn:#f59e0b;
+      --sidebar-w:260px;--topbar-h:68px;--radius:14px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(245,166,35,.4);border-radius:3px}
+
+    /* sidebar/topbar shared styles */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#060f24 0%,#0a1535 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:200;transition:transform .3s ease}
+    .sb-logo{display:flex;align-items:center;gap:11px;padding:20px 22px;border-bottom:1px solid var(--border);text-decoration:none}
+    .sb-logo-img{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;box-shadow:0 0 14px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:1.6px;text-transform:uppercase}
+    .sb-nav{flex:1;padding:18px 14px;overflow-y:auto}
+    .sb-section-label{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 10px;margin:18px 0 8px}
+    .sb-section-label:first-child{margin-top:0}
+    .sb-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:500;transition:all .22s;margin-bottom:2px}
+    .sb-link i{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+    .sb-link:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .sb-link.active{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.18)}
+    .sb-bottom{padding:16px 14px;border-top:1px solid var(--border)}
+    .sb-user{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--border)}
+    .sb-user-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy);flex-shrink:0;overflow:hidden}
+    .sb-user-ava img{width:100%;height:100%;object-fit:cover}
+    .sb-user-name{font-size:12.5px;font-weight:700}
+    .sb-user-role{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+    .sb-signout{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);font-size:16px;cursor:pointer;padding:4px;transition:color .2s}
+    .sb-signout:hover{color:var(--err)}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199}
+    .sb-overlay.show{display:block}
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(7,17,43,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:150}
+    .tb-left{display:flex;align-items:center;gap:14px}
+    .tb-menu{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;display:none;padding:4px}
+    .tb-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}
+    .tb-right{display:flex;align-items:center;gap:14px}
+    .notif-btn{position:relative;background:var(--card);border:1px solid var(--border);border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all .22s}
+    .notif-btn:hover{background:rgba(255,255,255,.08);color:var(--white)}
+    .user-menu-btn{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px 12px 6px 6px;cursor:pointer;transition:all .22s}
+    .user-menu-btn:hover{background:rgba(255,255,255,.07)}
+    .um-ava{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--navy);overflow:hidden;flex-shrink:0}
+    .um-ava img{width:100%;height:100%;object-fit:cover}
+    .um-name{font-size:13px;font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dropdown-menu-hms{position:absolute;top:calc(100% + 8px);right:0;background:#0c1a3d;border:1px solid var(--border);border-radius:12px;padding:8px;min-width:180px;box-shadow:0 16px 40px rgba(0,0,0,.4);z-index:500;display:none;animation:slideDown .2s ease}
+    .dropdown-menu-hms.open{display:block}
+    .dm-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none}
+    .dm-item:hover{background:rgba(255,255,255,.06);color:var(--white)}
+    .dm-item.danger{color:rgba(239,68,68,.8)}
+    .dm-item.danger:hover{background:rgba(239,68,68,.08);color:var(--err)}
+    .dm-divider{height:1px;background:var(--border);margin:6px 0}
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh}
+    .content{padding:28px 28px 50px}
+
+    /* ── PAGE GRID ── */
+    .page-grid{display:grid;grid-template-columns:1fr 380px;gap:22px;align-items:start}
+
+    /* ── STATE CARDS ── */
+    .state-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .sc-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .sc-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:9px}
+    .status-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:5px 13px;border-radius:100px;text-transform:uppercase;letter-spacing:.7px}
+    .sp-pending{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.25)}
+    .sp-active{background:rgba(34,197,94,.12);color:var(--ok);border:1px solid rgba(34,197,94,.25)}
+    .sp-expired{background:rgba(239,68,68,.1);color:var(--err);border:1px solid rgba(239,68,68,.2)}
+    .sp-none{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid rgba(255,255,255,.1)}
+    .sc-body{padding:24px}
+
+    /* room detail grid */
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}
+    .detail-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:12px 14px}
+    .di-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+    .di-value{font-size:14px;font-weight:700}
+
+    /* payment deadline countdown */
+    .deadline-banner{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);border-radius:11px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:14px}
+    .deadline-timer{display:flex;gap:8px}
+    .dt-box{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:6px 10px;text-align:center;min-width:46px}
+    .dt-num{font-family:'Playfair Display',serif;font-size:18px;font-weight:900;color:var(--err);line-height:1}
+    .dt-label{font-size:9px;color:var(--muted);text-transform:uppercase}
+
+    /* payment summary */
+    .payment-summary{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:18px;margin-bottom:20px}
+    .ps-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13.5px}
+    .ps-row:last-child{border-bottom:none;font-weight:700;font-size:15px;padding-top:12px;margin-top:4px}
+    .ps-row:last-child span:last-child{color:var(--gold);font-family:'Playfair Display',serif;font-size:18px}
+    .ps-label{color:var(--muted)}
+
+    /* paystack button */
+    .btn-paystack{width:100%;padding:14px;border-radius:11px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);font-size:15px;font-weight:700;border:none;cursor:pointer;box-shadow:0 6px 22px var(--glow);transition:all .3s;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:10px}
+    .btn-paystack:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 28px var(--glow)}
+    .btn-paystack:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .btn-cancel-booking{width:100%;padding:11px;border-radius:11px;background:transparent;border:1.5px solid rgba(239,68,68,.25);color:rgba(239,68,68,.7);font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:7px}
+    .btn-cancel-booking:hover{border-color:var(--err);color:var(--err);background:rgba(239,68,68,.05)}
+
+    /* ── APPROVED / RECEIPT ── */
+    .receipt-card{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.18);border-radius:11px;padding:18px;margin-bottom:20px}
+    .receipt-row{display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid rgba(255,255,255,.05)}
+    .receipt-row:last-child{border-bottom:none}
+    .receipt-label{color:var(--muted)}
+    .receipt-value{font-weight:600;color:var(--ok)}
+
+    .letter-actions{display:flex;gap:10px}
+    .btn-download{flex:1;padding:12px;border-radius:11px;background:var(--gold);color:var(--navy);font-size:14px;font-weight:700;border:none;cursor:pointer;box-shadow:0 6px 20px var(--glow);transition:all .3s;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px}
+    .btn-download:hover{background:var(--gold2);transform:translateY(-2px)}
+    .btn-print{flex:1;padding:12px;border-radius:11px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.14);color:var(--white);font-size:14px;font-weight:600;cursor:pointer;transition:all .25s;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px}
+    .btn-print:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+
+    /* ── APPROVAL LETTER PREVIEW ── */
+    .letter-preview-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .letter-preview-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .letter-preview-body{padding:20px}
+
+    /* the actual printable letter */
+    #letterDoc{
+      background:#fff;color:#111;
+      font-family:'Plus Jakarta Sans',sans-serif;
+      padding:36px 40px;border-radius:10px;
+      border:2px solid #1a3c8f;
+      position:relative;overflow:hidden;
+    }
+    .ld-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:80px;font-weight:900;color:rgba(26,60,143,.05);white-space:nowrap;pointer-events:none;user-select:none;font-family:'Playfair Display',serif}
+    .ld-header{display:flex;align-items:center;gap:16px;margin-bottom:14px;padding-bottom:14px;border-bottom:3px solid #1a3c8f}
+    .ld-logo{width:68px;height:68px;border-radius:50%;border:2px solid #f5a623;overflow:hidden;flex-shrink:0}
+    .ld-logo img{width:100%;height:100%;object-fit:cover}
+    .ld-uni-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:900;color:#0d2359;line-height:1.2}
+    .ld-uni-sub{font-size:10px;color:#888;margin-top:2px;letter-spacing:1px;text-transform:uppercase}
+    .ld-doc-title{text-align:center;margin-bottom:18px}
+    .ld-doc-title h2{font-family:'Playfair Display',serif;font-size:17px;font-weight:900;color:#0d2359;text-transform:uppercase;letter-spacing:1.5px}
+    .ld-doc-title p{font-size:11px;color:#666;margin-top:3px}
+    .ld-table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:12px}
+    .ld-table td{padding:7px 10px;border:1px solid #dde4f5;vertical-align:top}
+    .ld-table td:first-child{background:#f0f4ff;font-weight:700;color:#0d2359;width:45%;white-space:nowrap}
+    .ld-qr-section{display:flex;align-items:flex-start;gap:18px;padding:14px;background:#f8faff;border:1px solid #dde4f5;border-radius:8px;margin-bottom:14px}
+    #qrCanvas{flex-shrink:0}
+    .ld-qr-info p{font-size:11.5px;color:#444;line-height:1.6;margin-bottom:4px}
+    .ld-qr-info strong{color:#0d2359}
+    .ld-footer{border-top:2px solid #1a3c8f;padding-top:12px;display:flex;justify-content:space-between;align-items:flex-end}
+    .ld-footer-left p{font-size:10.5px;color:#777;line-height:1.6}
+    .ld-stamp{width:70px;height:70px;border-radius:50%;border:3px solid #1a3c8f;display:flex;align-items:center;justify-content:center;text-align:center;font-size:8px;font-weight:700;color:#1a3c8f;text-transform:uppercase;letter-spacing:.5px;line-height:1.3}
+
+    /* no booking */
+    .no-booking-state{text-align:center;padding:52px 20px}
+    .nb-icon{font-size:56px;display:block;margin-bottom:16px;opacity:.5}
+    .nb-title{font-size:18px;font-weight:700;margin-bottom:9px}
+    .nb-desc{font-size:13.5px;color:var(--muted);line-height:1.7;max-width:360px;margin:0 auto 24px}
+    .btn-go-browse{display:inline-flex;align-items:center;gap:8px;padding:13px 30px;border-radius:11px;background:var(--gold);color:var(--navy);font-size:14px;font-weight:700;text-decoration:none;box-shadow:0 6px 20px var(--glow);transition:all .3s}
+    .btn-go-browse:hover{background:var(--gold2);color:var(--navy);transform:translateY(-2px)}
+
+    /* expired */
+    .expired-state{text-align:center;padding:40px 20px}
+
+    /* skeleton */
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    /* alert */
+    .g-alert{border-radius:11px;padding:12px 16px;font-size:13px;font-weight:500;display:none;align-items:center;gap:10px;margin-bottom:16px}
+    .g-alert.show{display:flex}
+    .g-alert.a-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+    .g-alert.a-ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86efac}
+    .g-alert.a-warn{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);color:#fde68a}
+
+    /* cancel confirm modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(7px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+    .modal-overlay.open{display:flex}
+    .modal-box{background:#0c1a3d;border:1px solid rgba(239,68,68,.2);border-radius:20px;padding:32px;max-width:420px;width:100%;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.6);animation:modalIn .3s ease;text-align:center}
+    @keyframes modalIn{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
+    .modal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+    .btn-confirm-cancel{width:100%;padding:13px;border-radius:11px;background:var(--err);color:#fff;font-size:14.5px;font-weight:700;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .3s;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px}
+    .btn-confirm-cancel:hover{background:#dc2626;transform:translateY(-1px)}
+    .btn-keep{width:100%;padding:11px;border-radius:11px;background:transparent;border:1.5px solid rgba(255,255,255,.14);color:var(--muted);font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .25s}
+    .btn-keep:hover{border-color:rgba(255,255,255,.3);color:var(--white)}
+
+    .spin{width:17px;height:17px;border:2.5px solid rgba(7,17,43,.35);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+
+    @media(max-width:1050px){.page-grid{grid-template-columns:1fr}}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0}
+      .main{margin-left:0}
+      .tb-menu{display:block}
+      .content{padding:18px 14px 40px}
+      .detail-grid{grid-template-columns:1fr 1fr}
+      .letter-actions{flex-direction:column}
+      .um-name{display:none}
+    }
+    @media(max-width:480px){.detail-grid{grid-template-columns:1fr}}
+
+    /* print styles */
+    @media print{
+      body *{visibility:hidden}
+      #letterDoc,#letterDoc *{visibility:visible}
+      #letterDoc{position:fixed;top:0;left:0;width:100%;padding:20px;border:none;border-radius:0}
+    }
+  </style>
+</head>
+<body>
+
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+    <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Student Portal</div></div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section-label">Main Menu</div>
+    <a href="dashboard.html" class="sb-link"><i class="bi bi-grid-fill"></i>Dashboard</a>
+    <a href="browse-rooms.html" class="sb-link"><i class="bi bi-door-open-fill"></i>Browse Rooms</a>
+    <a href="my-booking.html" class="sb-link active"><i class="bi bi-house-check-fill"></i>My Booking</a>
+    <div class="sb-section-label">Services</div>
+    <a href="complaints.html" class="sb-link"><i class="bi bi-tools"></i>Complaints</a>
+    <a href="visitors.html" class="sb-link"><i class="bi bi-people-fill"></i>Visitors</a>
+    <div class="sb-section-label">Account</div>
+    <a href="profile.html" class="sb-link"><i class="bi bi-person-fill"></i>My Profile</a>
+    <a href="#" class="sb-link" id="sideSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-user-ava" id="sbAva">S</div>
+      <div><div class="sb-user-name" id="sbName">Loading...</div><div class="sb-user-role">Student</div></div>
+      <button class="sb-signout" id="sbSignOut"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-left">
+    <button class="tb-menu" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+    <div class="tb-title">My Booking</div>
+  </div>
+  <div class="tb-right">
+    <div class="notif-btn" onclick="window.location.href='dashboard.html'"><i class="bi bi-bell-fill"></i></div>
+    <div style="position:relative">
+      <div class="user-menu-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="um-ava" id="umAva">S</div>
+        <span class="um-name" id="umName">Student</span>
+        <i class="bi bi-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </div>
+      <div class="dropdown-menu-hms" id="userDropdown">
+        <a href="dashboard.html" class="dm-item"><i class="bi bi-grid-fill"></i>Dashboard</a>
+        <a href="profile.html" class="dm-item"><i class="bi bi-person-fill"></i>My Profile</a>
+        <div class="dm-divider"></div>
+        <div class="dm-item danger" id="dropSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="content fade-up">
+
+    <!-- loading skeleton -->
+    <div id="loadingSkeleton">
+      <div class="skeleton" style="height:200px;border-radius:14px;margin-bottom:22px"></div>
+      <div class="page-grid">
+        <div class="skeleton" style="height:420px;border-radius:14px"></div>
+        <div class="skeleton" style="height:420px;border-radius:14px"></div>
+      </div>
+    </div>
+
+    <!-- dynamic content -->
+    <div id="mainContent" style="display:none">
+      <div class="page-grid">
+
+        <!-- LEFT: booking state -->
+        <div>
+          <div class="state-card" id="stateCard">
+            <div class="sc-header">
+              <span class="sc-title" id="scTitle"><i class="bi bi-house-fill"></i>My Accommodation</span>
+              <span class="status-pill" id="statusPill">Loading...</span>
+            </div>
+            <div class="sc-body" id="scBody">
+              <!-- injected by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: letter preview or info -->
+        <div id="rightPanel"></div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CANCEL CONFIRM MODAL -->
+<div class="modal-overlay" id="cancelModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('cancelModal').classList.remove('open')"><i class="bi bi-x-lg"></i></button>
+    <div style="font-size:46px;margin-bottom:14px">⚠️</div>
+    <h3 style="font-family:'Playfair Display',serif;font-size:21px;font-weight:700;margin-bottom:8px">Cancel Booking?</h3>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:24px">Are you sure you want to cancel your room reservation? Your reserved room will be released and you will need to book again.</p>
+    <div class="g-alert" id="cancelAlert"><i class="bi" id="cancelAlertIcon"></i><span id="cancelAlertMsg"></span></div>
+    <button class="btn-confirm-cancel" id="confirmCancelBtn" onclick="doCancel()">
+      <span id="cancelBtnText"><i class="bi bi-x-circle"></i> Yes, Cancel Booking</span>
+    </button>
+    <button class="btn-keep" onclick="document.getElementById('cancelModal').classList.remove('open')">Keep My Booking</button>
+  </div>
+</div>
+
+<!-- Paystack -->
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, doc, query, where, getDocs,
+    updateDoc, addDoc, deleteDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg={apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app=initializeApp(cfg);
+  const db=getFirestore(app);
+  const auth=getAuth(app);
+
+  let currentUser=null, studentData=null, bookingData=null, bookingDocId=null, settings={};
+
+  onAuthStateChanged(auth,async user=>{
+    if(!user||!user.emailVerified){await signOut(auth);window.location.href="login.html";return;}
+    currentUser=user;
+    await loadPage(user);
+  });
+
+  async function loadPage(user){
+    try{
+      // student profile
+      const ps=await getDocs(query(collection(db,"users"),where("uid","==",user.uid)));
+      if(ps.empty||ps.docs[0].data().role!=="student"){await signOut(auth);window.location.href="login.html";return;}
+      studentData=ps.docs[0].data();
+      renderStudentUI(studentData);
+
+      // settings
+      const ss=await getDocs(collection(db,"settings"));
+      settings=ss.empty?{}:ss.docs[0].data();
+
+      // booking
+      const session=settings.currentSession||"2024/2025";
+      const bs=await getDocs(query(collection(db,"bookings"),where("studentUid","==",user.uid),where("session","==",session)));
+
+      document.getElementById("loadingSkeleton").style.display="none";
+      document.getElementById("mainContent").style.display="block";
+
+      if(bs.empty){renderNoBooking();return;}
+      bookingDocId=bs.docs[0].id;
+      bookingData={...bs.docs[0].data(),id:bookingDocId};
+      renderByStatus(bookingData.status);
+    }catch(e){console.error(e);}
+  }
+
+  function renderStudentUI(s){
+    const initials=(s.fullName||"S").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    ["sbAva","umAva"].forEach(id=>{
+      const el=document.getElementById(id);if(!el)return;
+      if(s.photoURL){el.innerHTML=`<img src="${s.photoURL}" alt=""/>`;}else{el.textContent=initials;}
+    });
+    document.getElementById("sbName").textContent=s.fullName||"Student";
+    document.getElementById("umName").textContent=(s.fullName||"Student").split(" ")[0];
+  }
+
+  // ════════════════════════════════
+  // RENDER STATES
+  // ════════════════════════════════
+  function renderNoBooking(){
+    document.getElementById("statusPill").className="status-pill sp-none";
+    document.getElementById("statusPill").textContent="No Booking";
+    document.getElementById("scBody").innerHTML=`
+      <div class="no-booking-state">
+        <span class="nb-icon">🏗</span>
+        <div class="nb-title">No Active Booking</div>
+        <p class="nb-desc">You haven't booked a room for the ${settings.currentSession||"2024/2025"} session. Browse available rooms and secure your spot.</p>
+        <a href="browse-rooms.html" class="btn-go-browse"><i class="bi bi-search"></i>Browse Available Rooms</a>
+      </div>`;
+    document.getElementById("rightPanel").innerHTML=`
+      <div class="state-card">
+        <div class="sc-header"><span class="sc-title"><i class="bi bi-info-circle-fill"></i>Booking Info</span></div>
+        <div class="sc-body">
+          <div style="text-align:center;padding:28px 16px">
+            <div style="font-size:40px;margin-bottom:12px">📋</div>
+            <p style="font-size:13.5px;color:var(--muted);line-height:1.75">Once you book a room and complete payment, your QR-coded approval letter will appear here for download and printing.</p>
+          </div>
+          ${settings.bookingDeadline?`<div class="g-alert a-warn show" style="margin-bottom:0"><i class="bi bi-clock-fill"></i><span>Booking deadline: <strong>${new Date(settings.bookingDeadline).toLocaleDateString("en-NG",{day:"numeric",month:"long",year:"numeric"})}</strong></span></div>`:""}
+        </div>
+      </div>`;
+  }
+
+  function renderByStatus(status){
+    if(status==="pending_payment") renderPending();
+    else if(status==="active")    renderActive();
+    else if(status==="expired")   renderExpired();
+    else renderNoBooking();
+  }
+
+  // ── PENDING PAYMENT ──
+  function renderPending(){
+    const b=bookingData;
+    document.getElementById("statusPill").className="status-pill sp-pending";
+    document.getElementById("statusPill").innerHTML=`<span style="width:6px;height:6px;border-radius:50%;background:var(--gold)"></span>Payment Pending`;
+
+    // deadline countdown
+    const deadline=b.paymentDeadline?new Date(b.paymentDeadline):new Date(Date.now()+86400000);
+    const deadlineStr=deadline.toLocaleString("en-NG",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+
+    document.getElementById("scBody").innerHTML=`
+      <div class="deadline-banner">
+        <i class="bi bi-clock-history" style="font-size:22px;color:var(--err);flex-shrink:0"></i>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:var(--err);margin-bottom:6px">Complete payment before ${deadlineStr} or your reservation will be released</div>
+          <div class="deadline-timer" id="deadlineTimer">
+            <div class="dt-box"><div class="dt-num" id="dtH">00</div><div class="dt-label">Hours</div></div>
+            <div class="dt-box"><div class="dt-num" id="dtM">00</div><div class="dt-label">Mins</div></div>
+            <div class="dt-box"><div class="dt-num" id="dtS">00</div><div class="dt-label">Secs</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="detail-grid">
+        ${detailItems([
+          ["Block",b.blockName],["Room Number",b.roomNumber],
+          ["Room Type",b.roomType],["Floor",b.floor||"Ground Floor"],
+          ["Gender",b.gender||studentData.gender],["Session",b.session]
+        ])}
+      </div>
+      <div class="payment-summary">
+        <div class="ps-row"><span class="ps-label">Hostel Fee</span><span>₦${Number(b.amount||0).toLocaleString()}</span></div>
+        <div class="ps-row"><span class="ps-label">Processing Fee</span><span>₦0.00</span></div>
+        <div class="ps-row"><span class="ps-label">Total Amount</span><span>₦${Number(b.amount||0).toLocaleString()}</span></div>
+      </div>
+      <div class="g-alert" id="payAlert"><i class="bi" id="payAlertIcon"></i><span id="payAlertMsg"></span></div>
+      <button class="btn-paystack" id="payBtn" onclick="initiatePayment()">
+        <i class="bi bi-credit-card-fill"></i> Pay ₦${Number(b.amount||0).toLocaleString()} via Paystack
+      </button>
+      <button class="btn-cancel-booking" onclick="document.getElementById('cancelModal').classList.add('open')">
+        <i class="bi bi-x-circle"></i> Cancel Booking
+      </button>`;
+
+    startDeadlineTimer(deadline);
+    renderRightPanelInfo(b);
+  }
+
+  // ── ACTIVE / CONFIRMED ──
+  function renderActive(){
+    const b=bookingData;
+    document.getElementById("statusPill").className="status-pill sp-active";
+    document.getElementById("statusPill").innerHTML=`<span style="width:6px;height:6px;border-radius:50%;background:var(--ok)"></span>Confirmed & Active`;
+
+    const payDate=b.paymentDate?new Date(b.paymentDate).toLocaleDateString("en-NG",{day:"numeric",month:"long",year:"numeric"}):"—";
+
+    document.getElementById("scBody").innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:12px 16px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.18);border-radius:11px">
+        <i class="bi bi-check-circle-fill" style="color:var(--ok);font-size:20px;flex-shrink:0"></i>
+        <div>
+          <div style="font-size:13.5px;font-weight:700;color:var(--ok)">Payment Confirmed — Room Allocated</div>
+          <div style="font-size:12px;color:var(--muted)">Your room is confirmed for the ${b.session} session</div>
+        </div>
+      </div>
+      <div class="detail-grid">
+        ${detailItems([
+          ["Block",b.blockName],["Room Number",b.roomNumber],
+          ["Room Type",b.roomType],["Floor",b.floor||"Ground Floor"],
+          ["Gender",b.gender||studentData.gender],["Session",b.session]
+        ])}
+      </div>
+      <div class="receipt-card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--ok)"><i class="bi bi-receipt"></i> Payment Receipt</div>
+        <div class="receipt-row"><span class="receipt-label">Payment Reference</span><span class="receipt-value" style="font-size:12px">${b.paymentRef||"—"}</span></div>
+        <div class="receipt-row"><span class="receipt-label">Amount Paid</span><span class="receipt-value">₦${Number(b.amountPaid||b.amount||0).toLocaleString()}</span></div>
+        <div class="receipt-row"><span class="receipt-label">Payment Date</span><span class="receipt-value">${payDate}</span></div>
+        <div class="receipt-row"><span class="receipt-label">Payment Method</span><span class="receipt-value">Paystack</span></div>
+      </div>
+      <div class="letter-actions">
+        <button class="btn-download" onclick="downloadLetter()"><i class="bi bi-download"></i> Download PDF</button>
+        <button class="btn-print" onclick="printLetter()"><i class="bi bi-printer-fill"></i> Print Letter</button>
+      </div>`;
+
+    renderLetterPreview(b);
+  }
+
+  // ── EXPIRED ──
+  function renderExpired(){
+    const b=bookingData;
+    document.getElementById("statusPill").className="status-pill sp-expired";
+    document.getElementById("statusPill").textContent="Booking Expired";
+    document.getElementById("scBody").innerHTML=`
+      <div class="expired-state">
+        <div style="font-size:50px;margin-bottom:16px">⚠️</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:9px">Your Booking Has Expired</div>
+        <p style="font-size:13.5px;color:var(--muted);line-height:1.72;max-width:360px;margin:0 auto 24px">Your reservation for ${b.blockName} — Room ${b.roomNumber} expired because payment was not completed in time. Please book again.</p>
+        <a href="browse-rooms.html" class="btn-go-browse"><i class="bi bi-arrow-repeat"></i>Book Again</a>
+      </div>`;
+    document.getElementById("rightPanel").innerHTML=`
+      <div class="state-card">
+        <div class="sc-header"><span class="sc-title"><i class="bi bi-info-circle-fill"></i>Previous Booking</span></div>
+        <div class="sc-body">
+          <div class="detail-grid">
+            ${detailItems([["Block",b.blockName],["Room",b.roomNumber],["Session",b.session],["Status","Expired"]])}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── RIGHT PANEL: LETTER PREVIEW ──
+  function renderLetterPreview(b){
+    const verifyUrl=`${window.location.origin}/verify.html?ref=${bookingDocId}`;
+    document.getElementById("rightPanel").innerHTML=`
+      <div class="letter-preview-card">
+        <div class="letter-preview-header">
+          <span style="font-size:14px;font-weight:700"><i class="bi bi-file-earmark-text-fill" style="color:var(--gold)"></i> Approval Letter Preview</span>
+          <span style="font-size:11px;color:var(--muted)">Official Document</span>
+        </div>
+        <div class="letter-preview-body">
+          <div id="letterDoc">
+            <div class="ld-watermark">OFFICIAL</div>
+            <div class="ld-header">
+              <div class="ld-logo"><img src="logo.jpg" alt="FUTBabura"/></div>
+              <div>
+                <div class="ld-uni-name">Federal University of Technology Babura</div>
+                <div class="ld-uni-sub">Jigawa State, Nigeria · Hostel Management System</div>
+              </div>
+            </div>
+            <div class="ld-doc-title">
+              <h2>Hostel Allocation Letter</h2>
+              <p>${b.session} Academic Session — Official Document</p>
+            </div>
+            <table class="ld-table">
+              <tr><td>Full Name</td><td>${studentData.fullName||"—"}</td></tr>
+              <tr><td>Matriculation Number</td><td>${studentData.matricNo||"—"}</td></tr>
+              <tr><td>Faculty</td><td>${studentData.faculty||"—"}</td></tr>
+              <tr><td>Department</td><td>${studentData.department||"—"}</td></tr>
+              <tr><td>Level</td><td>${studentData.level||"—"}</td></tr>
+              <tr><td>Gender</td><td>${studentData.gender||"—"}</td></tr>
+              <tr><td>Hostel Block</td><td>${b.blockName||"—"}</td></tr>
+              <tr><td>Room Number</td><td>${b.roomNumber||"—"}</td></tr>
+              <tr><td>Room Type</td><td>${b.roomType||"—"}</td></tr>
+              <tr><td>Floor</td><td>${b.floor||"Ground Floor"}</td></tr>
+              <tr><td>Academic Session</td><td>${b.session||"—"}</td></tr>
+              <tr><td>Payment Reference</td><td>${b.paymentRef||"—"}</td></tr>
+              <tr><td>Amount Paid</td><td>₦${Number(b.amountPaid||b.amount||0).toLocaleString()}</td></tr>
+              <tr><td>Date of Issue</td><td>${new Date().toLocaleDateString("en-NG",{day:"numeric",month:"long",year:"numeric"})}</td></tr>
+            </table>
+            <div class="ld-qr-section">
+              <div id="qrCanvas"></div>
+              <div class="ld-qr-info">
+                <p><strong>Verification QR Code</strong></p>
+                <p>Scan this QR code at the hostel gate or use it to verify the authenticity of this letter online.</p>
+                <p style="font-size:10px;color:#888;margin-top:4px">Booking ID: ${bookingDocId}</p>
+              </div>
+            </div>
+            <div class="ld-footer">
+              <div class="ld-footer-left">
+                <p><strong>FUTBabura Hostel Management System</strong></p>
+                <p>This letter is only valid for the ${b.session} academic session.</p>
+                <p>Tampering with this document is a serious offense.</p>
+              </div>
+              <div class="ld-stamp">FUTB<br>HMS<br>VERIFIED</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    // Generate QR code
+    setTimeout(()=>{
+      try{
+        new QRCode(document.getElementById("qrCanvas"),{
+          text: verifyUrl,
+          width:100, height:100,
+          colorDark:"#0d2359", colorLight:"#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      }catch(e){console.error("QR error",e);}
+    },200);
+  }
+
+  function renderRightPanelInfo(b){
+    document.getElementById("rightPanel").innerHTML=`
+      <div class="state-card">
+        <div class="sc-header"><span class="sc-title"><i class="bi bi-info-circle-fill"></i>After Payment</span></div>
+        <div class="sc-body">
+          <div style="text-align:center;padding:24px 14px">
+            <div style="font-size:40px;margin-bottom:14px">🔐</div>
+            <p style="font-size:13.5px;color:var(--muted);line-height:1.75;margin-bottom:18px">Once your payment is confirmed via Paystack, your QR-coded approval letter will be automatically generated and available here for download and printing.</p>
+            <div class="g-alert a-warn show" style="text-align:left">
+              <i class="bi bi-clock-fill"></i>
+              <span>Your room reservation will be automatically released if payment is not completed within <strong>24 hours</strong>.</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ════════════════════════════════
+  // PAYSTACK PAYMENT
+  // ════════════════════════════════
+  window.initiatePayment=function(){
+    if(!currentUser||!bookingData||!studentData)return;
+    const paystackKey=settings.paystackPublicKey||"pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+    const amount=Number(bookingData.amount||0)*100; // kobo
+    if(amount<=0){showPayAlert("Invalid payment amount. Please contact admin.","a-err");return;}
+
+    const btn=document.getElementById("payBtn");
+    btn.disabled=true;
+    btn.innerHTML=`<div class="spin"></div> Initializing payment...`;
+
+    const handler=PaystackPop.setup({
+      key: paystackKey,
+      email: currentUser.email,
+      amount: amount,
+      currency: "NGN",
+      ref: `FUTB-${bookingDocId}-${Date.now()}`,
+      metadata:{
+        custom_fields:[
+          {display_name:"Student Name",variable_name:"student_name",value:studentData.fullName},
+          {display_name:"Matric Number",variable_name:"matric_no",value:studentData.matricNo},
+          {display_name:"Room",variable_name:"room",value:`${bookingData.blockName} — ${bookingData.roomNumber}`},
+          {display_name:"Session",variable_name:"session",value:bookingData.session}
+        ]
+      },
+      onClose:()=>{
+        btn.disabled=false;
+        btn.innerHTML=`<i class="bi bi-credit-card-fill"></i> Pay ₦${Number(bookingData.amount||0).toLocaleString()} via Paystack`;
+        showPayAlert("Payment window closed. Click Pay again when ready.","a-warn");
+      },
+      callback: async(response)=>{
+        try{
+          // update booking in Firestore
+          await updateDoc(doc(db,"bookings",bookingDocId),{
+            status:"active",
+            paymentRef:  response.reference,
+            paymentDate: new Date().toISOString(),
+            amountPaid:  bookingData.amount,
+            paidVia:     "Paystack"
+          });
+          // send notification
+          await addDoc(collection(db,"notifications"),{
+            studentUid: currentUser.uid,
+            type:"payment",
+            message:`💳 Payment of ₦${Number(bookingData.amount).toLocaleString()} confirmed! Your room ${bookingData.roomNumber} in ${bookingData.blockName} is now active.`,
+            read:false,
+            createdAt:serverTimestamp()
+          });
+          // reload page to show active state
+          window.location.reload();
+        }catch(e){
+          showPayAlert("Payment received but failed to update. Please contact admin with ref: "+response.reference,"a-warn");
+        }
+      }
+    });
+    handler.openIframe();
+  };
+
+  function showPayAlert(msg,cls){
+    const el=document.getElementById("payAlert");if(!el)return;
+    el.className=`g-alert ${cls} show`;
+    document.getElementById("payAlertIcon").className=cls==="a-err"?"bi bi-exclamation-circle-fill":cls==="a-warn"?"bi bi-exclamation-triangle-fill":"bi bi-check-circle-fill";
+    document.getElementById("payAlertMsg").textContent=msg;
+    const btn=document.getElementById("payBtn");
+    if(btn){btn.disabled=false;btn.innerHTML=`<i class="bi bi-credit-card-fill"></i> Pay ₦${Number(bookingData.amount||0).toLocaleString()} via Paystack`;}
+  }
+
+  // ════════════════════════════════
+  // CANCEL BOOKING
+  // ════════════════════════════════
+  window.doCancel=async function(){
+    if(!bookingDocId||!bookingData)return;
+    const btn=document.getElementById("confirmCancelBtn");
+    btn.disabled=true;
+    document.getElementById("cancelBtnText").innerHTML=`<div class="spin"></div> Cancelling...`;
+    try{
+      // restore room slot
+      const rSnap=await getDocs(query(collection(db,"rooms"),where("__name__","==",bookingData.roomId)));
+      if(!rSnap.empty){
+        const r=rSnap.docs[0].data();
+        const newSlots=(r.slotsLeft||0)+1;
+        const newStatus=newSlots>=(r.totalSlots||1)?"available":newSlots===1?"few":"available";
+        await updateDoc(doc(db,"rooms",bookingData.roomId),{slotsLeft:newSlots,status:newStatus});
+      }
+      // delete booking
+      await deleteDoc(doc(db,"bookings",bookingDocId));
+      // notify
+      await addDoc(collection(db,"notifications"),{
+        studentUid:currentUser.uid,type:"system",
+        message:`🚫 Your booking for ${bookingData.blockName} — Room ${bookingData.roomNumber} has been cancelled.`,
+        read:false,createdAt:serverTimestamp()
+      });
+      window.location.reload();
+    }catch(e){
+      const al=document.getElementById("cancelAlert");
+      al.className="g-alert a-err show";
+      document.getElementById("cancelAlertIcon").className="bi bi-exclamation-circle-fill";
+      document.getElementById("cancelAlertMsg").textContent="Failed to cancel. Please try again.";
+      btn.disabled=false;
+      document.getElementById("cancelBtnText").innerHTML=`<i class="bi bi-x-circle"></i> Yes, Cancel Booking`;
+    }
+  };
+
+  // ════════════════════════════════
+  // DEADLINE COUNTDOWN
+  // ════════════════════════════════
+  function startDeadlineTimer(deadline){
+    function tick(){
+      const diff=deadline-new Date();
+      if(diff<=0){
+        ["dtH","dtM","dtS"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent="00";});
+        return;
+      }
+      const h=Math.floor(diff/3600000);
+      const m=Math.floor((diff%3600000)/60000);
+      const s=Math.floor((diff%60000)/1000);
+      const hEl=document.getElementById("dtH"),mEl=document.getElementById("dtM"),sEl=document.getElementById("dtS");
+      if(hEl)hEl.textContent=String(h).padStart(2,"0");
+      if(mEl)mEl.textContent=String(m).padStart(2,"0");
+      if(sEl)sEl.textContent=String(s).padStart(2,"0");
+      setTimeout(tick,1000);
+    }
+    tick();
+  }
+
+  // ════════════════════════════════
+  // PDF DOWNLOAD
+  // ════════════════════════════════
+  window.downloadLetter=async function(){
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+    const b=bookingData, s=studentData;
+    const session=b.session||"2024/2025";
+    const pageW=doc.internal.pageSize.getWidth();
+    const margin=20;
+    let y=20;
+
+    // header bar
+    doc.setFillColor(13,35,89);
+    doc.rect(0,0,pageW,28,`F`);
+    doc.setTextColor(255,255,255);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(13);
+    doc.text("FEDERAL UNIVERSITY OF TECHNOLOGY BABURA",pageW/2,10,{align:"center"});
+    doc.setFontSize(9);
+    doc.setFont("helvetica","normal");
+    doc.text("Jigawa State, Nigeria · Hostel Management System",pageW/2,17,{align:"center"});
+    doc.setFontSize(8);
+    doc.text(`${session} Academic Session`,pageW/2,23,{align:"center"});
+
+    y=38;
+    // title
+    doc.setTextColor(13,35,89);
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(16);
+    doc.text("HOSTEL ALLOCATION LETTER",pageW/2,y,{align:"center"});
+    y+=5;
+    doc.setDrawColor(13,35,89);
+    doc.setLineWidth(.6);
+    doc.line(margin,y,pageW-margin,y);
+    y+=8;
+
+    // student details table
+    const rows=[
+      ["Full Name",s.fullName||"—"],
+      ["Matriculation Number",s.matricNo||"—"],
+      ["Faculty",s.faculty||"—"],
+      ["Department",s.department||"—"],
+      ["Level",s.level||"—"],
+      ["Gender",s.gender||"—"],
+      ["Hostel Block",b.blockName||"—"],
+      ["Room Number",b.roomNumber||"—"],
+      ["Room Type",b.roomType||"—"],
+      ["Floor",b.floor||"Ground Floor"],
+      ["Academic Session",session],
+      ["Payment Reference",b.paymentRef||"—"],
+      ["Amount Paid",`NGN ${Number(b.amountPaid||b.amount||0).toLocaleString()}`],
+      ["Date of Issue",new Date().toLocaleDateString("en-NG",{day:"numeric",month:"long",year:"numeric"})],
+    ];
+
+    rows.forEach((row,i)=>{
+      if(i%2===0)doc.setFillColor(240,244,255);else doc.setFillColor(255,255,255);
+      doc.rect(margin,y-4,pageW-margin*2,8,"F");
+      doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(13,35,89);
+      doc.text(row[0],margin+2,y+1);
+      doc.setFont("helvetica","normal");doc.setTextColor(30,30,30);
+      doc.text(String(row[1]),margin+68,y+1);
+      y+=9;
+    });
+
+    y+=4;
+    // QR section
+    const qrEl=document.querySelector("#qrCanvas img")||document.querySelector("#qrCanvas canvas");
+    if(qrEl){
+      try{
+        let qrDataUrl="";
+        if(qrEl.tagName==="CANVAS"){qrDataUrl=qrEl.toDataURL("image/png");}
+        else{qrDataUrl=qrEl.src;}
+        doc.setFillColor(248,250,255);
+        doc.rect(margin,y,pageW-margin*2,34,"F");
+        doc.setDrawColor(200,210,240);doc.setLineWidth(.3);
+        doc.rect(margin,y,pageW-margin*2,34);
+        doc.addImage(qrDataUrl,"PNG",margin+4,y+2,28,28);
+        doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(13,35,89);
+        doc.text("Verification QR Code",margin+36,y+8);
+        doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(80,80,80);
+        doc.text("Scan this QR code at the hostel gate to verify",margin+36,y+15);
+        doc.text("the authenticity of this allocation letter.",margin+36,y+21);
+        doc.setFontSize(7.5);doc.setTextColor(140,140,140);
+        doc.text(`Booking ID: ${bookingDocId}`,margin+36,y+29);
+        y+=38;
+      }catch(e){y+=4;}
+    }
+
+    // footer
+    doc.setDrawColor(13,35,89);doc.setLineWidth(.6);
+    doc.line(margin,y,pageW-margin,y);y+=5;
+    doc.setFont("helvetica","bold");doc.setFontSize(8.5);doc.setTextColor(13,35,89);
+    doc.text("FUTBabura Hostel Management System",margin,y);
+    doc.setFont("helvetica","normal");doc.setTextColor(100,100,100);doc.setFontSize(8);
+    y+=5;doc.text(`This letter is only valid for the ${session} academic session.`,margin,y);
+    y+=4;doc.text("Tampering with this document is a serious offense.",margin,y);
+
+    // stamp circle
+    doc.setDrawColor(13,35,89);doc.setLineWidth(.8);
+    doc.circle(pageW-margin-14,y-16,14);
+    doc.setFont("helvetica","bold");doc.setFontSize(6);doc.setTextColor(13,35,89);
+    doc.text("FUTB",pageW-margin-14,y-20,{align:"center"});
+    doc.text("HMS",pageW-margin-14,y-16,{align:"center"});
+    doc.text("VERIFIED",pageW-margin-14,y-12,{align:"center"});
+
+    doc.save(`FUTBabura_Approval_Letter_${s.matricNo||"Student"}_${session.replace("/","_")}.pdf`);
+  };
+
+  window.printLetter=function(){window.print();};
+
+  // helpers
+  function detailItems(pairs){
+    return pairs.map(([l,v])=>`<div class="detail-item"><div class="di-label">${l}</div><div class="di-value">${v||"—"}</div></div>`).join("");
+  }
+
+  // sign out
+  ["sideSignOut","sbSignOut","dropSignOut"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener("click",async e=>{e.preventDefault();await signOut(auth);window.location.href="login.html";});
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleSidebar(){
+    document.getElementById("sidebar").classList.toggle("open");
+    document.getElementById("sbOverlay").classList.toggle("show");
+  }
+  function toggleUserMenu(){document.getElementById("userDropdown").classList.toggle("open");}
+  document.addEventListener("click",e=>{
+    if(!e.target.closest("#userMenuBtn")&&!e.target.closest("#userDropdown"))
+      document.getElementById("userDropdown").classList.remove("open");
+  });
+</script>
+</body>
+</html>

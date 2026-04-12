@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Tasks — Maintenance | FUTBabura HMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.2);
+      --white:#fff;--muted:rgba(255,255,255,.5);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.085);
+      --ok:#22c55e;--err:#ef4444;--warn:#f59e0b;--info:#3b82f6;--purple:#a855f7;
+      --sidebar-w:260px;--topbar-h:68px;--radius:14px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(34,197,94,.4);border-radius:3px}
+
+    /* ── SIDEBAR ── */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#060f24 0%,#07112b 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:200;transition:transform .3s ease}
+    .sb-logo{display:flex;align-items:center;gap:11px;padding:20px 22px;border-bottom:1px solid var(--border);text-decoration:none}
+    .sb-logo-img{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;box-shadow:0 0 14px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:1.6px;text-transform:uppercase}
+    .sb-nav{flex:1;padding:18px 14px;overflow-y:auto}
+    .sb-section-label{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 10px;margin:18px 0 8px}
+    .sb-section-label:first-child{margin-top:0}
+    .sb-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:500;transition:all .22s;margin-bottom:2px}
+    .sb-link i{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+    .sb-link:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .sb-link.active{background:rgba(34,197,94,.12);color:#86efac;border:1px solid rgba(34,197,94,.18)}
+    .sb-badge{margin-left:auto;background:var(--err);color:var(--white);font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;min-width:18px;text-align:center}
+    .sb-bottom{padding:16px 14px;border-top:1px solid var(--border)}
+    .sb-admin{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--border)}
+    .sb-admin-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--ok),#16a34a);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--white);flex-shrink:0;overflow:hidden}
+    .sb-admin-ava img{width:100%;height:100%;object-fit:cover}
+    .sb-admin-name{font-size:12.5px;font-weight:700;line-height:1.2}
+    .sb-admin-role{font-size:10px;color:#86efac;text-transform:uppercase;letter-spacing:1px}
+    .sb-signout{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);font-size:16px;cursor:pointer;padding:4px;transition:color .2s}
+    .sb-signout:hover{color:var(--err)}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199}
+    .sb-overlay.show{display:block}
+
+    /* ── TOPBAR ── */
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(7,17,43,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:150;transition:left .3s}
+    .tb-left{display:flex;align-items:center;gap:14px}
+    .tb-menu{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;display:none;padding:4px}
+    .tb-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}
+    .tb-right{display:flex;align-items:center;gap:12px}
+    .tb-badge{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.22);color:#86efac;font-size:11px;font-weight:700;padding:5px 13px;border-radius:100px;letter-spacing:.8px}
+    .user-menu-btn{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px 12px 6px 6px;cursor:pointer;transition:all .22s}
+    .user-menu-btn:hover{background:rgba(255,255,255,.07)}
+    .um-ava{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--ok),#16a34a);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--white);overflow:hidden;flex-shrink:0}
+    .um-ava img{width:100%;height:100%;object-fit:cover}
+    .um-name{font-size:13px;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dropdown-menu-hms{position:absolute;top:calc(100% + 8px);right:0;background:#0c1a3d;border:1px solid var(--border);border-radius:12px;padding:8px;min-width:190px;box-shadow:0 16px 40px rgba(0,0,0,.4);z-index:500;display:none;animation:slideDown .2s ease}
+    .dropdown-menu-hms.open{display:block}
+    .dm-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none}
+    .dm-item:hover{background:rgba(255,255,255,.06);color:var(--white)}
+    .dm-item.danger{color:rgba(239,68,68,.8)}
+    .dm-item.danger:hover{background:rgba(239,68,68,.08);color:var(--err)}
+
+    /* ── MAIN ── */
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh;transition:margin-left .3s}
+    .content{padding:28px 28px 50px}
+
+    /* ── PAGE HEADER ── */
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:16px}
+    .ph-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:900}
+    .ph-stats{display:flex;gap:20px}
+    .ph-stat{text-align:center}
+    .ph-stat-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--ok)}
+    .ph-stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+
+    /* ── FILTER TABS ── */
+    .filter-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+    .ftab{padding:8px 16px;border-radius:100px;font-size:12.5px;font-weight:600;cursor:pointer;border:1.5px solid rgba(255,255,255,.1);background:transparent;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;transition:all .22s}
+    .ftab:hover{border-color:rgba(34,197,94,.3);color:var(--white)}
+    .ftab.active{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.4);color:#86efac}
+
+    /* ── TASK CARDS ── */
+    .tasks-grid{display:flex;flex-direction:column;gap:14px}
+    .task-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:0;overflow:hidden;transition:all .25s}
+    .task-card:hover{border-color:rgba(34,197,94,.25);box-shadow:0 8px 24px rgba(0,0,0,.15)}
+    .task-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .task-title-section{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .task-title{font-size:15px;font-weight:700}
+    .task-body{padding:16px 20px;display:grid;grid-template-columns:1fr auto;gap:16px}
+    .task-info{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+    .task-info-item{display:flex;flex-direction:column;gap:3px}
+    .tii-label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+    .tii-value{font-size:13.5px;font-weight:500}
+    .task-actions{display:flex;gap:8px;align-items:flex-end}
+    .task-footer{padding:12px 20px;background:rgba(0,0,0,.15);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+    .task-progress{display:flex;align-items:center;gap:8px}
+    .progress-bar{width:120px;height:6px;background:rgba(255,255,255,.1);border-radius:100px;overflow:hidden}
+    .progress-fill{height:100%;border-radius:100px;background:var(--ok);transition:width .3s}
+
+    /* badges */
+    .tbadge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+    .tb-assigned{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+    .tb-progress{background:rgba(168,85,247,.12);color:#d8b4fe;border:1px solid rgba(168,85,247,.2)}
+    .tb-resolved{background:rgba(34,197,94,.12);color:var(--ok);border:1px solid rgba(34,197,94,.2)}
+    .pbadge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px}
+    .pb-low{background:rgba(34,197,94,.1);color:var(--ok)}
+    .pb-medium{background:rgba(245,166,35,.1);color:var(--gold)}
+    .pb-high{background:rgba(239,68,68,.1);color:var(--err)}
+    .pb-urgent{background:rgba(239,68,68,.2);color:var(--err);border:1px solid rgba(239,68,68,.3)}
+
+    /* buttons */
+    .btn-task{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s}
+    .btn-start{background:rgba(168,85,247,.15);color:#d8b4fe;border:1px solid rgba(168,85,247,.25)}
+    .btn-start:hover{background:rgba(168,85,247,.25)}
+    .btn-resolve{background:rgba(34,197,94,.15);color:var(--ok);border:1px solid rgba(34,197,94,.25)}
+    .btn-resolve:hover{background:rgba(34,197,94,.25)}
+    .btn-view{background:rgba(59,130,246,.15);color:#93c5fd;border:1px solid rgba(59,130,246,.25)}
+    .btn-view:hover{background:rgba(59,130,246,.25)}
+    .btn-note{background:transparent;border:1px solid var(--border);color:var(--muted)}
+    .btn-note:hover{background:rgba(255,255,255,.05);color:var(--white)}
+
+    /* modal */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center}
+    .modal-overlay.show{display:flex}
+    .modal{background:#0c1a3d;border:1px solid var(--border);border-radius:16px;width:90%;max-width:520px;max-height:85vh;overflow-y:auto;animation:slideDown .2s ease}
+    .modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+    .modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0}
+    .modal-body{padding:22px}
+    .modal-footer{padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+    .btn-modal{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;border:none;transition:all .2s}
+    .btn-modal-primary{background:var(--ok);color:var(--white)}
+    .btn-modal-primary:hover{background:#16a34a}
+    .btn-modal-secondary{background:transparent;border:1px solid var(--border);color:var(--muted)}
+    .btn-modal-secondary:hover{background:rgba(255,255,255,.05);color:var(--white)}
+
+    .field-wrap{margin-bottom:18px}
+    .field-label{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.72);margin-bottom:7px;display:block}
+    .hms-input{width:100%;background:rgba(255,255,255,.048);border:1.5px solid rgba(255,255,255,.1);border-radius:11px;padding:11px 14px;color:var(--white);font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;outline:none}
+    .hms-input:focus{border-color:var(--ok)}
+    .hms-textarea{width:100%;background:rgba(255,255,255,.048);border:1.5px solid rgba(255,255,255,.1);border-radius:11px;padding:11px 14px;color:var(--white);font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;resize:vertical;min-height:90px}
+    .hms-textarea:focus{border-color:var(--ok)}
+
+    .student-ava{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--ok),#16a34a);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:var(--white);overflow:hidden;flex-shrink:0}
+    .student-ava img{width:100%;height:100%;object-fit:cover}
+
+    .empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+    .empty-icon{font-size:56px;display:block;margin-bottom:16px;opacity:.4}
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0}.main{margin-left:0}
+      .tb-menu{display:block}
+      .content{padding:18px 14px 40px}
+      .task-body{grid-template-columns:1fr}
+      .task-actions{justify-content:flex-start}
+      .um-name{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar" id="sidebar">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+    <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Maintenance Panel</div></div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section-label">Main</div>
+    <a href="maintenance-dashboard.html" class="sb-link"><i class="bi bi-speedometer2"></i>Dashboard</a>
+    <a href="maintenance-complaints.html" class="sb-link"><i class="bi bi-tools"></i>All Complaints</a>
+    <a href="maintenance-my-tasks.html" class="sb-link active"><i class="bi bi-check2-square"></i>My Tasks <span class="sb-badge" id="taskCountBadge">0</span></a>
+    <div class="sb-section-label">Operations</div>
+    <a href="maintenance-assign.html" class="sb-link"><i class="bi bi-person-plus"></i>Assign Work</a>
+    <a href="maintenance-history.html" class="sb-link"><i class="bi bi-clock-history"></i>Work History</a>
+    <div class="sb-section-label">Reports</div>
+    <a href="maintenance-reports.html" class="sb-link"><i class="bi bi-bar-chart"></i>Reports</a>
+    <a href="maintenance-inventory.html" class="sb-link"><i class="bi bi-box-seam"></i>Inventory</a>
+    <div class="sb-section-label">Account</div>
+    <a href="admin-login.html" class="sb-link" id="sideSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-admin">
+      <div class="sb-admin-ava" id="sbAva">M</div>
+      <div><div class="sb-admin-name" id="sbName">Loading...</div><div class="sb-admin-role">Maintenance</div></div>
+      <button class="sb-signout" id="sbSignOut"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar" id="topbar">
+  <div class="tb-left">
+    <button class="tb-menu" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+    <div class="tb-title">My Tasks</div>
+  </div>
+  <div class="tb-right">
+    <span class="tb-badge" id="tbStaffName">Loading...</span>
+    <div style="position:relative">
+      <div class="user-menu-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="um-ava" id="umAva">M</div>
+        <span class="um-name" id="umName">Staff</span>
+        <i class="bi bi-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </div>
+      <div class="dropdown-menu-hms" id="userDropdown">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);margin-bottom:6px">
+          <div style="font-size:13px;font-weight:700" id="ddName">Maintenance Staff</div>
+          <div style="font-size:11px;color:#86efac">Maintenance Team</div>
+        </div>
+        <div class="dm-item danger" id="dropSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main" id="main">
+  <div class="content fade-up">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <h1 class="ph-title">My Assigned Tasks</h1>
+      <div class="ph-stats">
+        <div class="ph-stat"><div class="ph-stat-num" id="pendingCount">0</div><div class="ph-stat-label">Pending</div></div>
+        <div class="ph-stat"><div class="ph-stat-num" id="inProgressCount">0</div><div class="ph-stat-label">In Progress</div></div>
+        <div class="ph-stat"><div class="ph-stat-num" id="completedToday">0</div><div class="ph-stat-label">Completed Today</div></div>
+      </div>
+    </div>
+
+    <!-- FILTER TABS -->
+    <div class="filter-tabs">
+      <button class="ftab active" onclick="filterTasks('all',this)">All Tasks</button>
+      <button class="ftab" onclick="filterTasks('assigned',this)">Pending</button>
+      <button class="ftab" onclick="filterTasks('in_progress',this)">In Progress</button>
+      <button class="ftab" onclick="filterTasks('urgent',this)">Urgent</button>
+    </div>
+
+    <!-- TASKS LIST -->
+    <div class="tasks-grid" id="tasksGrid">
+      <div class="task-card"><div class="task-header"><div class="skeleton" style="width:200px;height:20px"></div></div><div class="task-body"><div class="skeleton" style="width:100%;height:60px"></div></div></div>
+      <div class="task-card"><div class="task-header"><div class="skeleton" style="width:200px;height:20px"></div></div><div class="task-body"><div class="skeleton" style="width:100%;height:60px"></div></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- RESOLVE MODAL -->
+<div class="modal-overlay" id="resolveModal" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title"><i class="bi bi-check-circle-fill" style="color:var(--ok);margin-right:8px"></i>Mark as Resolved</span>
+      <button class="modal-close" onclick="closeResolveModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-wrap">
+        <label class="field-label">Resolution Notes <span style="color:var(--err)">*</span></label>
+        <textarea class="hms-textarea" id="resolveNotes" placeholder="Describe what work was done to resolve this issue..." rows="4"></textarea>
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Reply to Student (Optional)</label>
+        <textarea class="hms-textarea" id="studentReply" placeholder="Message to the student about the resolution..." rows="3"></textarea>
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Time Spent (hours)</label>
+        <input type="number" class="hms-input" id="timeSpent" placeholder="e.g., 1.5" step="0.5" min="0">
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Materials Used / Cost (₦)</label>
+        <input type="number" class="hms-input" id="repairCost" placeholder="0" value="0">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secondary" onclick="closeResolveModal()">Cancel</button>
+      <button class="btn-modal btn-modal-primary" onclick="submitResolution()">Confirm & Resolve</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD NOTE MODAL -->
+<div class="modal-overlay" id="noteModal" onclick="closeNoteOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title"><i class="bi bi-pencil-fill" style="color:var(--gold);margin-right:8px"></i>Add Progress Note</span>
+      <button class="modal-close" onclick="closeNoteModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-wrap">
+        <label class="field-label">Note</label>
+        <textarea class="hms-textarea" id="progressNote" placeholder="Add a note about your progress..." rows="4"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secondary" onclick="closeNoteModal()">Cancel</button>
+      <button class="btn-modal btn-modal-primary" onclick="submitNote()">Save Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, query, where, getDocs, orderBy, onSnapshot, updateDoc, doc, serverTimestamp, addDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg={apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app=initializeApp(cfg);
+  const db=getFirestore(app);
+  const auth=getAuth(app);
+
+  let adminData=null, myTasks=[], currentFilter="all", currentTaskId=null;
+
+  // ── AUTH GUARD ──
+  onAuthStateChanged(auth, async user=>{
+    if(!user){window.location.href="admin-login.html";return;}
+    try{
+      const ps=await getDocs(query(collection(db,"users"),where("uid","==",user.uid)));
+      if(ps.empty){await signOut(auth);window.location.href="admin-login.html";return;}
+      adminData=ps.docs[0].data();
+      if(adminData.role!=="maintenance"&&adminData.role!=="super_admin"&&adminData.role!=="hostel_admin"){
+        window.location.href="admin-login.html";return;
+      }
+      renderAdminUI(adminData);
+      listenMyTasks();
+    }catch(e){console.error(e);}
+  });
+
+  function renderAdminUI(a){
+    const initials=(a.fullName||"M").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    ["sbAva","umAva"].forEach(id=>{
+      const el=document.getElementById(id);if(!el)return;
+      if(a.photoURL)el.innerHTML=`<img src="${a.photoURL}" alt=""/>`;else el.textContent=initials;
+    });
+    document.getElementById("sbName").textContent=a.fullName||"Maintenance Staff";
+    document.getElementById("umName").textContent=(a.fullName||"Staff").split(" ")[0];
+    document.getElementById("ddName").textContent=a.fullName||"Maintenance Staff";
+    document.getElementById("tbStaffName").textContent=(a.fullName||"Maintenance Staff").split(" ")[0];
+  }
+
+  function listenMyTasks(){
+    if(!adminData)return;
+    const q=query(collection(db,"complaints"),where("assignedTo","==",adminData.fullName),where("status","in",["assigned","in_progress"]),orderBy("priority","desc"),orderBy("createdAt","desc"));
+    onSnapshot(q,snap=>{
+      myTasks=snap.docs.map(d=>({id:d.id,...d.data()}));
+      updateStats();
+      renderTasks();
+    });
+  }
+
+  function updateStats(){
+    const pending=myTasks.filter(t=>t.status==="assigned").length;
+    const inProgress=myTasks.filter(t=>t.status==="in_progress").length;
+    const today=new Date().toDateString();
+    const completedToday=myTasks.filter(t=>t.status==="resolved"&&t.resolvedAt?.toDate?.().toDateString()===today).length;
+    document.getElementById("pendingCount").textContent=pending;
+    document.getElementById("inProgressCount").textContent=inProgress;
+    document.getElementById("completedToday").textContent=completedToday;
+    document.getElementById("taskCountBadge").textContent=myTasks.length;
+  }
+
+  window.filterTasks=function(filter,btn){
+    currentFilter=filter;
+    document.querySelectorAll(".ftab").forEach(t=>t.classList.remove("active"));
+    btn.classList.add("active");
+    renderTasks();
+  };
+
+  const statusMap={assigned:{cls:"tb-assigned",label:"Pending"},in_progress:{cls:"tb-progress",label:"In Progress"}};
+  const prioMap={low:"pb-low Low",medium:"pb-medium Medium",high:"pb-high High",urgent:"pb-urgent 🚨 Urgent"};
+  const prioColor={low:"var(--ok)",medium:"var(--gold)",high:"var(--err)",urgent:"var(--err)"};
+
+  function renderTasks(){
+    let data=myTasks;
+    if(currentFilter==="assigned")data=myTasks.filter(t=>t.status==="assigned");
+    else if(currentFilter==="in_progress")data=myTasks.filter(t=>t.status==="in_progress");
+    else if(currentFilter==="urgent")data=myTasks.filter(t=>t.priority==="urgent"||t.priority==="high");
+
+    const grid=document.getElementById("tasksGrid");
+    if(data.length===0){
+      grid.innerHTML=`<div class="empty-state"><span class="empty-icon">✅</span><h3 style="font-weight:700;margin-bottom:8px">No tasks found</h3><p style="font-size:14px">${currentFilter==="all"?"You don't have any assigned tasks at the moment.":"No tasks match this filter."}</p></div>`;
+      return;
+    }
+
+    const timeAgo=ts=>{if(!ts)return"—";const d=ts.toDate?ts.toDate():new Date(ts);const diff=(Date.now()-d)/1000;if(diff<86400)return`${Math.floor(diff/3600)}h ago`;return`${Math.floor(diff/86400)}d ago`;};
+
+    grid.innerHTML=data.map(t=>{
+      const sm=statusMap[t.status]||statusMap.assigned;
+      const initials=(t.studentName||"S").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+      const progress=t.status==="assigned"?25:t.status==="in_progress"?60:100;
+      return `<div class="task-card">
+        <div class="task-header">
+          <div class="task-title-section">
+            <span class="task-title">${t.title||"Untitled Complaint"}</span>
+            <span class="tbadge ${sm.cls}">${sm.label}</span>
+            <span class="pbadge ${prioMap[t.priority]?.split(' ')[0]||'pb-low'}" style="color:${prioColor[t.priority]||'var(--ok)'}">${prioMap[t.priority]?.split(' ').slice(1).join(' ')||'Low'}</span>
+          </div>
+          <span style="font-size:11px;color:var(--muted)">Assigned: ${timeAgo(t.assignedAt)}</span>
+        </div>
+        <div class="task-body">
+          <div class="task-info">
+            <div class="task-info-item"><span class="tii-label">Student</span><span class="tii-value" style="display:flex;align-items:center;gap:8px"><span class="student-ava">${initials}</span>${t.studentName||"—"}</span></div>
+            <div class="task-info-item"><span class="tii-label">Matric Number</span><span class="tii-value">${t.matricNo||"—"}</span></div>
+            <div class="task-info-item"><span class="tii-label">Room / Location</span><span class="tii-value">${t.location||"—"}</span></div>
+            <div class="task-info-item"><span class="tii-label">Category</span><span class="tii-value">${t.category||"—"}</span></div>
+          </div>
+          <div class="task-actions">
+            <button class="btn-task btn-view" onclick="window.open('/maintenance-complaints.html?id=${t.id}','_blank')"><i class="bi bi-eye"></i>View</button>
+            ${t.status==="assigned"?`<button class="btn-task btn-start" onclick="startWork('${t.id}')"><i class="bi bi-play-fill"></i>Start Work</button>`:''}
+            <button class="btn-task btn-note" onclick="openNoteModal('${t.id}')"><i class="bi bi-pencil"></i>Add Note</button>
+            <button class="btn-task btn-resolve" onclick="openResolveModal('${t.id}')"><i class="bi bi-check-lg"></i>Resolve</button>
+          </div>
+        </div>
+        <div class="task-footer">
+          <div class="task-progress">
+            <i class="bi bi-hourglass-split" style="color:var(--gold);font-size:13px"></i>
+            <span style="font-size:12px;color:var(--muted)">Progress</span>
+            <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+            <span style="font-size:12px;font-weight:600">${progress}%</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted)">
+            ${t.notes?.length?`<i class="bi bi-chat-left-text"></i> ${t.notes.length} note${t.notes.length!==1?'s':''}`:''}
+            ${t.startedAt?` · Started ${timeAgo(t.startedAt)}`:''}
+          </div>
+        </div>
+        ${t.description?`<div style="padding:0 20px 16px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px"><i class="bi bi-chat-left-quote" style="margin-right:6px;color:var(--gold)"></i>${t.description.slice(0,150)}${t.description.length>150?'...':''}</div>`:''}
+      </div>`;
+    }).join("");
+  }
+
+  window.startWork=async function(id){
+    await updateDoc(doc(db,"complaints",id),{status:"in_progress",startedAt:serverTimestamp(),updatedAt:serverTimestamp()});
+  };
+
+  window.openNoteModal=function(id){currentTaskId=id;document.getElementById("noteModal").classList.add("show");};
+  window.closeNoteModal=function(){document.getElementById("noteModal").classList.remove("show");currentTaskId=null;document.getElementById("progressNote").value="";};
+  window.closeNoteOnOverlay=function(e){if(e.target.classList.contains("modal-overlay"))closeNoteModal();};
+  window.submitNote=async function(){
+    const note=document.getElementById("progressNote").value.trim();
+    if(!note){alert("Please enter a note");return;}
+    await updateDoc(doc(db,"complaints",currentTaskId),{notes:arrayUnion({text:note,addedBy:adminData?.fullName,addedAt:new Date().toISOString()}),updatedAt:serverTimestamp()});
+    closeNoteModal();
+  };
+
+  window.openResolveModal=function(id){currentTaskId=id;document.getElementById("resolveModal").classList.add("show");};
+  window.closeResolveModal=function(){document.getElementById("resolveModal").classList.remove("show");currentTaskId=null;document.getElementById("resolveNotes").value="";document.getElementById("studentReply").value="";document.getElementById("timeSpent").value="";document.getElementById("repairCost").value="0";};
+  window.closeModalOnOverlay=function(e){if(e.target.classList.contains("modal-overlay"))closeResolveModal();};
+  window.submitResolution=async function(){
+    const notes=document.getElementById("resolveNotes").value.trim();
+    const reply=document.getElementById("studentReply").value.trim();
+    const timeSpent=parseFloat(document.getElementById("timeSpent").value)||0;
+    const cost=parseFloat(document.getElementById("repairCost").value)||0;
+    if(!notes){alert("Please provide resolution notes");return;}
+    const task=myTasks.find(t=>t.id===currentTaskId);
+    await updateDoc(doc(db,"complaints",currentTaskId),{status:"resolved",resolutionNotes:notes,adminReply:reply||`Resolved by ${adminData?.fullName}.`,timeSpent,repairCost:cost,resolvedBy:adminData?.fullName,resolvedAt:serverTimestamp(),updatedAt:serverTimestamp()});
+    await addDoc(collection(db,"notifications"),{studentUid:task?.studentUid,type:"complaint",message:`✅ Your complaint "${task?.title}" has been resolved!`,read:false,createdAt:serverTimestamp()});
+    closeResolveModal();
+  };
+
+  async function doSignOut(){await signOut(auth);window.location.href="admin-login.html";}
+  ["sideSignOut","sbSignOut","dropSignOut"].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener("click",async e=>{e.preventDefault();doSignOut();});});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleSidebar(){document.getElementById("sidebar").classList.toggle("open");document.getElementById("sbOverlay").classList.toggle("show");}
+  function toggleUserMenu(){document.getElementById("userDropdown").classList.toggle("open");}
+  document.addEventListener("click",e=>{if(!e.target.closest("#userMenuBtn")&&!e.target.closest("#userDropdown"))document.getElementById("userDropdown").classList.remove("open");});
+</script>
+</body>
+</html>

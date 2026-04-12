@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Security Dashboard — FUTBabura HMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.2);
+      --white:#fff;--muted:rgba(255,255,255,.5);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.085);
+      --ok:#22c55e;--err:#ef4444;--warn:#f59e0b;--info:#3b82f6;
+      --sidebar-w:260px;--topbar-h:68px;--radius:14px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(245,166,35,.4);border-radius:3px}
+
+    /* ── SIDEBAR ── */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#060f24 0%,#07112b 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:200;transition:transform .3s ease}
+    .sb-logo{display:flex;align-items:center;gap:11px;padding:20px 22px;border-bottom:1px solid var(--border);text-decoration:none}
+    .sb-logo-img{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;box-shadow:0 0 14px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:1.6px;text-transform:uppercase}
+    .sb-nav{flex:1;padding:18px 14px;overflow-y:auto}
+    .sb-section-label{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 10px;margin:18px 0 8px}
+    .sb-section-label:first-child{margin-top:0}
+    .sb-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:500;transition:all .22s;margin-bottom:2px;position:relative}
+    .sb-link i{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+    .sb-link:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .sb-link.active{background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.18)}
+    .sb-badge{margin-left:auto;background:var(--err);color:var(--white);font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;min-width:18px;text-align:center}
+    .sb-bottom{padding:16px 14px;border-top:1px solid var(--border)}
+    .sb-admin{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--border)}
+    .sb-admin-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--white);flex-shrink:0;overflow:hidden}
+    .sb-admin-ava img{width:100%;height:100%;object-fit:cover}
+    .sb-admin-name{font-size:12.5px;font-weight:700;line-height:1.2}
+    .sb-admin-role{font-size:10px;color:#93c5fd;text-transform:uppercase;letter-spacing:1px}
+    .sb-signout{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);font-size:16px;cursor:pointer;padding:4px;transition:color .2s}
+    .sb-signout:hover{color:var(--err)}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199}
+    .sb-overlay.show{display:block}
+
+    /* ── TOPBAR ── */
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(7,17,43,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:150;transition:left .3s}
+    .tb-left{display:flex;align-items:center;gap:14px}
+    .tb-menu{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;display:none;padding:4px}
+    .tb-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}
+    .tb-right{display:flex;align-items:center;gap:12px}
+    .tb-badge{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.22);color:#93c5fd;font-size:11px;font-weight:700;padding:5px 13px;border-radius:100px;letter-spacing:.8px}
+    .user-menu-btn{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px 12px 6px 6px;cursor:pointer;transition:all .22s}
+    .user-menu-btn:hover{background:rgba(255,255,255,.07)}
+    .um-ava{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--white);overflow:hidden;flex-shrink:0}
+    .um-ava img{width:100%;height:100%;object-fit:cover}
+    .um-name{font-size:13px;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dropdown-menu-hms{position:absolute;top:calc(100% + 8px);right:0;background:#0c1a3d;border:1px solid var(--border);border-radius:12px;padding:8px;min-width:190px;box-shadow:0 16px 40px rgba(0,0,0,.4);z-index:500;display:none;animation:slideDown .2s ease}
+    .dropdown-menu-hms.open{display:block}
+    .dm-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none}
+    .dm-item:hover{background:rgba(255,255,255,.06);color:var(--white)}
+    .dm-item.danger{color:rgba(239,68,68,.8)}
+    .dm-item.danger:hover{background:rgba(239,68,68,.08);color:var(--err)}
+    .dm-divider{height:1px;background:var(--border);margin:6px 0}
+
+    /* ── MAIN ── */
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh;transition:margin-left .3s}
+    .content{padding:28px 28px 50px}
+
+    /* ── STATS ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;position:relative;overflow:hidden;transition:all .25s}
+    .stat-card:hover{border-color:rgba(59,130,246,.25);transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.22)}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(90deg,var(--info),#2563eb)}
+    .stat-icon{width:38px;height:38px;border-radius:10px;background:rgba(59,130,246,.12);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px}
+    .stat-num{font-family:'Playfair Display',serif;font-size:clamp(20px,2vw,28px);font-weight:900;line-height:1;margin-bottom:4px}
+    .stat-label{font-size:11.5px;color:var(--muted)}
+
+    /* ── CARD ── */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:22px}
+    .card-header{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .card-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:9px}
+    .card-body{padding:0}
+    .view-all{font-size:12.5px;color:#93c5fd;text-decoration:none;font-weight:600;transition:color .2s}
+    .view-all:hover{color:var(--white)}
+
+    /* ── TABLE ── */
+    .admin-table{width:100%;border-collapse:collapse}
+    .admin-table th{padding:11px 18px;font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);text-align:left;background:rgba(255,255,255,.02)}
+    .admin-table td{padding:13px 18px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+    .admin-table tr:last-child td{border-bottom:none}
+    .admin-table tr:hover td{background:rgba(255,255,255,.025)}
+
+    /* badges */
+    .tbadge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+    .tb-active{background:rgba(34,197,94,.12);color:var(--ok);border:1px solid rgba(34,197,94,.2)}
+    .tb-pending{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+    .tb-checked-in{background:rgba(34,197,94,.12);color:var(--ok);border:1px solid rgba(34,197,94,.2)}
+    .tb-checked-out{background:rgba(239,68,68,.1);color:var(--err);border:1px solid rgba(239,68,68,.18)}
+    .tb-expected{background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.2)}
+
+    /* action buttons */
+    .btn-tbl{padding:5px 12px;border-radius:7px;font-size:11.5px;font-weight:600;border:none;cursor:pointer;transition:all .22s;font-family:'Plus Jakarta Sans',sans-serif;display:inline-flex;align-items:center;gap:5px}
+    .bt-checkin{background:rgba(34,197,94,.12);color:var(--ok);border:1px solid rgba(34,197,94,.2)}
+    .bt-checkin:hover{background:rgba(34,197,94,.22);color:#86efac}
+    .bt-checkout{background:rgba(239,68,68,.12);color:var(--err);border:1px solid rgba(239,68,68,.2)}
+    .bt-checkout:hover{background:rgba(239,68,68,.22);color:#fca5a5}
+    .bt-view{background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.2)}
+    .bt-view:hover{background:rgba(59,130,246,.22);color:#bfdbfe}
+
+    /* ── SEARCH BAR ── */
+    .search-section{background:linear-gradient(135deg,#0c1a3d 0%,#112060 55%,#0a1840 100%);border:1px solid rgba(59,130,246,.13);border-radius:16px;padding:20px 24px;margin-bottom:22px}
+    .search-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .search-input-wrap{flex:1;min-width:280px;position:relative}
+    .search-input{width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:11px;padding:13px 16px 13px 44px;color:var(--white);font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:all .25s}
+    .search-input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+    .search-input::placeholder{color:rgba(255,255,255,.3)}
+    .search-icon{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px}
+    .scan-btn{background:rgba(59,130,246,.15);border:1.5px solid rgba(59,130,246,.3);color:#93c5fd;padding:13px 24px;border-radius:11px;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .25s;font-family:'Plus Jakarta Sans',sans-serif}
+    .scan-btn:hover{background:rgba(59,130,246,.25);color:var(--white)}
+
+    /* student info card */
+    .student-info-card{background:rgba(59,130,246,.06);border:1.5px solid rgba(59,130,246,.15);border-radius:12px;padding:16px 20px;margin-top:16px;display:none}
+    .student-info-card.show{display:block}
+    .sic-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .sic-name{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+    .sic-details{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .sic-item .label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+    .sic-item .value{font-size:14px;font-weight:600}
+
+    /* two column layout */
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:22px}
+
+    /* activity feed */
+    .activity-feed{max-height:340px;overflow-y:auto}
+    .activity-item{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .2s}
+    .activity-item:hover{background:rgba(255,255,255,.02)}
+    .activity-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+    .ai-in{background:rgba(34,197,94,.12);color:var(--ok)}
+    .ai-out{background:rgba(239,68,68,.12);color:var(--err)}
+    .ai-new{background:rgba(59,130,246,.12);color:#93c5fd}
+    .activity-content{flex:1}
+    .activity-title{font-size:13px;font-weight:600;margin-bottom:2px}
+    .activity-desc{font-size:12px;color:var(--muted);margin-bottom:2px}
+    .activity-time{font-size:10.5px;color:rgba(255,255,255,.25)}
+
+    /* skeleton */
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    .tbl-empty{text-align:center;padding:36px;color:var(--muted);font-size:13.5px}
+
+    /* modal */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center}
+    .modal-overlay.show{display:flex}
+    .modal{background:#0c1a3d;border:1px solid var(--border);border-radius:16px;width:90%;max-width:420px;animation:slideDown .2s ease}
+    .modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+    .modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0}
+    .modal-close:hover{color:var(--white)}
+    .modal-body{padding:22px}
+    .modal-footer{padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+    .btn-modal{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;border:none;transition:all .2s}
+    .btn-primary{background:var(--info);color:var(--white)}
+    .btn-primary:hover{background:#2563eb}
+    .btn-secondary{background:transparent;border:1px solid var(--border);color:var(--muted)}
+    .btn-secondary:hover{background:rgba(255,255,255,.05);color:var(--white)}
+
+    .student-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--info),#1d4ed8);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--white);overflow:hidden;flex-shrink:0}
+    .student-ava img{width:100%;height:100%;object-fit:cover}
+
+    @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+
+    @media(max-width:1050px){.two-col{grid-template-columns:1fr}}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0}.main{margin-left:0}
+      .tb-menu{display:block}
+      .content{padding:18px 14px 40px}
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+      .sic-details{grid-template-columns:repeat(2,1fr)}
+      .um-name{display:none}
+    }
+    @media(max-width:480px){.stats-grid{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar" id="sidebar">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+    <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Security Panel</div></div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section-label">Main</div>
+    <a href="security-dashboard.html" class="sb-link active"><i class="bi bi-shield-fill"></i>Dashboard</a>
+    <a href="security-visitors.html" class="sb-link"><i class="bi bi-people-fill"></i>All Visitors</a>
+    <a href="security-students.html" class="sb-link"><i class="bi bi-mortarboard-fill"></i>Student Lookup</a>
+    <div class="sb-section-label">Operations</div>
+    <a href="security-checkin.html" class="sb-link"><i class="bi bi-box-arrow-in-right"></i>Check-In</a>
+    <a href="security-checkout.html" class="sb-link"><i class="bi bi-box-arrow-right"></i>Check-Out</a>
+    <div class="sb-section-label">Reports</div>
+    <a href="security-history.html" class="sb-link"><i class="bi bi-clock-history"></i>Visitor History</a>
+    <a href="security-reports.html" class="sb-link"><i class="bi bi-file-earmark-text"></i>Daily Reports</a>
+    <div class="sb-section-label">Account</div>
+    <a href="admin-login.html" class="sb-link" id="sideSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-admin">
+      <div class="sb-admin-ava" id="sbAva">S</div>
+      <div><div class="sb-admin-name" id="sbName">Loading...</div><div class="sb-admin-role">Security</div></div>
+      <button class="sb-signout" id="sbSignOut"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar" id="topbar">
+  <div class="tb-left">
+    <button class="tb-menu" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+    <div class="tb-title">Security Dashboard</div>
+  </div>
+  <div class="tb-right">
+    <span class="tb-badge" id="tbSession">Loading...</span>
+    <span class="tb-badge" id="tbShift">Day Shift</span>
+    <div style="position:relative">
+      <div class="user-menu-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="um-ava" id="umAva">S</div>
+        <span class="um-name" id="umName">Security</span>
+        <i class="bi bi-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </div>
+      <div class="dropdown-menu-hms" id="userDropdown">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);margin-bottom:6px">
+          <div style="font-size:13px;font-weight:700" id="ddName">Security Officer</div>
+          <div style="font-size:11px;color:#93c5fd">Security Staff</div>
+        </div>
+        <a href="security-reports.html" class="dm-item"><i class="bi bi-file-earmark-text"></i>Daily Report</a>
+        <div class="dm-divider"></div>
+        <div class="dm-item danger" id="dropSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main" id="main">
+  <div class="content fade-up">
+
+    <!-- STATS GRID -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-num" id="sExpected"><div class="skeleton" style="width:50px;height:24px"></div></div><div class="stat-label">Expected Today</div></div>
+      <div class="stat-card"><div class="stat-icon">🟢</div><div class="stat-num" id="sActive"><div class="skeleton" style="width:50px;height:24px"></div></div><div class="stat-label">Currently Inside</div></div>
+      <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-num" id="sCheckedIn"><div class="skeleton" style="width:50px;height:24px"></div></div><div class="stat-label">Checked In Today</div></div>
+      <div class="stat-card"><div class="stat-icon">🚪</div><div class="stat-num" id="sCheckedOut"><div class="skeleton" style="width:50px;height:24px"></div></div><div class="stat-label">Checked Out Today</div></div>
+    </div>
+
+    <!-- SEARCH SECTION -->
+    <div class="search-section">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <i class="bi bi-search" style="color:#93c5fd"></i>
+        <span style="font-size:13px;font-weight:600">Quick Visitor / Student Lookup</span>
+      </div>
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <i class="bi bi-search search-icon"></i>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search by Matric Number, Visitor Name, or Phone..." onkeyup="handleSearch(event)">
+        </div>
+        <button class="scan-btn" onclick="openScanModal()"><i class="bi bi-upc-scan"></i>Scan QR / Barcode</button>
+      </div>
+      <!-- Student Info Card (shows on search) -->
+      <div class="student-info-card" id="studentInfoCard">
+        <div class="sic-header">
+          <span class="sic-name" id="sicName">—</span>
+          <span class="tbadge" id="sicBookingStatus">—</span>
+        </div>
+        <div class="sic-details">
+          <div class="sic-item"><div class="label">Matric No.</div><div class="value" id="sicMatric">—</div></div>
+          <div class="sic-item"><div class="label">Room</div><div class="value" id="sicRoom">—</div></div>
+          <div class="sic-item"><div class="label">Department</div><div class="value" id="sicDept">—</div></div>
+          <div class="sic-item"><div class="label">Phone</div><div class="value" id="sicPhone">—</div></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn-tbl bt-checkin" onclick="registerVisitor()" id="registerVisitorBtn"><i class="bi bi-person-plus"></i>Register Visitor</button>
+          <button class="btn-tbl bt-view" onclick="viewStudentDetails()"><i class="bi bi-eye"></i>View Full Details</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TWO COLUMN LAYOUT -->
+    <div class="two-col">
+
+      <!-- TODAY'S EXPECTED VISITORS -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header">
+          <span class="card-title"><i class="bi bi-calendar-check" style="color:#93c5fd"></i>Expected Today</span>
+          <a href="security-visitors.html" class="view-all">View All →</a>
+        </div>
+        <table class="admin-table" id="expectedTable">
+          <thead><tr><th>Visitor</th><th>Student</th><th>Time</th><th>Purpose</th><th>Action</th></tr></thead>
+          <tbody id="expectedTbody">
+            <tr><td colspan="5" class="tbl-empty"><div class="skeleton" style="height:36px;border-radius:8px;margin-bottom:6px"></div><div class="skeleton" style="height:36px;border-radius:8px"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ACTIVE VISITORS (CURRENTLY INSIDE) -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header">
+          <span class="card-title"><i class="bi bi-person-check" style="color:var(--ok)"></i>Currently Inside</span>
+          <span style="font-size:11.5px;color:var(--muted)" id="activeCount">0 visitors</span>
+        </div>
+        <table class="admin-table" id="activeTable">
+          <thead><tr><th>Visitor</th><th>Student</th><th>Check-In</th><th>Action</th></tr></thead>
+          <tbody id="activeTbody">
+            <tr><td colspan="4" class="tbl-empty"><div class="skeleton" style="height:36px;border-radius:8px;margin-bottom:6px"></div><div class="skeleton" style="height:36px;border-radius:8px"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- RECENT ACTIVITY FEED -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="bi bi-activity" style="color:#93c5fd"></i>Recent Activity</span>
+        <a href="security-history.html" class="view-all">Full History →</a>
+      </div>
+      <div class="activity-feed" id="activityFeed">
+        <div class="activity-item"><div class="skeleton" style="width:100%;height:50px;border-radius:8px"></div></div>
+        <div class="activity-item"><div class="skeleton" style="width:100%;height:50px;border-radius:8px"></div></div>
+        <div class="activity-item"><div class="skeleton" style="width:100%;height:50px;border-radius:8px"></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SCAN MODAL -->
+<div class="modal-overlay" id="scanModal" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title"><i class="bi bi-upc-scan" style="margin-right:8px;color:#93c5fd"></i>Scan Gate Pass</span>
+      <button class="modal-close" onclick="closeScanModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;text-align:center">Scan the QR code on the student's approval letter or visitor pass</p>
+      <div style="background:rgba(255,255,255,.04);border:2px dashed rgba(255,255,255,.1);border-radius:12px;padding:30px;text-align:center">
+        <i class="bi bi-qr-code-scan" style="font-size:64px;color:var(--muted)"></i>
+        <p style="margin-top:12px;font-size:12px;color:var(--muted)">Camera access required</p>
+      </div>
+      <input type="text" class="search-input" placeholder="Or enter code manually" style="margin-top:16px" id="manualCode">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-secondary" onclick="closeScanModal()">Cancel</button>
+      <button class="btn-modal btn-primary" onclick="verifyCode()">Verify</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, query, where,
+    getDocs, orderBy, limit, onSnapshot, updateDoc, doc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg={apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app=initializeApp(cfg);
+  const db=getFirestore(app);
+  const auth=getAuth(app);
+
+  let adminData=null, settings={}, currentStudent=null;
+  const today=new Date().toISOString().split("T")[0];
+
+  // ── AUTH GUARD ──
+  onAuthStateChanged(auth, async user=>{
+    if(!user){window.location.href="admin-login.html";return;}
+    try{
+      const ps=await getDocs(query(collection(db,"users"),where("uid","==",user.uid)));
+      if(ps.empty){await signOut(auth);window.location.href="admin-login.html";return;}
+      adminData=ps.docs[0].data();
+      if(adminData.role!=="security"&&adminData.role!=="super_admin"){
+        const map={hostel_admin:"admin-dashboard.html",maintenance:"maintenance-dashboard.html"};
+        window.location.href=map[adminData.role]||"admin-login.html";
+        return;
+      }
+      renderAdminUI(adminData);
+      await loadSettings();
+      await Promise.all([loadStats(),loadExpectedVisitors(),loadActiveVisitors(),loadActivityFeed()]);
+    }catch(e){console.error(e);}
+  });
+
+  function renderAdminUI(a){
+    const initials=(a.fullName||"S").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    ["sbAva","umAva"].forEach(id=>{
+      const el=document.getElementById(id);if(!el)return;
+      if(a.photoURL)el.innerHTML=`<img src="${a.photoURL}" alt=""/>`;else el.textContent=initials;
+    });
+    document.getElementById("sbName").textContent=a.fullName||"Security Officer";
+    document.getElementById("umName").textContent=(a.fullName||"Security").split(" ")[0];
+    document.getElementById("ddName").textContent=a.fullName||"Security Officer";
+    const h=new Date().getHours();
+    document.getElementById("tbShift").textContent=h<12?"Morning Shift":h<17?"Afternoon Shift":"Night Shift";
+  }
+
+  async function loadSettings(){
+    const ss=await getDocs(collection(db,"settings"));
+    settings=ss.empty?{}:ss.docs[0].data();
+    document.getElementById("tbSession").textContent=(settings.currentSession||"2024/2025")+" Session";
+  }
+
+  // ══════════════════════════════
+  // LOAD STATS
+  // ══════════════════════════════
+  async function loadStats(){
+    const session=settings.currentSession||"2024/2025";
+    const visitorsSnap=await getDocs(collection(db,"visitors"));
+
+    let expected=0,active=0,checkedInToday=0,checkedOutToday=0;
+
+    visitorsSnap.forEach(d=>{
+      const v=d.data();
+      if(v.visitDate===today) expected++;
+      if(v.status==="checked_in") active++;
+      if(v.checkInTime?.toDate?.().toISOString().split("T")[0]===today) checkedInToday++;
+      if(v.checkOutTime?.toDate?.().toISOString().split("T")[0]===today) checkedOutToday++;
+    });
+
+    document.getElementById("sExpected").textContent=expected;
+    document.getElementById("sActive").textContent=active;
+    document.getElementById("sCheckedIn").textContent=checkedInToday;
+    document.getElementById("sCheckedOut").textContent=checkedOutToday;
+  }
+
+  // ══════════════════════════════
+  // LOAD EXPECTED VISITORS
+  // ══════════════════════════════
+  async function loadExpectedVisitors(){
+    const snap=await getDocs(query(collection(db,"visitors"),where("visitDate","==",today),where("status","in",["registered","expected"]),orderBy("createdAt","desc"),limit(5)));
+    const tbody=document.getElementById("expectedTbody");
+    if(snap.empty){tbody.innerHTML=`<tr><td colspan="5" class="tbl-empty">No visitors expected today</td></tr>`;return;}
+
+    tbody.innerHTML=snap.docs.map(d=>{
+      const v=d.data();
+      return `<tr>
+        <td style="font-weight:600">${v.visitorName||"—"}<div style="font-size:11px;color:var(--muted)">${v.visitorPhone||""}</div></td>
+        <td style="font-size:12.5px">${v.studentName||"—"}</td>
+        <td style="font-size:12px;color:var(--muted)">${v.expectedTime||"Anytime"}</td>
+        <td><span class="tbadge tb-expected">${v.purpose||"Visit"}</span></td>
+        <td><button class="btn-tbl bt-checkin" onclick="window.checkInVisitor('${d.id}')"><i class="bi bi-box-arrow-in-right"></i>Check-In</button></td>
+      </tr>`;
+    }).join("");
+  }
+
+  // ══════════════════════════════
+  // LOAD ACTIVE VISITORS
+  // ══════════════════════════════
+  async function loadActiveVisitors(){
+    const snap=await getDocs(query(collection(db,"visitors"),where("status","==","checked_in"),orderBy("checkInTime","desc"),limit(5)));
+    const tbody=document.getElementById("activeTbody");
+    document.getElementById("activeCount").textContent=snap.size+" visitor"+(snap.size!==1?"s":"");
+    if(snap.empty){tbody.innerHTML=`<tr><td colspan="4" class="tbl-empty">No visitors currently inside</td></tr>`;return;}
+
+    tbody.innerHTML=snap.docs.map(d=>{
+      const v=d.data();
+      const checkIn=v.checkInTime?.toDate?.().toLocaleTimeString("en-NG",{hour:"2-digit",minute:"2-digit"})||"—";
+      return `<tr>
+        <td style="font-weight:600">${v.visitorName||"—"}</td>
+        <td style="font-size:12.5px">${v.studentName||"—"}</td>
+        <td style="font-size:12px;color:var(--muted)">${checkIn}</td>
+        <td><button class="btn-tbl bt-checkout" onclick="window.checkOutVisitor('${d.id}')"><i class="bi bi-box-arrow-right"></i>Check-Out</button></td>
+      </tr>`;
+    }).join("");
+  }
+
+  // ══════════════════════════════
+  // LOAD ACTIVITY FEED
+  // ══════════════════════════════
+  async function loadActivityFeed(){
+    const snap=await getDocs(query(collection(db,"visitors"),orderBy("updatedAt","desc"),limit(8)));
+    const feed=document.getElementById("activityFeed");
+    if(snap.empty){feed.innerHTML=`<div class="tbl-empty">No recent activity</div>`;return;}
+
+    feed.innerHTML=snap.docs.map(d=>{
+      const v=d.data();
+      let icon="ai-new",iconEl="📋",title="New Registration",desc=`${v.visitorName} registered to visit ${v.studentName}`;
+      if(v.status==="checked_in"){icon="ai-in";iconEl="🟢";title="Check-In";desc=`${v.visitorName} checked in to see ${v.studentName}`;}
+      else if(v.status==="checked_out"){icon="ai-out";iconEl="🔴";title="Check-Out";desc=`${v.visitorName} checked out`;}
+      const time=v.updatedAt?.toDate?.().toLocaleTimeString("en-NG",{hour:"2-digit",minute:"2-digit"})||"—";
+      return `<div class="activity-item">
+        <div class="activity-icon ${icon}">${iconEl}</div>
+        <div class="activity-content"><div class="activity-title">${title}</div><div class="activity-desc">${desc}</div></div>
+        <div class="activity-time">${time}</div>
+      </div>`;
+    }).join("");
+  }
+
+  // ══════════════════════════════
+  // SEARCH FUNCTION
+  // ══════════════════════════════
+  window.handleSearch=async function(e){
+    if(e.key!=="Enter")return;
+    const query=e.target.value.trim();
+    if(!query)return;
+    const card=document.getElementById("studentInfoCard");
+    try{
+      const snap=await getDocs(query(collection(db,"users"),where("matricNo","==",query)));
+      if(!snap.empty){
+        const s=snap.docs[0].data();
+        currentStudent={id:snap.docs[0].id,...s};
+        displayStudentInfo(s);
+        card.classList.add("show");
+      }else{
+        const vSnap=await getDocs(query(collection(db,"visitors"),where("visitorPhone","==",query)));
+        if(!vSnap.empty){
+          const v=vSnap.docs[0].data();
+          const sSnap=await getDocs(query(collection(db,"users"),where("uid","==",v.studentUid)));
+          if(!sSnap.empty){const s=sSnap.docs[0].data();currentStudent={id:sSnap.docs[0].id,...s};displayStudentInfo(s);card.classList.add("show");return;}
+        }
+        card.classList.remove("show");
+      }
+    }catch(err){console.error(err);}
+  };
+
+  function displayStudentInfo(s){
+    document.getElementById("sicName").textContent=s.fullName||"—";
+    document.getElementById("sicMatric").textContent=s.matricNo||"—";
+    document.getElementById("sicDept").textContent=s.department||"—";
+    document.getElementById("sicPhone").textContent=s.phone||"—";
+    const bookingStatus=s.bookingStatus==="active"?"Active Booking":s.bookingStatus==="pending"?"Pending":"No Active Booking";
+    const statusCls=s.bookingStatus==="active"?"tb-active":s.bookingStatus==="pending"?"tb-pending":"tb-expired";
+    document.getElementById("sicBookingStatus").className=`tbadge ${statusCls}`;
+    document.getElementById("sicBookingStatus").textContent=bookingStatus;
+    if(s.bookingStatus==="active"){
+      document.getElementById("sicRoom").textContent=`${s.blockName||""} Rm ${s.roomNumber||"—"}`;
+    }else{
+      document.getElementById("sicRoom").textContent="—";
+    }
+  }
+
+  // ══════════════════════════════
+  // VISITOR CHECK-IN/OUT
+  // ══════════════════════════════
+  window.checkInVisitor=async function(visitorId){
+    try{
+      await updateDoc(doc(db,"visitors",visitorId),{
+        status:"checked_in",
+        checkInTime:serverTimestamp(),
+        checkedInBy:adminData?.fullName||"Security",
+        updatedAt:serverTimestamp()
+      });
+      await Promise.all([loadStats(),loadExpectedVisitors(),loadActiveVisitors(),loadActivityFeed()]);
+    }catch(e){alert("Error checking in: "+e.message);}
+  };
+
+  window.checkOutVisitor=async function(visitorId){
+    try{
+      await updateDoc(doc(db,"visitors",visitorId),{
+        status:"checked_out",
+        checkOutTime:serverTimestamp(),
+        checkedOutBy:adminData?.fullName||"Security",
+        updatedAt:serverTimestamp()
+      });
+      await Promise.all([loadStats(),loadExpectedVisitors(),loadActiveVisitors(),loadActivityFeed()]);
+    }catch(e){alert("Error checking out: "+e.message);}
+  };
+
+  window.registerVisitor=function(){
+    if(currentStudent){
+      window.location.href=`security-checkin.html?student=${currentStudent.uid}`;
+    }
+  };
+
+  window.viewStudentDetails=function(){
+    if(currentStudent){
+      window.location.href=`security-students.html?id=${currentStudent.uid}`;
+    }
+  };
+
+  // Modal functions
+  window.openScanModal=()=>document.getElementById("scanModal").classList.add("show");
+  window.closeScanModal=()=>document.getElementById("scanModal").classList.remove("show");
+  window.closeModalOnOverlay=e=>{if(e.target.classList.contains("modal-overlay"))closeScanModal();};
+  window.verifyCode=()=>{alert("QR scanning simulation - implement actual scanner integration");closeScanModal();};
+
+  // Sign out
+  async function doSignOut(){await signOut(auth);window.location.href="admin-login.html";}
+  ["sideSignOut","sbSignOut","dropSignOut"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener("click",async e=>{e.preventDefault();doSignOut();});
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleSidebar(){
+    document.getElementById("sidebar").classList.toggle("open");
+    document.getElementById("sbOverlay").classList.toggle("show");
+  }
+  function toggleUserMenu(){document.getElementById("userDropdown").classList.toggle("open");}
+  document.addEventListener("click",e=>{
+    if(!e.target.closest("#userMenuBtn")&&!e.target.closest("#userDropdown"))
+      document.getElementById("userDropdown").classList.remove("open");
+  });
+</script>
+</body>
+</html>

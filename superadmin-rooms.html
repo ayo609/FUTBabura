@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Room Management — Super Admin | FUTBabura HMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.2);
+      --white:#fff;--muted:rgba(255,255,255,.5);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.085);
+      --ok:#22c55e;--err:#ef4444;--warn:#f59e0b;--info:#3b82f6;--purple:#a855f7;
+      --sidebar-w:280px;--topbar-h:70px;--radius:16px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:rgba(245,166,35,.4);border-radius:3px}
+
+    /* ── SIDEBAR ── */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#050e20 0%,#07112b 100%);border-right:1px solid rgba(245,166,35,.12);display:flex;flex-direction:column;z-index:200;transition:transform .3s ease}
+    .sb-logo{display:flex;align-items:center;gap:12px;padding:22px 24px;border-bottom:1px solid rgba(245,166,35,.15);text-decoration:none}
+    .sb-logo-img{width:42px;height:42px;border-radius:50%;border:2.5px solid var(--gold);overflow:hidden;box-shadow:0 0 20px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+    .sb-nav{flex:1;padding:20px 16px;overflow-y:auto}
+    .sb-section-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 12px;margin:20px 0 10px}
+    .sb-section-label:first-child{margin-top:0}
+    .sb-link{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:11px;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:500;transition:all .22s;margin-bottom:3px}
+    .sb-link i{font-size:17px;width:22px;text-align:center;flex-shrink:0}
+    .sb-link:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .sb-link.active{background:linear-gradient(135deg,rgba(245,166,35,.15),rgba(245,166,35,.05));color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+    .sb-bottom{padding:18px 16px;border-top:1px solid rgba(245,166,35,.1)}
+    .sb-admin{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.12)}
+    .sb-admin-ava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:var(--navy);flex-shrink:0;overflow:hidden}
+    .sb-admin-ava img{width:100%;height:100%;object-fit:cover}
+    .sb-admin-name{font-size:13px;font-weight:700;line-height:1.2}
+    .sb-admin-role{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px}
+    .sb-signout{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.3);font-size:17px;cursor:pointer;padding:4px;transition:color .2s}
+    .sb-signout:hover{color:var(--err)}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:199}
+    .sb-overlay.show{display:block}
+
+    /* ── TOPBAR ── */
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(7,17,43,.98);backdrop-filter:blur(20px);border-bottom:1px solid rgba(245,166,35,.1);display:flex;align-items:center;justify-content:space-between;padding:0 32px;z-index:150}
+    .tb-left{display:flex;align-items:center;gap:16px}
+    .tb-menu{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;display:none;padding:4px}
+    .tb-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+    .tb-right{display:flex;align-items:center;gap:16px}
+    .user-menu-btn{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:6px 14px 6px 8px;cursor:pointer;transition:all .22s}
+    .user-menu-btn:hover{background:rgba(255,255,255,.07)}
+    .um-ava{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--navy);overflow:hidden;flex-shrink:0}
+    .um-name{font-size:13.5px;font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dropdown-menu-hms{position:absolute;top:calc(100% + 10px);right:0;background:#0c1a3d;border:1px solid rgba(245,166,35,.15);border-radius:14px;padding:8px;min-width:200px;box-shadow:0 20px 40px rgba(0,0,0,.5);z-index:500;display:none;animation:slideDown .2s ease}
+    .dropdown-menu-hms.open{display:block}
+    .dm-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:9px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none}
+    .dm-item:hover{background:rgba(255,255,255,.06);color:var(--white)}
+    .dm-item.danger{color:rgba(239,68,68,.8)}
+    .dm-item.danger:hover{background:rgba(239,68,68,.08);color:var(--err)}
+
+    /* ── MAIN ── */
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh}
+    .content{padding:28px 32px 50px}
+
+    /* ── PAGE HEADER ── */
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px}
+    .ph-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:900}
+    .ph-actions{display:flex;gap:12px}
+    .btn-primary{padding:12px 22px;border-radius:11px;background:var(--gold);color:var(--navy);font-size:13.5px;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:'Plus Jakarta Sans',sans-serif;transition:all .25s;box-shadow:0 4px 14px var(--glow)}
+    .btn-primary:hover{background:var(--gold2);transform:translateY(-2px)}
+    .btn-outline{padding:12px 22px;border-radius:11px;background:transparent;border:1.5px solid var(--border);color:var(--muted);font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .25s}
+    .btn-outline:hover{background:rgba(255,255,255,.05);color:var(--white)}
+
+    /* ── STATS ROW ── */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px}
+    .stat-label{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+    .stat-value{font-family:'Playfair Display',serif;font-size:26px;font-weight:900}
+
+    /* ── FILTER BAR ── */
+    .filter-bar{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .search-wrap{flex:1;min-width:250px;position:relative}
+    .search-input{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 16px 11px 44px;color:var(--white);font-size:13.5px;outline:none}
+    .search-input:focus{border-color:var(--gold)}
+    .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px}
+    .filter-select{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 32px 11px 14px;color:var(--white);font-size:13px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='rgba(255,255,255,.4)' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:11px}
+    .filter-select option{background:#0c1a3d}
+    .btn-reset{padding:11px 20px;border-radius:10px;background:transparent;border:1.5px solid var(--border);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .25s}
+    .btn-reset:hover{background:rgba(255,255,255,.05);color:var(--white)}
+
+    /* ── ROOM GRID ── */
+    .room-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;margin-bottom:24px}
+    .room-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .25s}
+    .room-card:hover{border-color:rgba(245,166,35,.3);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
+    .room-header{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .room-number{font-size:20px;font-weight:700;display:flex;align-items:center;gap:8px}
+    .room-type{font-size:11px;padding:3px 10px;border-radius:100px;font-weight:700;background:rgba(245,166,35,.12);color:var(--gold)}
+    .room-body{padding:16px 18px}
+    .room-info{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+    .info-item{display:flex;flex-direction:column;gap:3px}
+    .info-label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+    .info-value{font-size:14px;font-weight:600}
+    .occupancy-bar{margin:14px 0}
+    .occ-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px}
+    .occ-track{height:6px;background:rgba(255,255,255,.1);border-radius:100px;overflow:hidden}
+    .occ-fill{height:100%;border-radius:100px;background:var(--ok);transition:width .3s}
+    .room-footer{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-top:1px solid var(--border)}
+    .price{font-size:18px;font-weight:700;color:var(--gold)}
+    .price small{font-size:11px;color:var(--muted);font-weight:400}
+    .action-group{display:flex;gap:6px}
+    .btn-icon{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:6px 8px;border-radius:7px;transition:all .2s}
+    .btn-icon:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .btn-icon.edit:hover{color:var(--gold)}
+    .btn-icon.delete:hover{color:var(--err)}
+    .btn-icon.view:hover{color:var(--info)}
+
+    /* status badges */
+    .status-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px}
+    .status-available{background:rgba(34,197,94,.12);color:var(--ok)}
+    .status-occupied{background:rgba(239,68,68,.12);color:var(--err)}
+    .status-maintenance{background:rgba(245,158,11,.12);color:var(--warn)}
+
+    /* ── MODAL ── */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:center;justify-content:center}
+    .modal-overlay.show{display:flex}
+    .modal{background:#0c1a3d;border:1px solid rgba(245,166,35,.2);border-radius:18px;width:90%;max-width:550px;max-height:85vh;overflow-y:auto;animation:slideDown .2s ease}
+    .modal-lg{max-width:700px}
+    .modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+    .modal-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer}
+    .modal-body{padding:24px}
+    .modal-footer{padding:18px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:12px}
+    .btn-modal{padding:10px 22px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;border:none;transition:all .2s}
+    .btn-modal-primary{background:var(--gold);color:var(--navy)}
+    .btn-modal-primary:hover{background:var(--gold2)}
+    .btn-modal-secondary{background:transparent;border:1.5px solid var(--border);color:var(--muted)}
+    .btn-modal-secondary:hover{background:rgba(255,255,255,.05);color:var(--white)}
+    .btn-modal-danger{background:rgba(239,68,68,.15);color:var(--err);border:1px solid rgba(239,68,68,.3)}
+    .btn-modal-danger:hover{background:rgba(239,68,68,.25)}
+
+    .field-wrap{margin-bottom:18px}
+    .field-label{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.72);margin-bottom:7px;display:block}
+    .req{color:var(--gold)}
+    .hms-input{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:11px;padding:11px 14px;color:var(--white);font-size:13.5px;outline:none}
+    .hms-input:focus{border-color:var(--gold)}
+    .hms-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='rgba(255,255,255,.4)' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:12px;padding-right:38px}
+    .hms-select option{background:#0c1a3d}
+    .row-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .ferr{font-size:11px;color:var(--err);margin-top:5px;display:none}
+    .ferr.show{display:block}
+
+    .empty-state{text-align:center;padding:60px;color:var(--muted)}
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0}.main{margin-left:0}
+      .tb-menu{display:block}
+      .content{padding:18px 16px 40px}
+      .stats-row{grid-template-columns:repeat(2,1fr)}
+      .room-grid{grid-template-columns:1fr}
+      .um-name{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar" id="sidebar">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+    <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Super Admin</div></div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-section-label">MAIN</div>
+    <a href="superadmin-dashboard.html" class="sb-link"><i class="bi bi-grid-fill"></i>Dashboard</a>
+    <a href="superadmin-admins.html" class="sb-link"><i class="bi bi-shield-lock-fill"></i>Admin Management</a>
+    <a href="superadmin-students.html" class="sb-link"><i class="bi bi-people-fill"></i>Students</a>
+    <div class="sb-section-label">HOSTEL MANAGEMENT</div>
+    <a href="superadmin-hostels.html" class="sb-link"><i class="bi bi-building"></i>Hostels</a>
+    <a href="superadmin-rooms.html" class="sb-link active"><i class="bi bi-door-open-fill"></i>Rooms</a>
+    <a href="superadmin-bookings.html" class="sb-link"><i class="bi bi-house-check-fill"></i>All Bookings</a>
+    <div class="sb-section-label">FINANCE</div>
+    <a href="superadmin-payments.html" class="sb-link"><i class="bi bi-cash-stack"></i>Payments</a>
+    <a href="superadmin-reports.html" class="sb-link"><i class="bi bi-bar-chart-fill"></i>Reports</a>
+    <div class="sb-section-label">SYSTEM</div>
+    <a href="superadmin-settings.html" class="sb-link"><i class="bi bi-gear-fill"></i>Settings</a>
+    <a href="superadmin-audit.html" class="sb-link"><i class="bi bi-journal-text"></i>Audit Logs</a>
+    <div class="sb-section-label">ACCOUNT</div>
+    <a href="admin-login.html" class="sb-link" id="sideSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-admin">
+      <div class="sb-admin-ava" id="sbAva">SA</div>
+      <div><div class="sb-admin-name" id="sbName">Loading...</div><div class="sb-admin-role">SUPER ADMIN</div></div>
+      <button class="sb-signout" id="sbSignOut"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar" id="topbar">
+  <div class="tb-left">
+    <button class="tb-menu" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+    <div class="tb-title">Room Management</div>
+  </div>
+  <div class="tb-right">
+    <div style="position:relative">
+      <div class="user-menu-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+        <div class="um-ava" id="umAva">SA</div>
+        <span class="um-name" id="umName">Super Admin</span>
+        <i class="bi bi-chevron-down" style="font-size:12px;color:var(--muted)"></i>
+      </div>
+      <div class="dropdown-menu-hms" id="userDropdown">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);margin-bottom:6px">
+          <div style="font-size:13px;font-weight:700" id="ddName">Super Admin</div>
+          <div style="font-size:11px;color:var(--gold)">System Administrator</div>
+        </div>
+        <div class="dm-item danger" id="dropSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main" id="main">
+  <div class="content fade-up">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <h1 class="ph-title">Room Inventory</h1>
+      <div class="ph-actions">
+        <button class="btn-outline" onclick="openBulkAddModal()"><i class="bi bi-plus-square"></i>Bulk Add</button>
+        <button class="btn-primary" onclick="openCreateModal()"><i class="bi bi-plus-lg"></i>Add Room</button>
+      </div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Total Rooms</div><div class="stat-value" id="stTotal">0</div></div>
+      <div class="stat-card"><div class="stat-label">Available</div><div class="stat-value" id="stAvailable" style="color:var(--ok)">0</div></div>
+      <div class="stat-card"><div class="stat-label">Occupied</div><div class="stat-value" id="stOccupied" style="color:var(--err)">0</div></div>
+      <div class="stat-card"><div class="stat-label">Maintenance</div><div class="stat-value" id="stMaintenance" style="color:var(--warn)">0</div></div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search by room number..." onkeyup="applyFilters()">
+      </div>
+      <select class="filter-select" id="filterHostel" onchange="applyFilters()">
+        <option value="all">All Hostels</option>
+      </select>
+      <select class="filter-select" id="filterType" onchange="applyFilters()">
+        <option value="all">All Types</option>
+        <option value="Standard">Standard</option>
+        <option value="Premium">Premium</option>
+        <option value="Executive">Executive</option>
+      </select>
+      <select class="filter-select" id="filterStatus" onchange="applyFilters()">
+        <option value="all">All Status</option>
+        <option value="available">Available</option>
+        <option value="occupied">Occupied</option>
+        <option value="maintenance">Maintenance</option>
+      </select>
+      <button class="btn-reset" onclick="resetFilters()"><i class="bi bi-arrow-counterclockwise"></i>Reset</button>
+    </div>
+
+    <!-- ROOM GRID -->
+    <div class="room-grid" id="roomGrid">
+      <div class="room-card"><div class="room-header"><div class="skeleton" style="width:100px;height:24px"></div></div><div class="room-body"><div class="skeleton" style="width:100%;height:100px"></div></div></div>
+      <div class="room-card"><div class="room-header"><div class="skeleton" style="width:100px;height:24px"></div></div><div class="room-body"><div class="skeleton" style="width:100%;height:100px"></div></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CREATE/EDIT MODAL -->
+<div class="modal-overlay" id="roomModal" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Add New Room</span>
+      <button class="modal-close" onclick="closeRoomModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-wrap">
+        <label class="field-label">Hostel <span class="req">*</span></label>
+        <select class="hms-input hms-select" id="roomHostel">
+          <option value="">Select Hostel</option>
+        </select>
+      </div>
+      <div class="row-fields">
+        <div class="field-wrap">
+          <label class="field-label">Room Number <span class="req">*</span></label>
+          <input type="text" class="hms-input" id="roomNumber" placeholder="e.g., A101">
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Floor</label>
+          <input type="text" class="hms-input" id="roomFloor" placeholder="e.g., 1st Floor">
+        </div>
+      </div>
+      <div class="row-fields">
+        <div class="field-wrap">
+          <label class="field-label">Room Type <span class="req">*</span></label>
+          <select class="hms-input hms-select" id="roomType">
+            <option value="Standard">Standard</option>
+            <option value="Premium">Premium</option>
+            <option value="Executive">Executive</option>
+          </select>
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Total Slots <span class="req">*</span></label>
+          <input type="number" class="hms-input" id="totalSlots" placeholder="e.g., 4" min="1" value="4">
+        </div>
+      </div>
+      <div class="row-fields">
+        <div class="field-wrap">
+          <label class="field-label">Price per Slot (₦) <span class="req">*</span></label>
+          <input type="number" class="hms-input" id="pricePerSlot" placeholder="e.g., 50000" min="0" value="50000">
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Status</label>
+          <select class="hms-input hms-select" id="roomStatus">
+            <option value="available">Available</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="occupied">Occupied</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Amenities</label>
+        <input type="text" class="hms-input" id="roomAmenities" placeholder="e.g., AC, Study Table, Wardrobe">
+      </div>
+      <div class="ferr" id="roomFormErr"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secondary" onclick="closeRoomModal()">Cancel</button>
+      <button class="btn-modal btn-modal-primary" id="modalActionBtn" onclick="saveRoom()">Create Room</button>
+    </div>
+  </div>
+</div>
+
+<!-- BULK ADD MODAL -->
+<div class="modal-overlay" id="bulkModal" onclick="closeBulkOnOverlay(event)">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title"><i class="bi bi-plus-square" style="color:var(--gold);margin-right:8px"></i>Bulk Add Rooms</span>
+      <button class="modal-close" onclick="closeBulkModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-wrap">
+        <label class="field-label">Select Hostel <span class="req">*</span></label>
+        <select class="hms-input hms-select" id="bulkHostel">
+          <option value="">Select Hostel</option>
+        </select>
+      </div>
+      <div class="row-fields">
+        <div class="field-wrap">
+          <label class="field-label">Starting Room Number <span class="req">*</span></label>
+          <input type="text" class="hms-input" id="bulkStartNumber" placeholder="e.g., A101">
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Number of Rooms <span class="req">*</span></label>
+          <input type="number" class="hms-input" id="bulkCount" placeholder="e.g., 10" min="1" value="1">
+        </div>
+      </div>
+      <div class="row-fields">
+        <div class="field-wrap">
+          <label class="field-label">Room Type</label>
+          <select class="hms-input hms-select" id="bulkType">
+            <option value="Standard">Standard</option>
+            <option value="Premium">Premium</option>
+            <option value="Executive">Executive</option>
+          </select>
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Slots per Room</label>
+          <input type="number" class="hms-input" id="bulkSlots" min="1" value="4">
+        </div>
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Price per Slot (₦)</label>
+        <input type="number" class="hms-input" id="bulkPrice" min="0" value="50000">
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Floor</label>
+        <input type="text" class="hms-input" id="bulkFloor" placeholder="e.g., 1st Floor">
+      </div>
+      <div class="ferr" id="bulkFormErr"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secondary" onclick="closeBulkModal()">Cancel</button>
+      <button class="btn-modal btn-modal-primary" onclick="executeBulkAdd()">Add Rooms</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-overlay" id="deleteModal" onclick="closeDeleteOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title"><i class="bi bi-exclamation-triangle-fill" style="color:var(--err);margin-right:8px"></i>Confirm Delete</span>
+      <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Are you sure you want to delete <strong id="deleteRoomNumber">this room</strong>?</p>
+      <p style="font-size:13px;color:var(--muted)">This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secondary" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn-modal btn-modal-danger" onclick="confirmDelete()">Delete Room</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, query, where, getDocs, onSnapshot, addDoc, updateDoc, doc, deleteDoc, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg={apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app=initializeApp(cfg);
+  const db=getFirestore(app);
+  const auth=getAuth(app);
+
+  let adminData=null, rooms=[], hostels=[], filteredRooms=[], editingRoomId=null, deletingRoomId=null;
+
+  onAuthStateChanged(auth, async user=>{
+    if(!user){window.location.href="admin-login.html";return;}
+    try{
+      const ps=await getDocs(query(collection(db,"users"),where("uid","==",user.uid)));
+      if(ps.empty||ps.docs[0].data().role!=="super_admin"){await signOut(auth);window.location.href="admin-login.html";return;}
+      adminData=ps.docs[0].data();
+      renderAdminUI(adminData);
+      await loadHostels();
+      listenRooms();
+    }catch(e){console.error(e);}
+  });
+
+  function renderAdminUI(a){
+    const initials=(a.fullName||"SA").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    ["sbAva","umAva"].forEach(id=>{const el=document.getElementById(id);if(el){if(a.photoURL)el.innerHTML=`<img src="${a.photoURL}" alt=""/>`;else el.textContent=initials;}});
+    document.getElementById("sbName").textContent=a.fullName||"Super Admin";
+    document.getElementById("umName").textContent=(a.fullName||"Super Admin").split(" ")[0];
+    document.getElementById("ddName").textContent=a.fullName||"Super Admin";
+  }
+
+  async function loadHostels(){
+    const snap=await getDocs(collection(db,"hostels"));
+    hostels=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const filterSelect=document.getElementById("filterHostel");
+    const modalSelect=document.getElementById("roomHostel");
+    const bulkSelect=document.getElementById("bulkHostel");
+    const options=hostels.map(h=>`<option value="${h.id}">${h.name||h.blockName||'Hostel'}</option>`).join("");
+    filterSelect.innerHTML='<option value="all">All Hostels</option>'+options;
+    modalSelect.innerHTML='<option value="">Select Hostel</option>'+options;
+    bulkSelect.innerHTML='<option value="">Select Hostel</option>'+options;
+  }
+
+  function listenRooms(){
+    const q=query(collection(db,"rooms"));
+    onSnapshot(q,snap=>{
+      rooms=snap.docs.map(d=>({id:d.id,...d.data()}));
+      updateStats();
+      applyFilters();
+    });
+  }
+
+  function updateStats(){
+    const total=rooms.length;
+    const available=rooms.filter(r=>r.status==="available").length;
+    const occupied=rooms.filter(r=>r.status==="occupied").length;
+    const maintenance=rooms.filter(r=>r.status==="maintenance").length;
+    document.getElementById("stTotal").textContent=total;
+    document.getElementById("stAvailable").textContent=available;
+    document.getElementById("stOccupied").textContent=occupied;
+    document.getElementById("stMaintenance").textContent=maintenance;
+  }
+
+  window.applyFilters=function(){
+    const search=document.getElementById("searchInput").value.toLowerCase();
+    const hostelId=document.getElementById("filterHostel").value;
+    const type=document.getElementById("filterType").value;
+    const status=document.getElementById("filterStatus").value;
+
+    filteredRooms=rooms.filter(r=>{
+      if(hostelId!=="all"&&r.hostelId!==hostelId)return false;
+      if(type!=="all"&&r.roomType!==type)return false;
+      if(status!=="all"&&r.status!==status)return false;
+      if(search&&!r.roomNumber?.toLowerCase().includes(search))return false;
+      return true;
+    });
+    renderRoomGrid();
+  };
+
+  window.resetFilters=function(){
+    document.getElementById("searchInput").value="";
+    document.getElementById("filterHostel").value="all";
+    document.getElementById("filterType").value="all";
+    document.getElementById("filterStatus").value="all";
+    applyFilters();
+  };
+
+  function renderRoomGrid(){
+    const grid=document.getElementById("roomGrid");
+    if(filteredRooms.length===0){grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><i class="bi bi-door-open" style="font-size:48px;opacity:.3;display:block;margin-bottom:12px"></i><h3>No Rooms Found</h3><p style="color:var(--muted)">Click "Add Room" to create a new room.</p></div>`;return;}
+
+    grid.innerHTML=filteredRooms.map(r=>{
+      const hostel=hostels.find(h=>h.id===r.hostelId);
+      const occupied=r.totalSlots-(r.slotsLeft||0);
+      const occupancy=Math.round((occupied/r.totalSlots)*100);
+      return `<div class="room-card">
+        <div class="room-header">
+          <span class="room-number"><i class="bi bi-door-closed" style="color:var(--gold)"></i>${r.roomNumber||"—"}</span>
+          <span class="room-type">${r.roomType||"Standard"}</span>
+        </div>
+        <div class="room-body">
+          <div class="room-info">
+            <div class="info-item"><span class="info-label">Hostel</span><span class="info-value">${hostel?.name||"—"}</span></div>
+            <div class="info-item"><span class="info-label">Floor</span><span class="info-value">${r.floor||"—"}</span></div>
+            <div class="info-item"><span class="info-label">Capacity</span><span class="info-value">${r.totalSlots||0} slots</span></div>
+            <div class="info-item"><span class="info-label">Available</span><span class="info-value">${r.slotsLeft||0}</span></div>
+          </div>
+          <div class="occupancy-bar">
+            <div class="occ-label"><span>Occupancy</span><span>${occupied}/${r.totalSlots}</span></div>
+            <div class="occ-track"><div class="occ-fill" style="width:${occupancy}%"></div></div>
+          </div>
+          <span class="status-badge status-${r.status||'available'}"><i class="bi bi-${r.status==='available'?'check-circle':r.status==='occupied'?'person-fill':'tools'}"></i>${r.status||'available'}</span>
+          ${r.amenities?`<div style="margin-top:10px;font-size:11px;color:var(--muted)"><i class="bi bi-star-fill" style="color:var(--gold);font-size:9px;margin-right:4px"></i>${r.amenities}</div>`:''}
+        </div>
+        <div class="room-footer">
+          <div class="price">₦${(r.pricePerSlot||0).toLocaleString()} <small>/ slot</small></div>
+          <div class="action-group">
+            <button class="btn-icon view" onclick="viewRoomDetails('${r.id}')" title="View"><i class="bi bi-eye-fill"></i></button>
+            <button class="btn-icon edit" onclick="openEditModal('${r.id}')" title="Edit"><i class="bi bi-pencil-fill"></i></button>
+            <button class="btn-icon delete" onclick="openDeleteModal('${r.id}')" title="Delete"><i class="bi bi-trash-fill"></i></button>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  // ── CREATE/EDIT ──
+  window.openCreateModal=function(){
+    editingRoomId=null;
+    document.getElementById("modalTitle").textContent="Add New Room";
+    document.getElementById("modalActionBtn").textContent="Create Room";
+    document.getElementById("roomHostel").value="";
+    document.getElementById("roomNumber").value="";
+    document.getElementById("roomFloor").value="";
+    document.getElementById("roomType").value="Standard";
+    document.getElementById("totalSlots").value="4";
+    document.getElementById("pricePerSlot").value="50000";
+    document.getElementById("roomStatus").value="available";
+    document.getElementById("roomAmenities").value="";
+    document.getElementById("roomFormErr").classList.remove("show");
+    document.getElementById("roomModal").classList.add("show");
+  };
+
+  window.openEditModal=function(id){
+    const room=rooms.find(r=>r.id===id);if(!room)return;
+    editingRoomId=id;
+    document.getElementById("modalTitle").textContent="Edit Room";
+    document.getElementById("modalActionBtn").textContent="Save Changes";
+    document.getElementById("roomHostel").value=room.hostelId||"";
+    document.getElementById("roomNumber").value=room.roomNumber||"";
+    document.getElementById("roomFloor").value=room.floor||"";
+    document.getElementById("roomType").value=room.roomType||"Standard";
+    document.getElementById("totalSlots").value=room.totalSlots||4;
+    document.getElementById("pricePerSlot").value=room.pricePerSlot||50000;
+    document.getElementById("roomStatus").value=room.status||"available";
+    document.getElementById("roomAmenities").value=room.amenities||"";
+    document.getElementById("roomFormErr").classList.remove("show");
+    document.getElementById("roomModal").classList.add("show");
+  };
+
+  window.closeRoomModal=function(){
+    document.getElementById("roomModal").classList.remove("show");
+    editingRoomId=null;
+  };
+
+  window.saveRoom=async function(){
+    const hostelId=document.getElementById("roomHostel").value;
+    const roomNumber=document.getElementById("roomNumber").value.trim();
+    const floor=document.getElementById("roomFloor").value.trim();
+    const roomType=document.getElementById("roomType").value;
+    const totalSlots=parseInt(document.getElementById("totalSlots").value)||4;
+    const pricePerSlot=parseFloat(document.getElementById("pricePerSlot").value)||0;
+    const status=document.getElementById("roomStatus").value;
+    const amenities=document.getElementById("roomAmenities").value.trim();
+    const errEl=document.getElementById("roomFormErr");
+
+    if(!hostelId){errEl.textContent="Please select a hostel";errEl.classList.add("show");return;}
+    if(!roomNumber){errEl.textContent="Room number is required";errEl.classList.add("show");return;}
+
+    const hostel=hostels.find(h=>h.id===hostelId);
+    const data={hostelId,hostelName:hostel?.name,blockName:hostel?.name,roomNumber,floor,roomType,totalSlots,slotsLeft:status==="available"?totalSlots:0,pricePerSlot,status,amenities,updatedAt:serverTimestamp()};
+
+    try{
+      if(editingRoomId){
+        const oldRoom=rooms.find(r=>r.id===editingRoomId);
+        if(oldRoom&&oldRoom.status!==status){
+          if(status==="available")data.slotsLeft=totalSlots;
+          else if(status==="occupied")data.slotsLeft=0;
+        }
+        await updateDoc(doc(db,"rooms",editingRoomId),data);
+      }else{
+        data.slotsLeft=status==="available"?totalSlots:0;
+        data.createdAt=serverTimestamp();
+        await addDoc(collection(db,"rooms"),data);
+      }
+      closeRoomModal();
+    }catch(e){errEl.textContent=e.message;errEl.classList.add("show");}
+  };
+
+  // ── BULK ADD ──
+  window.openBulkAddModal=function(){
+    document.getElementById("bulkHostel").value="";
+    document.getElementById("bulkStartNumber").value="";
+    document.getElementById("bulkCount").value="1";
+    document.getElementById("bulkType").value="Standard";
+    document.getElementById("bulkSlots").value="4";
+    document.getElementById("bulkPrice").value="50000";
+    document.getElementById("bulkFloor").value="";
+    document.getElementById("bulkFormErr").classList.remove("show");
+    document.getElementById("bulkModal").classList.add("show");
+  };
+
+  window.closeBulkModal=function(){document.getElementById("bulkModal").classList.remove("show");};
+  window.executeBulkAdd=async function(){
+    const hostelId=document.getElementById("bulkHostel").value;
+    const startNumber=document.getElementById("bulkStartNumber").value.trim();
+    const count=parseInt(document.getElementById("bulkCount").value)||1;
+    const roomType=document.getElementById("bulkType").value;
+    const totalSlots=parseInt(document.getElementById("bulkSlots").value)||4;
+    const pricePerSlot=parseFloat(document.getElementById("bulkPrice").value)||0;
+    const floor=document.getElementById("bulkFloor").value.trim();
+    const errEl=document.getElementById("bulkFormErr");
+
+    if(!hostelId){errEl.textContent="Please select a hostel";errEl.classList.add("show");return;}
+    if(!startNumber){errEl.textContent="Starting room number is required";errEl.classList.add("show");return;}
+
+    const hostel=hostels.find(h=>h.id===hostelId);
+    const batch=writeBatch(db);
+    for(let i=0;i<count;i++){
+      const roomNumber=startNumber.replace(/\d+$/,m=>String(parseInt(m)+i).padStart(m.length,'0'))||`${startNumber}-${i+1}`;
+      const ref=doc(collection(db,"rooms"));
+      batch.set(ref,{hostelId,hostelName:hostel?.name,blockName:hostel?.name,roomNumber,floor,roomType,totalSlots,slotsLeft:totalSlots,pricePerSlot,status:"available",createdAt:serverTimestamp()});
+    }
+    await batch.commit();
+    closeBulkModal();
+  };
+
+  window.closeBulkOnOverlay=function(e){if(e.target.classList.contains("modal-overlay"))closeBulkModal();};
+  window.closeModalOnOverlay=function(e){if(e.target.classList.contains("modal-overlay"))closeRoomModal();};
+
+  // ── DELETE ──
+  window.openDeleteModal=function(id){
+    const room=rooms.find(r=>r.id===id);if(!room)return;
+    deletingRoomId=id;
+    document.getElementById("deleteRoomNumber").textContent=room.roomNumber||"this room";
+    document.getElementById("deleteModal").classList.add("show");
+  };
+  window.closeDeleteModal=function(){document.getElementById("deleteModal").classList.remove("show");deletingRoomId=null;};
+  window.confirmDelete=async function(){
+    if(!deletingRoomId)return;
+    await deleteDoc(doc(db,"rooms",deletingRoomId));
+    closeDeleteModal();
+  };
+  window.closeDeleteOnOverlay=function(e){if(e.target.classList.contains("modal-overlay"))closeDeleteModal();};
+
+  window.viewRoomDetails=function(id){alert("View room details: "+id);};
+
+  async function doSignOut(){await signOut(auth);window.location.href="admin-login.html";}
+  ["sideSignOut","sbSignOut","dropSignOut"].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener("click",async e=>{e.preventDefault();doSignOut();});});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleSidebar(){document.getElementById("sidebar").classList.toggle("open");document.getElementById("sbOverlay").classList.toggle("show");}
+  function toggleUserMenu(){document.getElementById("userDropdown").classList.toggle("open");}
+  document.addEventListener("click",e=>{if(!e.target.closest("#userMenuBtn")&&!e.target.closest("#userDropdown"))document.getElementById("userDropdown").classList.remove("open");});
+</script>
+</body>
+</html>
