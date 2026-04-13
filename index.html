@@ -24,12 +24,23 @@
     body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
     #particles{position:fixed;inset:0;z-index:0;pointer-events:none}
 
-    /* ── SCROLLBAR ── */
+    /* SCROLL TO TOP/BOTTOM BUTTON */
+    .scroll-arrow{position:fixed;right:24px;bottom:24px;width:48px;height:48px;border-radius:50%;background:var(--gold);color:var(--navy);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;box-shadow:0 6px 20px var(--glow);z-index:999;opacity:0;visibility:hidden;transition:all .3s ease;border:none}
+    .scroll-arrow.show{opacity:1;visibility:visible}
+    .scroll-arrow:hover{background:var(--gold2);transform:scale(1.08)}
+    .scroll-arrow.up{transform:rotate(180deg)}
+    .scroll-arrow.up:hover{transform:rotate(180deg) scale(1.08)}
+
+    /* SCROLLBAR */
     ::-webkit-scrollbar{width:5px}
     ::-webkit-scrollbar-track{background:var(--navy)}
     ::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}
 
-    /* ── NAVBAR ── */
+    /* TYPING CURSOR */
+    .typing-cursor{display:inline-block;width:3px;height:clamp(40px,5.8vw,74px);background:var(--gold);margin-left:8px;animation:blink 1s infinite;vertical-align:middle}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+    /* NAVBAR */
     #navbar{position:fixed;top:0;left:0;right:0;z-index:9999;padding:15px 0;transition:all .4s}
     #navbar.scrolled{background:rgba(7,17,43,.97);backdrop-filter:blur(22px);box-shadow:0 4px 32px rgba(0,0,0,.45);border-bottom:1px solid var(--border);padding:10px 0}
     .nb-brand{display:flex;align-items:center;gap:11px;text-decoration:none}
@@ -48,14 +59,14 @@
     .navbar-toggler{border-color:rgba(255,255,255,.18)}
     .navbar-toggler-icon{filter:invert(1)}
 
-    /* ── SESSION BANNER ── */
+    /* SESSION BANNER */
     .session-banner{background:linear-gradient(135deg,rgba(245,166,35,.12),rgba(245,166,35,.04));border:1px solid rgba(245,166,35,.18);border-radius:100px;padding:8px 20px;display:inline-flex;align-items:center;gap:10px;margin-bottom:20px}
     .sb-dot{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pulse 1.5s infinite}
     .sb-text{font-size:13px;font-weight:600}
     .sb-text span{color:var(--gold)}
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.9)}}
 
-    /* ── HERO ── */
+    /* HERO */
     .hero{min-height:100vh;display:flex;align-items:center;padding:120px 0 80px;position:relative;overflow:hidden}
     .hero-bg{position:absolute;inset:0;background:linear-gradient(128deg,#07112b 0%,#0c1a3d 42%,#091530 100%)}
     .hero-slice{position:absolute;right:0;top:0;bottom:0;width:52%;background:linear-gradient(150deg,#112060 0%,#0a1840 100%);clip-path:polygon(10% 0,100% 0,100% 100%,0% 100%);border-left:1.5px solid rgba(245,166,35,.13)}
@@ -66,6 +77,7 @@
     .eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 1.6s infinite}
     .hero h1{font-family:'Playfair Display',serif;font-size:clamp(40px,5.8vw,74px);font-weight:900;line-height:1.07;margin-bottom:22px}
     .hero h1 .gold{color:var(--gold)}
+    #heroTypingText{display:inline}
     .hero-p{font-size:16.5px;font-weight:300;color:rgba(255,255,255,.66);line-height:1.78;max-width:500px;margin-bottom:38px}
     .hero-btns{display:flex;gap:13px;flex-wrap:wrap}
     .btn-primary-hero{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:var(--navy);font-weight:700;font-size:14.5px;padding:13px 32px;border-radius:10px;text-decoration:none;box-shadow:0 6px 26px var(--glow);transition:all .3s;border:none;cursor:pointer}
@@ -84,7 +96,6 @@
     .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.1) 50%,rgba(255,255,255,.06) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
     .sk-row{height:52px;border-radius:10px;margin-bottom:8px}
-    .sk-stat{height:36px;border-radius:8px;flex:1;margin:0 4px}
 
     /* ROOM ROWS */
     .room-row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);margin-bottom:8px;transition:background .2s;cursor:pointer}
@@ -110,8 +121,9 @@
     .fbadge{position:absolute;background:rgba(7,17,43,.93);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:10px 15px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:600;box-shadow:0 8px 28px rgba(0,0,0,.35)}
     .fb1{top:-18px;left:-22px;animation:floatY 3.2s ease-in-out infinite}
     .fb2{bottom:-18px;right:-10px;animation:floatY 3.2s ease-in-out 1.6s infinite}
+    @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
 
-    /* ── QUICK STATS BAR ── */
+    /* QUICK STATS */
     .quick-stats{background:rgba(245,166,35,.07);border-top:1px solid rgba(245,166,35,.14);border-bottom:1px solid rgba(245,166,35,.14);padding:20px 0;position:relative;z-index:2}
     .qs-item{display:flex;align-items:center;justify-content:center;gap:12px}
     .qs-icon{width:40px;height:40px;border-radius:10px;background:rgba(245,166,35,.12);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--gold)}
@@ -119,7 +131,7 @@
     .qs-label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
     .qs-value{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--gold);line-height:1.2}
 
-    /* ── COUNTERS ── */
+    /* COUNTERS */
     .counters{padding:52px 0;background:rgba(245,166,35,.07);border-top:1px solid rgba(245,166,35,.14);border-bottom:1px solid rgba(245,166,35,.14);position:relative;z-index:2}
     .ctr-box{text-align:center;padding:18px 28px}
     .ctr-box:not(:last-child){border-right:1px solid rgba(255,255,255,.07)}
@@ -127,48 +139,35 @@
     .ctr-num{font-family:'Playfair Display',serif;font-size:clamp(34px,4vw,52px);font-weight:900;color:var(--gold);line-height:1}
     .ctr-label{font-size:12.5px;color:var(--muted);margin-top:5px}
 
-    /* ── SECTION SHARED ── */
+    /* SECTION SHARED */
     .stag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);background:rgba(245,166,35,.09);border:1px solid rgba(245,166,35,.22);padding:5px 15px;border-radius:100px;margin-bottom:14px}
     .stitle{font-family:'Playfair Display',serif;font-size:clamp(26px,3.5vw,44px);font-weight:900;line-height:1.12;margin-bottom:14px}
     .ssub{font-size:15.5px;color:var(--muted);line-height:1.76;max-width:540px}
 
-    /* ── FEATURES ── */
+    /* FEATURES */
     .feat-section{padding:96px 0}
     .bento{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
-    .bc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:30px;position:relative;overflow:hidden;transition:border-color .3s,transform .3s,box-shadow .3s}
-    .bc:hover{border-color:rgba(245,166,35,.38);transform:translateY(-5px);box-shadow:0 18px 48px rgba(0,0,0,.3),0 0 0 1px rgba(245,166,35,.13)}
-    .bc::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(245,166,35,.038) 0%,transparent 55%);opacity:0;transition:opacity .3s}
-    .bc:hover::before{opacity:1}
-    .b1{grid-column:span 5}.b2{grid-column:span 7}
-    .b3{grid-column:span 4}.b4{grid-column:span 4}.b5{grid-column:span 4}
-    .b6{grid-column:span 6}.b7{grid-column:span 6}
+    .bc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:30px;position:relative;overflow:hidden;transition:all .3s}
+    .bc:hover{border-color:rgba(245,166,35,.38);transform:translateY(-5px);box-shadow:0 18px 48px rgba(0,0,0,.3)}
+    .b1{grid-column:span 5}.b2{grid-column:span 7}.b3{grid-column:span 4}.b4{grid-column:span 4}.b5{grid-column:span 4}.b6{grid-column:span 6}.b7{grid-column:span 6}
     .bc-icon{width:52px;height:52px;border-radius:13px;background:rgba(245,166,35,.11);border:1px solid rgba(245,166,35,.18);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:18px}
     .bc-title{font-size:17px;font-weight:700;margin-bottom:9px}
     .bc-desc{font-size:13.5px;color:var(--muted);line-height:1.72}
-    .bc-num{font-family:'Playfair Display',serif;font-size:clamp(44px,5.5vw,74px);font-weight:900;color:rgba(245,166,35,.055);position:absolute;bottom:-12px;right:18px;line-height:1;pointer-events:none;user-select:none}
+    .bc-num{font-family:'Playfair Display',serif;font-size:clamp(44px,5.5vw,74px);font-weight:900;color:rgba(245,166,35,.055);position:absolute;bottom:-12px;right:18px;pointer-events:none}
 
-    /* AOS custom overrides for features */
-    [data-aos="slide-right"]{transform:translateX(-60px);opacity:0;transition-property:transform,opacity}
-    [data-aos="slide-right"].aos-animate{transform:translateX(0);opacity:1}
-    [data-aos="slide-left"]{transform:translateX(60px);opacity:0;transition-property:transform,opacity}
-    [data-aos="slide-left"].aos-animate{transform:translateX(0);opacity:1}
-    [data-aos="slide-up-feat"]{transform:translateY(50px);opacity:0;transition-property:transform,opacity}
-    [data-aos="slide-up-feat"].aos-animate{transform:translateY(0);opacity:1}
-
-    /* ── HOW IT WORKS ── */
-    .how-section{padding:96px 0;background:linear-gradient(180deg,var(--navy) 0%,#060f24 100%);position:relative;overflow:hidden}
+    /* HOW IT WORKS */
+    .how-section{padding:96px 0;background:linear-gradient(180deg,var(--navy) 0%,#060f24 100%)}
     .how-line{position:absolute;top:0;left:50%;transform:translateX(-50%);width:1px;height:100%;background:linear-gradient(180deg,transparent 5%,rgba(245,166,35,.28) 50%,transparent 95%)}
-    .tstep{display:grid;grid-template-columns:1fr 76px 1fr;align-items:center;margin-bottom:44px;gap:0}
-    .tstep:last-child{margin-bottom:0}
+    .tstep{display:grid;grid-template-columns:1fr 76px 1fr;align-items:center;margin-bottom:44px}
     .ts-left{text-align:right;padding-right:38px}
     .ts-right{padding-left:38px}
-    .ts-node{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--navy);margin:0 auto;box-shadow:0 0 0 9px rgba(245,166,35,.09),0 8px 22px rgba(245,166,35,.28);position:relative;z-index:2}
+    .ts-node{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--navy);margin:0 auto;box-shadow:0 0 0 9px rgba(245,166,35,.09)}
     .ts-title{font-size:16.5px;font-weight:700;margin-bottom:7px}
     .ts-desc{font-size:13px;color:var(--muted);line-height:1.72}
     .tstep.right .ts-left{display:none}
     .tstep.left .ts-right{display:none}
 
-    /* ── HOSTEL BLOCKS ── */
+    /* HOSTEL BLOCKS */
     .blocks-section{padding:96px 0}
     .block-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;height:100%;transition:all .35s;cursor:pointer}
     .block-card:hover{border-color:rgba(245,166,35,.38);transform:translateY(-7px);box-shadow:0 22px 52px rgba(0,0,0,.4)}
@@ -182,74 +181,54 @@
     .bm{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted)}
     .bm i{color:var(--gold);font-size:13px}
     .blk-price{font-size:15.5px;font-weight:700;color:var(--gold)}
-    .blk-price span{font-size:11px;color:var(--muted);font-weight:400}
     .avbar{background:rgba(255,255,255,.07);border-radius:100px;height:4px;margin:10px 0 5px;overflow:hidden}
     .avfill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--gold),#22c55e);transition:width 1.2s ease}
     .avtext{font-size:10.5px;color:var(--muted)}
     .btn-blk{display:block;text-align:center;margin-top:16px;background:rgba(245,166,35,.09);border:1px solid rgba(245,166,35,.28);color:var(--gold);font-size:12.5px;font-weight:700;padding:10px;border-radius:10px;text-decoration:none;transition:all .25s}
     .btn-blk:hover{background:var(--gold);color:var(--navy)}
-    /* skeleton block */
-    .sk-blk-img{height:175px;border-radius:0}
-    .sk-blk-line{height:14px;margin-bottom:10px;border-radius:6px}
-    .sk-blk-line.short{width:60%}
 
-    /* ── USER ROLES SWIPER ── */
+    /* ROLES */
     .roles-section{padding:96px 0;background:linear-gradient(135deg,#060f24 0%,#0c1a3d 100%)}
-    .role-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:30px;text-align:center;height:100%;transition:all .3s;position:relative;overflow:hidden}
-    .role-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);transform:scaleX(0);transition:transform .3s}
+    .role-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:30px;text-align:center;height:100%;transition:all .3s}
     .role-card:hover{border-color:rgba(245,166,35,.28);transform:translateY(-5px)}
-    .role-card:hover::after{transform:scaleX(1)}
     .r-emoji{font-size:42px;margin-bottom:14px;display:block}
     .r-title{font-size:16.5px;font-weight:700;margin-bottom:13px}
     .r-list{list-style:none;text-align:left}
     .r-list li{font-size:12.5px;color:var(--muted);padding:4px 0;display:flex;align-items:flex-start;gap:7px}
-    .r-list li i{color:var(--gold);font-size:11px;margin-top:3px;flex-shrink:0}
-    .swiper-pagination-bullet{background:rgba(255,255,255,.3)!important;opacity:1!important}
-    .swiper-pagination-bullet-active{background:var(--gold)!important}
-    .swiper-button-next,.swiper-button-prev{color:var(--gold)!important;width:36px!important;height:36px!important}
-    .swiper-button-next::after,.swiper-button-prev::after{font-size:16px!important;font-weight:900}
+    .r-list li i{color:var(--gold);font-size:11px;margin-top:3px}
 
-    /* ── TESTIMONIALS SWIPER ── */
+    /* TESTIMONIALS */
     .testi-section{padding:96px 0}
-    .testi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:30px;height:100%;position:relative}
+    .testi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:30px;height:100%}
     .testi-quote-icon{font-size:44px;line-height:1;color:var(--gold);opacity:.25;font-family:'Playfair Display',serif;margin-bottom:6px}
     .testi-text{font-size:14.5px;color:rgba(255,255,255,.78);line-height:1.72;margin-bottom:22px;font-style:italic}
     .testi-author{display:flex;align-items:center;gap:11px}
-    .tav{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:var(--navy);flex-shrink:0}
+    .tav{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--navy)}
     .tname{font-weight:700;font-size:13.5px}
     .trole{font-size:11px;color:var(--muted)}
     .tstars{color:var(--gold);font-size:11.5px;margin-bottom:3px}
-    /* skeleton testi */
-    .sk-testi{height:180px;border-radius:var(--radius)}
-    /* write review btn */
-    .btn-review{display:inline-flex;align-items:center;gap:7px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.28);color:var(--gold);font-size:13px;font-weight:600;padding:9px 22px;border-radius:9px;text-decoration:none;transition:all .25s;cursor:pointer}
+    .btn-review{display:inline-flex;align-items:center;gap:7px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.28);color:var(--gold);font-size:13px;font-weight:600;padding:9px 22px;border-radius:9px;cursor:pointer;transition:all .25s}
     .btn-review:hover{background:var(--gold);color:var(--navy)}
 
     /* REVIEW MODAL */
     .review-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px}
     .review-modal-overlay.open{display:flex}
-    .review-modal{background:#0d1f4a;border:1px solid rgba(245,166,35,.22);border-radius:20px;padding:36px;max-width:480px;width:100%;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.6)}
-    .rm-close{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;transition:color .2s}
+    .review-modal{background:#0d1f4a;border:1px solid rgba(245,166,35,.22);border-radius:20px;padding:36px;max-width:480px;width:100%}
+    .rm-close{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer}
     .rm-close:hover{color:var(--white)}
     .form-label-hms{font-size:13px;font-weight:600;color:rgba(255,255,255,.8);margin-bottom:6px;display:block}
-    .form-control-hms{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 14px;color:var(--white);font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .2s;resize:none}
+    .form-control-hms{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 14px;color:var(--white);font-size:13.5px;outline:none;resize:none}
     .form-control-hms:focus{border-color:var(--gold)}
-    .form-control-hms::placeholder{color:rgba(255,255,255,.3)}
     .star-rating{display:flex;gap:6px;margin-bottom:18px}
     .star-rating i{font-size:24px;color:rgba(255,255,255,.2);cursor:pointer;transition:color .15s}
     .star-rating i.active{color:var(--gold)}
 
-    /* ── CTA ── */
-    .cta-section{position:relative;padding:110px 0;overflow:hidden;text-align:center}
-    .cta-bg{position:absolute;inset:0;background:linear-gradient(135deg,#091530 0%,#112060 50%,#0c1a3d 100%)}
-    .cta-bg::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(245,166,35,.055) 1px,transparent 1px);background-size:30px 30px}
-    .cta-orb1{position:absolute;left:-8%;top:-25%;width:480px;height:480px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.1) 0%,transparent 68%);animation:pulseOrb 5s ease-in-out infinite}
-    .cta-orb2{position:absolute;right:-5%;bottom:-25%;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(17,68,180,.15) 0%,transparent 68%);animation:pulseOrb 6s ease-in-out infinite reverse}
-    .cta-content{position:relative;z-index:2}
-    .cta-title{font-family:'Playfair Display',serif;font-size:clamp(30px,4.5vw,56px);font-weight:900;line-height:1.1;margin-bottom:18px}
-    .cta-sub{font-size:16px;color:var(--muted);max-width:500px;margin:0 auto 38px;line-height:1.74}
+    /* CTA */
+    .cta-section{padding:110px 0;text-align:center;position:relative;background:linear-gradient(135deg,#091530 0%,#112060 50%,#0c1a3d 100%)}
+    .cta-title{font-family:'Playfair Display',serif;font-size:clamp(30px,4.5vw,56px);font-weight:900;margin-bottom:18px}
+    .cta-sub{font-size:16px;color:var(--muted);max-width:500px;margin:0 auto 38px}
 
-    /* ── FOOTER ── */
+    /* FOOTER */
     footer{background:#040c1e;border-top:1px solid rgba(255,255,255,.05);padding:60px 0 26px}
     .ft-desc{font-size:12.5px;color:rgba(255,255,255,.42);line-height:1.8;margin-top:14px;max-width:255px}
     .ft-col h5{font-size:10.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
@@ -258,12 +237,19 @@
     hr.ft-hr{border-color:rgba(255,255,255,.055);margin:38px 0 22px}
     .ft-bottom{font-size:11.5px;color:rgba(255,255,255,.28)}
 
-    /* ── KEYFRAMES ── */
-    @keyframes pulseOrb{0%,100%{opacity:.8;transform:translateY(-50%) scale(1)}50%{opacity:1;transform:translateY(-50%) scale(1.07)}}
-    @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    /* SWIPER OVERRIDES */
+    .swiper-pagination-bullet{background:rgba(255,255,255,.3)!important}
+    .swiper-pagination-bullet-active{background:var(--gold)!important}
+    .swiper-button-next,.swiper-button-prev{color:var(--gold)!important}
 
-    /* ── RESPONSIVE ── */
+    /* AOS */
+    [data-aos="slide-right"]{transform:translateX(-60px);opacity:0}
+    [data-aos="slide-right"].aos-animate{transform:translateX(0);opacity:1}
+    [data-aos="slide-left"]{transform:translateX(60px);opacity:0}
+    [data-aos="slide-left"].aos-animate{transform:translateX(0);opacity:1}
+
+    @keyframes pulseOrb{0%,100%{opacity:.8;transform:translateY(-50%) scale(1)}50%{opacity:1;transform:translateY(-50%) scale(1.07)}}
+
     @media(max-width:992px){
       .hero-slice,.hero-glow{display:none}
       .how-line{left:28px;transform:none}
@@ -274,9 +260,7 @@
     @media(max-width:768px){
       .bento{grid-template-columns:1fr 1fr}
       .b1,.b2,.b3,.b4,.b5,.b6,.b7{grid-column:span 2}
-      .b3,.b4,.b5{grid-column:span 1}
-      .ctr-box:not(:last-child){border-right:none;border-bottom:1px solid rgba(255,255,255,.07)}
-      .quick-stats .qs-item{justify-content:flex-start;margin-bottom:15px}
+      .ctr-box:not(:last-child){border-right:none}
     }
     @media(max-width:540px){
       .bento{grid-template-columns:1fr}
@@ -287,7 +271,10 @@
 <body>
 <canvas id="particles"></canvas>
 
-<!-- ═══════════════════ NAVBAR ═══════════════════ -->
+<!-- SCROLL ARROW -->
+<button class="scroll-arrow" id="scrollArrow"><i class="bi bi-arrow-down"></i></button>
+
+<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg" id="navbar">
   <div class="container">
     <a class="nb-brand navbar-brand" href="index.html">
@@ -313,28 +300,28 @@
   </div>
 </nav>
 
-<!-- ═══════════════════ HERO ═══════════════════ -->
+<!-- HERO -->
 <section class="hero" id="home">
-  <div class="hero-bg"></div>
-  <div class="hero-slice"></div>
-  <div class="hero-glow"></div>
-  <div class="hero-dots"></div>
+  <div class="hero-bg"></div><div class="hero-slice"></div><div class="hero-glow"></div><div class="hero-dots"></div>
   <div class="container position-relative" style="z-index:4">
     <div class="row align-items-center">
       <div class="col-lg-6 hero-content" data-aos="fade-right" data-aos-duration="850">
         <div class="session-banner" id="sessionBanner">
           <span class="sb-dot"></span>
-          <span class="sb-text"><span id="sessionName">2024/2025</span> Session — <span id="bookingStatus">Bookings Open</span></span>
+          <span class="sb-text"><span id="sessionName">2025/2026</span> Session — <span id="bookingStatus">Bookings Open</span></span>
         </div>
         <div class="eyebrow"><span class="pulse"></span>Official Digital Hostel Platform</div>
         <h1>Your <span class="gold">Smart</span><br>Hostel, One<br>Click Away</h1>
+        <!-- TYPING EFFECT REPLACES THIS LINE -->
+        <div style="display:flex;align-items:center;margin-bottom:22px">
+          <span id="heroTypingText" style="font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,48px);font-weight:900;line-height:1.07"></span>
+          <span class="typing-cursor"></span>
+        </div>
         <p class="hero-p">FUTBabura's official digital hostel platform. Browse real rooms, book securely, pay via Paystack, and get your QR-coded approval letter instantly — no queues, no stress.</p>
         <div class="hero-btns">
           <a href="register.html" class="btn-primary-hero"><i class="bi bi-house-door-fill"></i>Book a Room</a>
           <a href="#how" class="btn-ghost-hero">How It Works<i class="bi bi-arrow-down"></i></a>
         </div>
-        
-        <!-- Quick Stats Mini -->
         <div class="row mt-5 g-3">
           <div class="col-4"><div class="qs-item"><div class="qs-icon">🏢</div><div class="qs-content"><div class="qs-label">Hostels</div><div class="qs-value" id="qsHostels">—</div></div></div></div>
           <div class="col-4"><div class="qs-item"><div class="qs-icon">🚪</div><div class="qs-content"><div class="qs-label">Rooms</div><div class="qs-value" id="qsRooms">—</div></div></div></div>
@@ -347,12 +334,10 @@
           <div class="hero-card">
             <div class="hc-head">
               <div class="hc-icon">🏢</div>
-              <div><div class="hc-title">Available Rooms</div><div class="hc-sub" id="hc-session">Loading session...</div></div>
+              <div><div class="hc-title">Available Rooms</div><div class="hc-sub" id="hc-session">2025/2026 Session • Live</div></div>
             </div>
             <div id="hero-rooms-list">
-              <div class="skeleton sk-row"></div>
-              <div class="skeleton sk-row"></div>
-              <div class="skeleton sk-row"></div>
+              <div class="skeleton sk-row"></div><div class="skeleton sk-row"></div><div class="skeleton sk-row"></div>
             </div>
             <div class="hc-footer" id="hc-stats">
               <div class="hcs"><div class="hcs-num" id="hcs-blocks">—</div><div class="hcs-label">Blocks</div></div>
@@ -367,19 +352,19 @@
   </div>
 </section>
 
-<!-- ═══════════════════ COUNTERS ═══════════════════ -->
-<section class="counters" id="counters">
+<!-- COUNTERS -->
+<section class="counters">
   <div class="container">
     <div class="row g-0">
-      <div class="col-6 col-md-3"><div class="ctr-box" data-aos="fade-up"><div class="ctr-icon"><i class="bi bi-buildings-fill"></i></div><div class="ctr-num"><span class="count" data-target="0" id="cnt-blocks">0</span><span style="font-size:.6em">+</span></div><div class="ctr-label">Hostel Blocks</div></div></div>
-      <div class="col-6 col-md-3"><div class="ctr-box" data-aos="fade-up" data-aos-delay="90"><div class="ctr-icon"><i class="bi bi-door-open-fill"></i></div><div class="ctr-num"><span class="count" data-target="0" id="cnt-rooms">0</span><span style="font-size:.6em">+</span></div><div class="ctr-label">Total Rooms</div></div></div>
-      <div class="col-6 col-md-3"><div class="ctr-box" data-aos="fade-up" data-aos-delay="180"><div class="ctr-icon"><i class="bi bi-people-fill"></i></div><div class="ctr-num"><span class="count" data-target="0" id="cnt-students">0</span><span style="font-size:.6em">+</span></div><div class="ctr-label">Students Housed</div></div></div>
+      <div class="col-6 col-md-3"><div class="ctr-box" data-aos="fade-up"><div class="ctr-icon"><i class="bi bi-buildings-fill"></i></div><div class="ctr-num"><span id="cnt-blocks">0</span><span style="font-size:.6em">+</span></div><div class="ctr-label">Hostel Blocks</div></div></div>
+      <div class="col-6 col-md-3"><div class="ctr-box" data-aos="fade-up" data-aos-delay="90"><div class="ctr-icon"><i class="bi bi-door-open-fill"></i></div><div class="ctr-num"><span id="cnt-rooms">0</span><span style="font-size:.6em">+</span></div><div class="ctr-label">Total Rooms</div></div></div>
+      <div class="col-6 col-md-3"><div class="ctr-box" data-aos="fade-up" data-aos-delay="180"><div class="ctr-icon"><i class="bi bi-people-fill"></i></div><div class="ctr-num"><span id="cnt-students">0</span><span style="font-size:.6em">+</span></div><div class="ctr-label">Students Housed</div></div></div>
       <div class="col-6 col-md-3"><div class="ctr-box" data-aos="fade-up" data-aos-delay="270"><div class="ctr-icon"><i class="bi bi-clock-fill"></i></div><div class="ctr-num">24<span style="font-size:.6em">/7</span></div><div class="ctr-label">Online Access</div></div></div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════ FEATURES ═══════════════════ -->
+<!-- FEATURES -->
 <section class="feat-section" id="features">
   <div class="container">
     <div class="text-center mb-5" data-aos="fade-up">
@@ -388,18 +373,18 @@
       <p class="ssub mx-auto">From booking to access verification — the entire hostel experience, fully digitized and real.</p>
     </div>
     <div class="bento">
-      <div class="bc b1" data-aos="slide-right" data-aos-duration="700"><div class="bc-icon">🔍</div><h3 class="bc-title">Real-Time Room Browsing</h3><p class="bc-desc">Browse all available rooms with live Firestore data. Availability updates the instant someone books or admin changes a room status. No stale data, ever.</p><div class="bc-num">01</div></div>
-      <div class="bc b2" data-aos="slide-left" data-aos-duration="700"><div class="bc-icon">💳</div><h3 class="bc-title">Secure Online Payment via Paystack</h3><p class="bc-desc">Pay hostel fees directly from the platform using Paystack. Instant digital receipt generated after payment. All transactions are logged, auditable, and synced to admin in real time.</p><div class="bc-num">02</div></div>
-      <div class="bc b3" data-aos="slide-up-feat" data-aos-duration="600" data-aos-delay="0"><div class="bc-icon">📄</div><h3 class="bc-title">QR Approval Letter</h3><p class="bc-desc">Auto-generated printable letter with unique QR code after payment. Security scans it to verify access.</p><div class="bc-num">03</div></div>
-      <div class="bc b4" data-aos="slide-up-feat" data-aos-duration="600" data-aos-delay="100"><div class="bc-icon">🔧</div><h3 class="bc-title">Maintenance Complaints</h3><p class="bc-desc">Report room issues from your dashboard. Track status in real time — Received, In Progress, Resolved.</p><div class="bc-num">04</div></div>
-      <div class="bc b5" data-aos="slide-up-feat" data-aos-duration="600" data-aos-delay="200"><div class="bc-icon">👥</div><h3 class="bc-title">Visitor Management</h3><p class="bc-desc">Register visitors before arrival. Digital passes generated for security desk validation at the gate.</p><div class="bc-num">05</div></div>
-      <div class="bc b6" data-aos="slide-right" data-aos-duration="700" data-aos-delay="100"><div class="bc-icon">📊</div><h3 class="bc-title">Admin Dashboard & Reports</h3><p class="bc-desc">Real-time occupancy stats, revenue reports, complaint management, and full student record control. Exportable reports for university management — all powered by Firestore.</p><div class="bc-num">06</div></div>
-      <div class="bc b7" data-aos="slide-left" data-aos-duration="700" data-aos-delay="100"><div class="bc-icon">🔐</div><h3 class="bc-title">Role-Based Access Control</h3><p class="bc-desc">Five roles — Student, Hostel Admin, Security Officer, Maintenance Staff, Super Admin — each with dedicated dashboards and permissions stored securely in Firestore.</p><div class="bc-num">07</div></div>
+      <div class="bc b1" data-aos="slide-right"><div class="bc-icon">🔍</div><h3 class="bc-title">Real-Time Room Browsing</h3><p class="bc-desc">Browse all available rooms with live Firestore data. Availability updates the instant someone books or admin changes a room status. No stale data, ever.</p><div class="bc-num">01</div></div>
+      <div class="bc b2" data-aos="slide-left"><div class="bc-icon">💳</div><h3 class="bc-title">Secure Online Payment via Paystack</h3><p class="bc-desc">Pay hostel fees directly from the platform using Paystack. Instant digital receipt generated after payment. All transactions are logged, auditable, and synced to admin in real time.</p><div class="bc-num">02</div></div>
+      <div class="bc b3" data-aos="fade-up"><div class="bc-icon">📄</div><h3 class="bc-title">QR Approval Letter</h3><p class="bc-desc">Auto-generated printable letter with unique QR code after payment. Security scans it to verify access.</p><div class="bc-num">03</div></div>
+      <div class="bc b4" data-aos="fade-up" data-aos-delay="100"><div class="bc-icon">🔧</div><h3 class="bc-title">Maintenance Complaints</h3><p class="bc-desc">Report room issues from your dashboard. Track status in real time — Received, In Progress, Resolved.</p><div class="bc-num">04</div></div>
+      <div class="bc b5" data-aos="fade-up" data-aos-delay="200"><div class="bc-icon">👥</div><h3 class="bc-title">Visitor Management</h3><p class="bc-desc">Register visitors before arrival. Digital passes generated for security desk validation at the gate.</p><div class="bc-num">05</div></div>
+      <div class="bc b6" data-aos="slide-right"><div class="bc-icon">📊</div><h3 class="bc-title">Admin Dashboard & Reports</h3><p class="bc-desc">Real-time occupancy stats, revenue reports, complaint management, and full student record control.</p><div class="bc-num">06</div></div>
+      <div class="bc b7" data-aos="slide-left"><div class="bc-icon">🔐</div><h3 class="bc-title">Role-Based Access Control</h3><p class="bc-desc">Five roles — Student, Hostel Admin, Security, Maintenance, Super Admin — each with dedicated dashboards.</p><div class="bc-num">07</div></div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════ HOW IT WORKS ═══════════════════ -->
+<!-- HOW IT WORKS -->
 <section class="how-section" id="how">
   <div class="how-line"></div>
   <div class="container">
@@ -409,102 +394,67 @@
       <p class="ssub mx-auto">No queues, no paperwork, no stress — a fully digital flow from registration to room access.</p>
     </div>
     <div>
-      <div class="tstep left" data-aos="fade-right" data-aos-duration="750">
-        <div class="ts-left"><h3 class="ts-title">Create Your Account</h3><p class="ts-desc">Register with your matric number, faculty, department, level, gender, and university email. Verify your email to activate your account and unlock full platform access.</p></div>
-        <div class="d-flex justify-content-center"><div class="ts-node">1</div></div>
-        <div class="ts-right"><h3 class="ts-title">Create Your Account</h3><p class="ts-desc">Register with your matric number, department, level, and email. Verify to activate your account.</p></div>
-      </div>
-      <div class="tstep right" data-aos="fade-left" data-aos-duration="750" data-aos-delay="80">
-        <div class="ts-left" style="display:none"></div>
-        <div class="d-flex justify-content-center"><div class="ts-node">2</div></div>
-        <div class="ts-right"><h3 class="ts-title">Browse & Select a Room</h3><p class="ts-desc">Browse live rooms filtered by your gender automatically. Pick your preferred block, room type, and price range. Real availability from Firestore — no guessing.</p></div>
-      </div>
-      <div class="tstep left" data-aos="fade-right" data-aos-duration="750" data-aos-delay="160">
-        <div class="ts-left"><h3 class="ts-title">Pay Your Hostel Fee</h3><p class="ts-desc">Complete payment securely via Paystack. Your room is reserved and booking confirmed automatically the instant payment is verified. No waiting for admin approval.</p></div>
-        <div class="d-flex justify-content-center"><div class="ts-node">3</div></div>
-        <div class="ts-right"><h3 class="ts-title">Pay Your Hostel Fee</h3><p class="ts-desc">Pay via Paystack. Room auto-reserved the instant payment is verified by the system.</p></div>
-      </div>
-      <div class="tstep right" data-aos="fade-left" data-aos-duration="750" data-aos-delay="240">
-        <div class="ts-left" style="display:none"></div>
-        <div class="d-flex justify-content-center"><div class="ts-node">4</div></div>
-        <div class="ts-right"><h3 class="ts-title">Get Your Approval Letter</h3><p class="ts-desc">Download and print your QR-coded approval letter from your dashboard. Present it at the hostel gate — security scans the QR code to verify your booking and grant room access instantly.</p></div>
-      </div>
+      <div class="tstep left" data-aos="fade-right"><div class="ts-left"><h3 class="ts-title">Create Your Account</h3><p class="ts-desc">Register with your matric number, faculty, department, level, gender, and email.</p></div><div class="d-flex justify-content-center"><div class="ts-node">1</div></div><div class="ts-right"></div></div>
+      <div class="tstep right" data-aos="fade-left"><div class="ts-left"></div><div class="d-flex justify-content-center"><div class="ts-node">2</div></div><div class="ts-right"><h3 class="ts-title">Browse & Select a Room</h3><p class="ts-desc">Browse live rooms filtered by your gender automatically.</p></div></div>
+      <div class="tstep left" data-aos="fade-right"><div class="ts-left"><h3 class="ts-title">Pay Your Hostel Fee</h3><p class="ts-desc">Complete payment securely via Paystack. Room auto-reserved.</p></div><div class="d-flex justify-content-center"><div class="ts-node">3</div></div><div class="ts-right"></div></div>
+      <div class="tstep right" data-aos="fade-left"><div class="ts-left"></div><div class="d-flex justify-content-center"><div class="ts-node">4</div></div><div class="ts-right"><h3 class="ts-title">Get Your Approval Letter</h3><p class="ts-desc">Download and print your QR-coded approval letter. Present at gate.</p></div></div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════ HOSTEL BLOCKS ═══════════════════ -->
+<!-- HOSTEL BLOCKS -->
 <section class="blocks-section" id="blocks">
   <div class="container">
     <div class="text-center mb-5" data-aos="fade-up">
       <span class="stag">Accommodation</span>
       <h2 class="stitle">Our Hostel Blocks</h2>
-      <p class="ssub mx-auto">Room availability, pricing, and capacity are managed live by the admin. What you see is always up to date.</p>
+      <p class="ssub mx-auto">Room availability, pricing, and capacity are managed live by the admin.</p>
     </div>
     <div class="row g-4" id="blocks-grid">
-      <div class="col-sm-6 col-lg-3 block-skeleton"><div class="block-card"><div class="skeleton sk-blk-img"></div><div class="blk-body"><div class="skeleton sk-blk-line" style="width:40%;height:20px;margin-bottom:8px"></div><div class="skeleton sk-blk-line" style="height:12px"></div><div class="skeleton sk-blk-line short" style="height:12px"></div><div class="skeleton sk-blk-line" style="width:50%;height:16px;margin-top:14px"></div></div></div></div>
-      <div class="col-sm-6 col-lg-3 block-skeleton"><div class="block-card"><div class="skeleton sk-blk-img"></div><div class="blk-body"><div class="skeleton sk-blk-line" style="width:40%;height:20px;margin-bottom:8px"></div><div class="skeleton sk-blk-line" style="height:12px"></div><div class="skeleton sk-blk-line short" style="height:12px"></div><div class="skeleton sk-blk-line" style="width:50%;height:16px;margin-top:14px"></div></div></div></div>
-      <div class="col-sm-6 col-lg-3 block-skeleton"><div class="block-card"><div class="skeleton sk-blk-img"></div><div class="blk-body"><div class="skeleton sk-blk-line" style="width:40%;height:20px;margin-bottom:8px"></div><div class="skeleton sk-blk-line" style="height:12px"></div><div class="skeleton sk-blk-line short" style="height:12px"></div><div class="skeleton sk-blk-line" style="width:50%;height:16px;margin-top:14px"></div></div></div></div>
-      <div class="col-sm-6 col-lg-3 block-skeleton"><div class="block-card"><div class="skeleton sk-blk-img"></div><div class="blk-body"><div class="skeleton sk-blk-line" style="width:40%;height:20px;margin-bottom:8px"></div><div class="skeleton sk-blk-line" style="height:12px"></div><div class="skeleton sk-blk-line short" style="height:12px"></div><div class="skeleton sk-blk-line" style="width:50%;height:16px;margin-top:14px"></div></div></div></div>
+      <div class="col-sm-6 col-lg-3 block-skeleton"><div class="block-card"><div class="skeleton sk-blk-img"></div><div class="blk-body"><div class="skeleton sk-blk-line"></div></div></div></div>
+      <div class="col-sm-6 col-lg-3 block-skeleton"><div class="block-card"><div class="skeleton sk-blk-img"></div><div class="blk-body"><div class="skeleton sk-blk-line"></div></div></div></div>
+      <div class="col-sm-6 col-lg-3 block-skeleton"><div class="block-card"><div class="skeleton sk-blk-img"></div><div class="blk-body"><div class="skeleton sk-blk-line"></div></div></div></div>
+      <div class="col-sm-6 col-lg-3 block-skeleton"><div class="block-card"><div class="skeleton sk-blk-img"></div><div class="blk-body"><div class="skeleton sk-blk-line"></div></div></div></div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════ USER ROLES SWIPER ═══════════════════ -->
+<!-- ROLES -->
 <section class="roles-section" id="roles">
   <div class="container">
     <div class="text-center mb-5" data-aos="fade-up">
       <span class="stag">User Roles</span>
       <h2 class="stitle">Built for Everyone<br>in the Hostel Ecosystem</h2>
-      <p class="ssub mx-auto">Each user type gets a tailored experience with role-specific access, tools, and dashboards.</p>
     </div>
-    <div class="swiper roles-swiper" data-aos="fade-up" data-aos-delay="100">
-      <div class="swiper-wrapper">
-        <div class="swiper-slide"><div class="role-card"><span class="r-emoji">👨‍🎓</span><h3 class="r-title">Student</h3><ul class="r-list"><li><i class="bi bi-check-circle-fill"></i>Browse & book rooms live</li><li><i class="bi bi-check-circle-fill"></i>Pay hostel fees via Paystack</li><li><i class="bi bi-check-circle-fill"></i>Download QR approval letter</li><li><i class="bi bi-check-circle-fill"></i>Submit maintenance complaints</li><li><i class="bi bi-check-circle-fill"></i>Register expected visitors</li><li><i class="bi bi-check-circle-fill"></i>Leave verified reviews</li></ul></div></div>
-        <div class="swiper-slide"><div class="role-card"><span class="r-emoji">🏠</span><h3 class="r-title">Hostel Admin</h3><ul class="r-list"><li><i class="bi bi-check-circle-fill"></i>Manage room inventory & pricing</li><li><i class="bi bi-check-circle-fill"></i>View real-time financial reports</li><li><i class="bi bi-check-circle-fill"></i>Assign & resolve complaints</li><li><i class="bi bi-check-circle-fill"></i>Monitor live occupancy</li><li><i class="bi bi-check-circle-fill"></i>Manage student records</li><li><i class="bi bi-check-circle-fill"></i>Control hostel block settings</li></ul></div></div>
-        <div class="swiper-slide"><div class="role-card"><span class="r-emoji">👮</span><h3 class="r-title">Security Officer</h3><ul class="r-list"><li><i class="bi bi-check-circle-fill"></i>Scan student QR codes at gate</li><li><i class="bi bi-check-circle-fill"></i>Validate visitor passes</li><li><i class="bi bi-check-circle-fill"></i>View daily access logs</li><li><i class="bi bi-check-circle-fill"></i>Flag unauthorized entry attempts</li></ul></div></div>
-        <div class="swiper-slide"><div class="role-card"><span class="r-emoji">🔧</span><h3 class="r-title">Maintenance Staff</h3><ul class="r-list"><li><i class="bi bi-check-circle-fill"></i>View assigned complaints</li><li><i class="bi bi-check-circle-fill"></i>Update repair progress status</li><li><i class="bi bi-check-circle-fill"></i>Flag unresolved critical issues</li><li><i class="bi bi-check-circle-fill"></i>Access full maintenance history</li></ul></div></div>
-        <div class="swiper-slide"><div class="role-card"><span class="r-emoji">⚙️</span><h3 class="r-title">Super Admin</h3><ul class="r-list"><li><i class="bi bi-check-circle-fill"></i>Full system access & configuration</li><li><i class="bi bi-check-circle-fill"></i>Manage all user roles & accounts</li><li><i class="bi bi-check-circle-fill"></i>Set academic session parameters</li><li><i class="bi bi-check-circle-fill"></i>Override any admin action</li><li><i class="bi bi-check-circle-fill"></i>System audit logs & analytics</li></ul></div></div>
-      </div>
-      <div class="swiper-pagination mt-4 position-relative"></div>
-      <div class="swiper-button-prev"></div>
-      <div class="swiper-button-next"></div>
+    <div class="swiper roles-swiper">
+      <div class="swiper-wrapper" id="rolesWrapper"></div>
+      <div class="swiper-pagination"></div>
+      <div class="swiper-button-prev"></div><div class="swiper-button-next"></div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════ TESTIMONIALS SWIPER ═══════════════════ -->
+<!-- TESTIMONIALS -->
 <section class="testi-section" id="reviews">
   <div class="container">
     <div class="text-center mb-4" data-aos="fade-up">
       <span class="stag">Student Reviews</span>
       <h2 class="stitle">What Students Say</h2>
-      <p class="ssub mx-auto">Real reviews from real FUTBabura students who have used the platform.</p>
     </div>
-    <div class="text-center mb-5" data-aos="fade-up" data-aos-delay="80">
-      <button class="btn-review" id="openReviewBtn"><i class="bi bi-star-fill"></i>Leave a Review</button>
-    </div>
-    <div id="testi-container" data-aos="fade-up" data-aos-delay="120">
-      <div class="row g-4" id="testi-skeletons">
-        <div class="col-md-4"><div class="skeleton sk-testi"></div></div>
-        <div class="col-md-4"><div class="skeleton sk-testi"></div></div>
-        <div class="col-md-4"><div class="skeleton sk-testi"></div></div>
-      </div>
-      <div class="swiper testi-swiper d-none" id="testi-swiper-wrap">
-        <div class="swiper-wrapper" id="testi-swiper-inner"></div>
-        <div class="swiper-pagination mt-4 position-relative"></div>
-      </div>
+    <div class="text-center mb-5"><button class="btn-review" id="openReviewBtn"><i class="bi bi-star-fill"></i>Leave a Review</button></div>
+    <div id="testi-container">
+      <div class="row g-4" id="testi-skeletons"><div class="col-md-4"><div class="skeleton sk-testi"></div></div><div class="col-md-4"><div class="skeleton sk-testi"></div></div><div class="col-md-4"><div class="skeleton sk-testi"></div></div></div>
+      <div class="swiper testi-swiper d-none" id="testi-swiper-wrap"><div class="swiper-wrapper" id="testi-swiper-inner"></div><div class="swiper-pagination"></div></div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════ CTA ═══════════════════ -->
+<!-- CTA -->
 <section class="cta-section">
-  <div class="cta-bg"></div><div class="cta-orb1"></div><div class="cta-orb2"></div>
   <div class="container cta-content" data-aos="zoom-in">
     <span class="stag">Get Started</span>
     <h2 class="cta-title">Ready to Secure<br>Your <span style="color:var(--gold)">Room?</span></h2>
-    <p class="cta-sub">Rooms fill up fast — don't miss your spot for the 2024/2025 session. Create your account and book in minutes.</p>
+    <p class="cta-sub">Rooms fill up fast — don't miss your spot for the 2025/2026 session.</p>
     <div class="d-flex gap-3 justify-content-center flex-wrap">
       <a href="register.html" class="btn-primary-hero"><i class="bi bi-person-plus-fill"></i>Create Account — It's Free</a>
       <a href="login.html" class="btn-ghost-hero">Already registered? Sign In<i class="bi bi-arrow-right"></i></a>
@@ -512,7 +462,7 @@
   </div>
 </section>
 
-<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<!-- FOOTER (Admin Portal link REMOVED) -->
 <footer>
   <div class="container">
     <div class="row g-4">
@@ -524,40 +474,32 @@
         <p class="ft-desc">The official digital hostel management platform for Federal University of Technology Babura, Jigawa State, Nigeria.</p>
       </div>
       <div class="col-6 col-lg-2 ft-col"><h5>Platform</h5><a href="#features">Features</a><a href="#how">How It Works</a><a href="#blocks">Hostel Blocks</a><a href="#roles">User Roles</a></div>
-      <div class="col-6 col-lg-2 ft-col"><h5>Account</h5><a href="register.html">Create Account</a><a href="login.html">Student Login</a><a href="admin-login.html">Admin Portal</a></div>
-      <div class="col-6 col-lg-2 ft-col"><h5>Session</h5><a href="#">2024/2025 Session</a><a href="#">Hostel Guidelines</a><a href="#">Fee Structure</a><a href="#">Contact Admin</a></div>
+      <div class="col-6 col-lg-2 ft-col"><h5>Account</h5><a href="register.html">Create Account</a><a href="login.html">Student Login</a></div>
+      <div class="col-6 col-lg-2 ft-col"><h5>Session</h5><a href="#">2025/2026 Session</a><a href="#">Hostel Guidelines</a><a href="#">Fee Structure</a><a href="#">Contact Admin</a></div>
     </div>
     <hr class="ft-hr"/>
     <div class="d-flex justify-content-between flex-wrap gap-2 ft-bottom">
-      <p>© 2024 FUTBabura Hostel Management System. All rights reserved.</p>
+      <p>© 2025 FUTBabura Hostel Management System. All rights reserved.</p>
       <p>Built with ❤️ for FUTBabura Students</p>
     </div>
   </div>
 </footer>
 
-<!-- ═══════════════════ REVIEW MODAL ═══════════════════ -->
+<!-- REVIEW MODAL -->
 <div class="review-modal-overlay" id="reviewOverlay">
   <div class="review-modal">
     <button class="rm-close" id="closeReviewBtn"><i class="bi bi-x-lg"></i></button>
     <h4 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:6px">Leave a Review</h4>
     <p style="font-size:13px;color:var(--muted);margin-bottom:22px">Share your experience to help other students</p>
-    <div id="review-auth-check">
-      <p style="font-size:13.5px;color:var(--muted);text-align:center;padding:20px 0">Checking if you are logged in...</p>
-    </div>
+    <div id="review-auth-check"><p style="font-size:13.5px;color:var(--muted);text-align:center;padding:20px 0">Checking...</p></div>
     <div id="review-form-wrap" style="display:none">
       <label class="form-label-hms">Your Rating</label>
-      <div class="star-rating" id="starRating">
-        <i class="bi bi-star-fill" data-val="1"></i>
-        <i class="bi bi-star-fill" data-val="2"></i>
-        <i class="bi bi-star-fill" data-val="3"></i>
-        <i class="bi bi-star-fill" data-val="4"></i>
-        <i class="bi bi-star-fill" data-val="5"></i>
-      </div>
+      <div class="star-rating" id="starRating"><i class="bi bi-star-fill" data-val="1"></i><i class="bi bi-star-fill" data-val="2"></i><i class="bi bi-star-fill" data-val="3"></i><i class="bi bi-star-fill" data-val="4"></i><i class="bi bi-star-fill" data-val="5"></i></div>
       <label class="form-label-hms">Your Review</label>
-      <textarea class="form-control-hms" id="reviewText" rows="4" placeholder="Tell other students about your experience with FUTBabura HMS..."></textarea>
+      <textarea class="form-control-hms" id="reviewText" rows="4" placeholder="Tell other students..."></textarea>
       <div class="mt-3 d-flex gap-2">
-        <button class="btn-primary-hero" id="submitReviewBtn" style="font-size:13.5px;padding:10px 24px">Submit Review</button>
-        <div id="reviewSpinner" class="d-none" style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px"><div class="spinner-border spinner-border-sm text-warning" role="status"></div>Submitting...</div>
+        <button class="btn-primary-hero" id="submitReviewBtn" style="font-size:13.5px;padding:10px 24px">Submit</button>
+        <div id="reviewSpinner" class="d-none"><div class="spinner-border spinner-border-sm text-warning"></div>Submitting...</div>
       </div>
       <p id="review-msg" style="font-size:12.5px;margin-top:10px;color:#22c55e;display:none"></p>
     </div>
@@ -568,126 +510,71 @@
   </div>
 </div>
 
-<!-- Firebase -->
+<!-- FIREBASE -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, collection, getDocs, addDoc, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",
-    authDomain: "futb-485e8.firebaseapp.com",
-    projectId: "futb-485e8",
-    storageBucket: "futb-485e8.firebasestorage.app",
-    messagingSenderId: "260966342395",
-    appId: "1:260966342395:web:8a43fd08e01af57c111a5e"
-  };
+  const firebaseConfig = { apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY", authDomain:"futb-485e8.firebaseapp.com", projectId:"futb-485e8", storageBucket:"futb-485e8.firebasestorage.app", messagingSenderId:"260966342395", appId:"1:260966342395:web:8a43fd08e01af57c111a5e" };
+  const app = initializeApp(firebaseConfig), db = getFirestore(app), auth = getAuth(app);
 
-  const app  = initializeApp(firebaseConfig);
-  const db   = getFirestore(app);
-  const auth = getAuth(app);
+  // TYPING EFFECT
+  const phrases = ["Book Smart.", "Live Better.", "One Click Away."];
+  let phraseIndex = 0, charIndex = 0, isDeleting = false;
+  const typingEl = document.getElementById('heroTypingText');
+  function typeEffect() {
+    const current = phrases[phraseIndex];
+    if (isDeleting) charIndex--; else charIndex++;
+    typingEl.textContent = current.substring(0, charIndex);
+    if (!isDeleting && charIndex === current.length) { isDeleting = true; setTimeout(typeEffect, 1500); }
+    else if (isDeleting && charIndex === 0) { isDeleting = false; phraseIndex = (phraseIndex + 1) % phrases.length; setTimeout(typeEffect, 200); }
+    else setTimeout(typeEffect, isDeleting ? 50 : 100);
+  }
+  typeEffect();
 
-  // ── BLOCK GRADIENT THEMES ──
-  const blockThemes = [
-    "linear-gradient(135deg,#0d2359,#1a3c8f)",
-    "linear-gradient(135deg,#3d0a4a,#7b1fa2)",
-    "linear-gradient(135deg,#0a2e1a,#1b5e20)",
-    "linear-gradient(135deg,#2e1a00,#8d4e00)",
-    "linear-gradient(135deg,#1a0a2e,#4a1a8f)",
-    "linear-gradient(135deg,#0a1a2e,#1a4a6f)"
-  ];
+  // SCROLL ARROW
+  const scrollArrow = document.getElementById('scrollArrow');
+  window.addEventListener('scroll', () => {
+    scrollArrow.classList.toggle('show', window.scrollY > 300);
+    const isNearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100;
+    scrollArrow.classList.toggle('up', isNearBottom);
+  });
+  scrollArrow.addEventListener('click', () => {
+    if (scrollArrow.classList.contains('up')) window.scrollTo({ top: 0, behavior: 'smooth' });
+    else window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  });
+
+  // LOAD DATA
+  const blockThemes = ["linear-gradient(135deg,#0d2359,#1a3c8f)","linear-gradient(135deg,#3d0a4a,#7b1fa2)","linear-gradient(135deg,#0a2e1a,#1b5e20)","linear-gradient(135deg,#2e1a00,#8d4e00)","linear-gradient(135deg,#1a0a2e,#4a1a8f)","linear-gradient(135deg,#0a1a2e,#1a4a6f)"];
   const blockEmojis = ["🏠","🏡","🏘","🏗","🏢","🏣"];
-
   let globalSettings = {};
 
-  // ══════════════════════════════════════════
-  // LOAD SETTINGS FIRST
-  // ══════════════════════════════════════════
   async function loadSettings() {
-    try {
-      const snap = await getDocs(collection(db, "settings"));
-      if (!snap.empty) {
-        globalSettings = snap.docs[0].data();
-        document.getElementById("sessionName").textContent = globalSettings.currentSession || "2024/2025";
-        const bookingOpen = globalSettings.allowBookings !== false;
-        document.getElementById("bookingStatus").textContent = bookingOpen ? "Bookings Open" : "Bookings Closed";
-        document.getElementById("bookingStatus").style.color = bookingOpen ? "var(--ok)" : "var(--err)";
-        document.getElementById("hc-session").textContent = (globalSettings.currentSession || "2024/2025") + " Session • Live";
-      }
-    } catch(e) { console.warn("Settings load error:", e); }
+    const snap = await getDocs(collection(db, "settings"));
+    if (!snap.empty) globalSettings = snap.docs[0].data();
+    document.getElementById("sessionName").textContent = globalSettings.currentSession || "2025/2026";
+    document.getElementById("bookingStatus").textContent = globalSettings.allowBookings !== false ? "Bookings Open" : "Bookings Closed";
+    document.getElementById("hc-session").textContent = (globalSettings.currentSession || "2025/2026") + " Session • Live";
   }
 
-  // ══════════════════════════════════════════
-  // LOAD HOSTEL BLOCKS FROM FIRESTORE
-  // ══════════════════════════════════════════
   async function loadBlocks() {
-    try {
-      const snap = await getDocs(collection(db, "hostels"));
-      const grid = document.getElementById("blocks-grid");
-      document.querySelectorAll(".block-skeleton").forEach(e => e.remove());
-
-      let totalRooms = 0, totalAvail = 0, blockCount = snap.size;
-
-      if (snap.empty) {
-        grid.innerHTML = `<div class="col-12 text-center py-5" style="color:var(--muted)"><i class="bi bi-building-slash" style="font-size:40px;color:var(--gold);opacity:.4;display:block;margin-bottom:12px"></i>No hostel blocks have been configured yet.<br><small>Admin can add blocks from the admin panel.</small></div>`;
-        updateStats(blockCount, totalRooms, totalAvail);
-        return;
-      }
-
-      let idx = 0;
-      snap.forEach(doc => {
-        const b = doc.data();
-        const totalInBlock = b.totalRooms || 0;
-        const availInBlock = b.availableRooms !== undefined ? b.availableRooms : totalInBlock;
-        const booked = totalInBlock - availInBlock;
-        const pct = totalInBlock > 0 ? Math.round((booked / totalInBlock) * 100) : 0;
-        totalRooms += totalInBlock;
-        totalAvail += availInBlock;
-
-        const theme = blockThemes[idx % blockThemes.length];
-        const emoji = b.emoji || blockEmojis[idx % blockEmojis.length];
-        const gender = b.genderType || b.gender || "Mixed";
-        const gIcon  = gender === "Male" ? "♂" : gender === "Female" ? "♀" : "⚥";
-        const amenities = (b.amenities || ["Water","Power"]).slice(0,3);
-        const amenHtml = amenities.map(a => `<div class="bm"><i class="bi bi-check-lg"></i>${a}</div>`).join("");
-        const priceFrom = b.priceFrom ? `₦${Number(b.priceFrom).toLocaleString()}` : "—";
-
-        const col = document.createElement("div");
-        col.className = "col-sm-6 col-lg-3";
-        col.setAttribute("data-aos","fade-up");
-        col.setAttribute("data-aos-delay", String(idx * 90));
-        col.innerHTML = `
-          <div class="block-card" onclick="window.location.href='register.html'">
-            <div class="blk-img" style="background:${theme}">
-              <span style="font-size:62px;position:relative;z-index:1">${emoji}</span>
-              <div class="blk-img-ov"></div>
-              <div class="blk-gender">${gIcon} ${gender}</div>
-            </div>
-            <div class="blk-body">
-              <div class="blk-name">${b.name || b.blockName || "Block"}</div>
-              <div class="blk-type">${b.roomTypes || "Mixed Occupancy"}</div>
-              <div class="blk-meta">${amenHtml}</div>
-              <div class="blk-meta"><div class="bm"><i class="bi bi-door-open"></i>${totalInBlock} Rooms</div></div>
-              <div class="blk-price">From ${priceFrom} <span>/ session</span></div>
-              <div class="avbar"><div class="avfill" style="width:0%" data-width="${pct}%"></div></div>
-              <div class="avtext">${availInBlock} room${availInBlock !== 1 ? "s" : ""} available</div>
-              <span class="btn-blk">Book Now</span>
-            </div>
-          </div>`;
-        grid.appendChild(col);
-        idx++;
-      });
-
-      setTimeout(() => {
-        document.querySelectorAll(".avfill[data-width]").forEach(el => {
-          el.style.width = el.dataset.width;
-        });
-      }, 300);
-
-      updateStats(blockCount, totalRooms, totalAvail);
-      if (window.AOS) AOS.refresh();
-
-    } catch (e) { console.error("Blocks load error:", e); }
+    const snap = await getDocs(collection(db, "hostels"));
+    const grid = document.getElementById("blocks-grid");
+    document.querySelectorAll(".block-skeleton").forEach(e => e.remove());
+    let totalRooms = 0, totalAvail = 0, blockCount = snap.size;
+    if (snap.empty) { grid.innerHTML = `<div class="col-12 text-center py-5" style="color:var(--muted)">No hostel blocks configured yet.</div>`; updateStats(0,0,0); return; }
+    let idx = 0;
+    snap.forEach(doc => {
+      const b = doc.data();
+      const totalInBlock = b.totalRooms || 0, availInBlock = b.availableRooms !== undefined ? b.availableRooms : totalInBlock;
+      totalRooms += totalInBlock; totalAvail += availInBlock;
+      const col = document.createElement("div"); col.className = "col-sm-6 col-lg-3"; col.setAttribute("data-aos","fade-up");
+      col.innerHTML = `<div class="block-card" onclick="window.location.href='register.html'"><div class="blk-img" style="background:${blockThemes[idx%blockThemes.length]}"><span style="font-size:62px">${b.emoji||blockEmojis[idx%blockEmojis.length]}</span><div class="blk-img-ov"></div><div class="blk-gender">${b.genderType||b.gender||"Mixed"}</div></div><div class="blk-body"><div class="blk-name">${b.name||b.blockName||"Block"}</div><div class="blk-price">From ${b.priceFrom?`₦${Number(b.priceFrom).toLocaleString()}`:"—"} <span>/ session</span></div><div class="avbar"><div class="avfill" style="width:${totalInBlock>0?Math.round(((totalInBlock-availInBlock)/totalInBlock)*100):0}%"></div></div><div class="avtext">${availInBlock} available</div><span class="btn-blk">Book Now</span></div></div>`;
+      grid.appendChild(col); idx++;
+    });
+    updateStats(blockCount, totalRooms, totalAvail);
+    if (window.AOS) AOS.refresh();
   }
 
   function updateStats(blocks, rooms, avail) {
@@ -699,203 +586,76 @@
     document.getElementById("qsHostels").textContent = blocks;
     document.getElementById("qsRooms").textContent = rooms;
     document.getElementById("qsAvailable").textContent = avail;
-    animCount(document.getElementById("cnt-blocks"), blocks);
-    animCount(document.getElementById("cnt-rooms"), rooms);
   }
 
-  // ══════════════════════════════════════════
-  // LOAD HERO ROOM PREVIEW
-  // ══════════════════════════════════════════
   async function loadHeroRooms() {
-    try {
-      const q = query(collection(db,"rooms"), limit(4));
-      const snap = await getDocs(q);
-      const list = document.getElementById("hero-rooms-list");
-      list.innerHTML = "";
-
-      if (snap.empty) {
-        list.innerHTML = `<p style="font-size:12px;color:var(--muted);text-align:center;padding:12px 0">No rooms configured yet</p>`;
-        return;
-      }
-
-      snap.forEach(doc => {
-        const r = doc.data();
-        const slotsLeft = r.slotsLeft || 0;
-        const totalSlots = r.totalSlots || 4;
-        let avail = "available";
-        if (slotsLeft === 0) avail = "full";
-        else if (slotsLeft === 1) avail = "few";
-        
-        const dotClass = avail === "available" ? "sd-green" : avail === "few" ? "sd-amber" : "sd-red";
-        const badgeClass = avail === "available" ? "b-av" : avail === "few" ? "b-few" : "b-full";
-        const badgeText = avail === "available" ? "Available" : avail === "few" ? "1 Slot Left" : "Full";
-        const price = r.pricePerSlot ? `₦${Number(r.pricePerSlot).toLocaleString()}` : "—";
-        const row = document.createElement("div");
-        row.className = "room-row";
-        row.onclick = () => window.location.href = "register.html";
-        row.innerHTML = `
-          <div class="d-flex align-items-center gap-2">
-            <div class="sdot ${dotClass}"></div>
-            <div><div class="rname">${r.blockName || "Block"} — Room ${r.roomNumber || "—"}</div><div class="rtype">${r.roomType || "Room"} · ${slotsLeft} slot${slotsLeft !== 1 ? "s" : ""} left</div></div>
-          </div>
-          <div class="text-end"><div class="rprice">${price}</div><span class="rbadge ${badgeClass}">${badgeText}</span></div>`;
-        list.appendChild(row);
-      });
-    } catch (e) { console.warn("Hero rooms error:", e); }
-  }
-
-  // ══════════════════════════════════════════
-  // LOAD STUDENT STATS
-  // ══════════════════════════════════════════
-  async function loadStudentStats() {
-    try {
-      const snap = await getDocs(collection(db,"users"));
-      let studentCount = 0;
-      snap.forEach(d => { if (d.data().role === "student") studentCount++; });
-      animCount(document.getElementById("cnt-students"), studentCount);
-    } catch { animCount(document.getElementById("cnt-students"), 0); }
-  }
-
-  // ══════════════════════════════════════════
-  // LOAD REVIEWS
-  // ══════════════════════════════════════════
-  async function loadReviews() {
-    try {
-      const q = query(collection(db,"reviews"), orderBy("createdAt","desc"), limit(20));
-      const snap = await getDocs(q);
-      const skeletons = document.getElementById("testi-skeletons");
-      const swiperWrap = document.getElementById("testi-swiper-wrap");
-      const inner = document.getElementById("testi-swiper-inner");
-
-      if (skeletons) skeletons.remove();
-
-      if (snap.empty) {
-        swiperWrap.classList.remove("d-none");
-        inner.innerHTML = `<div class="swiper-slide"><div class="testi-card" style="text-align:center;padding:40px 20px"><i class="bi bi-chat-square-heart" style="font-size:38px;color:var(--gold);opacity:.4;display:block;margin-bottom:12px"></i><p style="color:var(--muted);font-size:14px">No reviews yet. Be the first to share your experience!</p></div></div>`;
-        initTestiSwiper();
-        return;
-      }
-
-      snap.forEach(doc => {
-        const r = doc.data();
-        const stars = "★".repeat(Math.min(5, r.rating || 5)) + "☆".repeat(5 - Math.min(5, r.rating || 5));
-        const initials = (r.studentName || "S").split(" ").map(w => w[0]).join("").toUpperCase().slice(0,2);
-        const slide = document.createElement("div");
-        slide.className = "swiper-slide";
-        slide.innerHTML = `
-          <div class="testi-card">
-            <div class="tstars">${stars}</div>
-            <div class="testi-quote-icon">"</div>
-            <p class="testi-text">${r.review || ""}</p>
-            <div class="testi-author">
-              <div class="tav">${initials}</div>
-              <div><div class="tname">${r.studentName || "Student"}</div><div class="trole">${r.department || ""} · ${r.level || ""}</div></div>
-            </div>
-          </div>`;
-        inner.appendChild(slide);
-      });
-
-      swiperWrap.classList.remove("d-none");
-      initTestiSwiper();
-    } catch(e) { console.error("Reviews error:", e); }
-  }
-
-  function initTestiSwiper() {
-    new Swiper(".testi-swiper", {
-      loop: true, autoplay: { delay: 4500, disableOnInteraction: false },
-      slidesPerView: 1, spaceBetween: 20,
-      pagination: { el: ".testi-swiper .swiper-pagination", clickable: true },
-      breakpoints: { 640: { slidesPerView: 2 }, 960: { slidesPerView: 3 } }
+    const q = query(collection(db,"rooms"), limit(4));
+    const snap = await getDocs(q);
+    const list = document.getElementById("hero-rooms-list"); list.innerHTML = "";
+    if (snap.empty) { list.innerHTML = `<p style="font-size:12px;color:var(--muted);text-align:center;padding:12px 0">No rooms configured yet</p>`; return; }
+    snap.forEach(doc => {
+      const r = doc.data(), slotsLeft = r.slotsLeft || 0;
+      let avail = slotsLeft === 0 ? "full" : slotsLeft === 1 ? "few" : "available";
+      const row = document.createElement("div"); row.className = "room-row"; row.onclick = () => window.location.href = "register.html";
+      row.innerHTML = `<div class="d-flex align-items-center gap-2"><div class="sdot ${avail==='available'?'sd-green':avail==='few'?'sd-amber':'sd-red'}"></div><div><div class="rname">${r.blockName||"Block"} — Room ${r.roomNumber||"—"}</div></div></div><div class="text-end"><span class="rbadge ${avail==='available'?'b-av':avail==='few'?'b-few':'b-full'}">${avail==='available'?'Available':avail==='few'?'1 Slot Left':'Full'}</span></div>`;
+      list.appendChild(row);
     });
   }
 
-  // ══════════════════════════════════════════
-  // REVIEW MODAL
-  // ══════════════════════════════════════════
-  let currentUser = null;
-  let selectedRating = 5;
+  async function loadStudentStats() {
+    const snap = await getDocs(collection(db,"users"));
+    let count = 0; snap.forEach(d => { if (d.data().role === "student") count++; });
+    document.getElementById("cnt-students").textContent = count;
+  }
 
+  async function loadReviews() {
+    const q = query(collection(db,"reviews"), orderBy("createdAt","desc"), limit(20));
+    const snap = await getDocs(q);
+    document.getElementById("testi-skeletons")?.remove();
+    const swiperWrap = document.getElementById("testi-swiper-wrap"), inner = document.getElementById("testi-swiper-inner");
+    swiperWrap.classList.remove("d-none");
+    if (snap.empty) { inner.innerHTML = `<div class="swiper-slide"><div class="testi-card" style="text-align:center">No reviews yet.</div></div>`; new Swiper(".testi-swiper",{slidesPerView:1,pagination:{clickable:true}}); return; }
+    snap.forEach(doc => {
+      const r = doc.data();
+      const slide = document.createElement("div"); slide.className = "swiper-slide";
+      slide.innerHTML = `<div class="testi-card"><div class="tstars">${"★".repeat(r.rating||5)}</div><div class="testi-quote-icon">"</div><p class="testi-text">${r.review||""}</p><div class="testi-author"><div class="tav">${(r.studentName||"S").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2)}</div><div><div class="tname">${r.studentName||"Student"}</div></div></div></div>`;
+      inner.appendChild(slide);
+    });
+    new Swiper(".testi-swiper",{loop:true,autoplay:{delay:4500},slidesPerView:1,spaceBetween:20,pagination:{clickable:true},breakpoints:{640:{slidesPerView:2},960:{slidesPerView:3}}});
+  }
+
+  // REVIEW MODAL
+  let currentUser = null, selectedRating = 5;
   onAuthStateChanged(auth, user => {
     currentUser = user;
-    const check = document.getElementById("review-auth-check");
-    const form  = document.getElementById("review-form-wrap");
-    const login = document.getElementById("review-login-prompt");
-    if (check) check.style.display = "none";
-    if (user) { 
-      if (form) form.style.display = "block"; 
-      if (login) login.style.display = "none"; 
-    } else { 
-      if (form) form.style.display = "none"; 
-      if (login) login.style.display = "block"; 
-    }
+    document.getElementById("review-auth-check").style.display = "none";
+    document.getElementById("review-form-wrap").style.display = user ? "block" : "none";
+    document.getElementById("review-login-prompt").style.display = user ? "none" : "block";
   });
-
-  // Star rating
-  document.querySelectorAll("#starRating i").forEach(star => {
-    star.addEventListener("click", () => {
-      selectedRating = +star.dataset.val;
-      document.querySelectorAll("#starRating i").forEach((s, i) => s.classList.toggle("active", i < selectedRating));
-    });
-  });
-  document.querySelectorAll("#starRating i").forEach(s => s.classList.add("active"));
-
+  document.querySelectorAll("#starRating i").forEach(s => { s.addEventListener("click", () => { selectedRating = +s.dataset.val; document.querySelectorAll("#starRating i").forEach((st,i) => st.classList.toggle("active", i < selectedRating)); }); s.classList.add("active"); });
   document.getElementById("submitReviewBtn")?.addEventListener("click", async () => {
     const text = document.getElementById("reviewText").value.trim();
-    if (!text) { showMsg("Please write something first.", "#ef4444"); return; }
-    if (!currentUser) { showMsg("Please sign in first.", "#ef4444"); return; }
-
-    const btn = document.getElementById("submitReviewBtn");
-    const spinner = document.getElementById("reviewSpinner");
-    btn.style.display = "none";
-    spinner.classList.remove("d-none");
-
+    if (!text) return;
+    if (!currentUser) return;
     try {
-      const profSnap = await getDocs(query(collection(db,"users"), where("uid","==",currentUser.uid)));
-      let studentName = currentUser.displayName || "Student";
-      let department = "", level = "";
-      if (!profSnap.empty) {
-        const p = profSnap.docs[0].data();
-        studentName = p.fullName || studentName;
-        department = p.department || "";
-        level = p.level || "";
-      }
-
-      await addDoc(collection(db,"reviews"), {
-        studentName, department, level,
-        rating: selectedRating, review: text,
-        uid: currentUser.uid,
-        createdAt: serverTimestamp()
-      });
-
-      showMsg("✅ Review submitted! Thank you 🎉", "#22c55e");
+      const prof = await getDocs(query(collection(db,"users"), where("uid","==",currentUser.uid)));
+      let name = currentUser.displayName || "Student", dept = "", level = "";
+      if (!prof.empty) { const p = prof.docs[0].data(); name = p.fullName || name; dept = p.department || ""; level = p.level || ""; }
+      await addDoc(collection(db,"reviews"), { studentName:name, department:dept, level, rating:selectedRating, review:text, uid:currentUser.uid, createdAt:serverTimestamp() });
+      document.getElementById("reviewOverlay").classList.remove("open");
       document.getElementById("reviewText").value = "";
-      setTimeout(() => { closeModal(); loadReviews(); }, 2000);
-    } catch(e) {
-      showMsg("Error submitting review. Try again.", "#ef4444");
-    } finally {
-      btn.style.display = "";
-      spinner.classList.add("d-none");
-    }
+      setTimeout(() => loadReviews(), 500);
+    } catch(e) { alert("Error submitting review"); }
   });
-
-  function showMsg(msg, color) {
-    const el = document.getElementById("review-msg");
-    if (el) { el.textContent = msg; el.style.color = color; el.style.display = "block"; }
-  }
-
-  function closeModal() {
-    document.getElementById("reviewOverlay").classList.remove("open");
-    const msg = document.getElementById("review-msg");
-    if (msg) msg.style.display = "none";
-  }
-
   document.getElementById("openReviewBtn")?.addEventListener("click", () => document.getElementById("reviewOverlay").classList.add("open"));
-  document.getElementById("closeReviewBtn")?.addEventListener("click", closeModal);
-  document.getElementById("reviewOverlay")?.addEventListener("click", e => { if (e.target === e.currentTarget) closeModal(); });
+  document.getElementById("closeReviewBtn")?.addEventListener("click", () => document.getElementById("reviewOverlay").classList.remove("open"));
 
-  // ══════════════════════════════════════════
+  // ROLES SWIPER
+  const roles = [{emoji:"👨‍🎓",title:"Student",items:["Browse & book rooms","Pay via Paystack","QR approval letter","Submit complaints","Register visitors"]},{emoji:"🏠",title:"Hostel Admin",items:["Manage room inventory","View financial reports","Assign complaints","Monitor occupancy"]},{emoji:"👮",title:"Security Officer",items:["Scan QR codes","Validate visitors","View access logs"]},{emoji:"🔧",title:"Maintenance Staff",items:["View assigned complaints","Update repair status","Access history"]},{emoji:"⚙️",title:"Super Admin",items:["Full system access","Manage all roles","System configuration","Audit logs"]}];
+  document.getElementById("rolesWrapper").innerHTML = roles.map(r => `<div class="swiper-slide"><div class="role-card"><span class="r-emoji">${r.emoji}</span><h3 class="r-title">${r.title}</h3><ul class="r-list">${r.items.map(i=>`<li><i class="bi bi-check-circle-fill"></i>${i}</li>`).join("")}</ul></div></div>`).join("");
+  new Swiper(".roles-swiper", {loop:true,autoplay:{delay:3800},slidesPerView:1,spaceBetween:20,pagination:{clickable:true},navigation:{nextEl:".swiper-button-next",prevEl:".swiper-button-prev"},breakpoints:{640:{slidesPerView:2},960:{slidesPerView:3},1200:{slidesPerView:4}}});
+
   // BOOT
-  // ══════════════════════════════════════════
   await loadSettings();
   loadBlocks();
   loadHeroRooms();
@@ -903,56 +663,18 @@
   loadReviews();
 </script>
 
-<!-- Bootstrap + AOS + Swiper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
 <script>
-  // AOS
   AOS.init({ once: true, offset: 70, duration: 700 });
-
-  // Navbar
   window.addEventListener("scroll", () => document.getElementById("navbar").classList.toggle("scrolled", scrollY > 50));
-
-  // Active nav link
-  const sections = document.querySelectorAll("section[id]");
-  const navLinks = document.querySelectorAll("#navbar .nav-link");
-  window.addEventListener("scroll", () => {
-    let cur = "";
-    sections.forEach(s => { if (scrollY >= s.offsetTop - 120) cur = s.id; });
-    navLinks.forEach(l => l.classList.toggle("active", l.getAttribute("href") === "#" + cur));
-  });
-
-  // Particles
-  const canvas = document.getElementById("particles"), ctx = canvas.getContext("2d");
-  function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
-  resize(); addEventListener("resize", resize);
-  const pts = Array.from({length:65},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.4+.4,dx:(Math.random()-.5)*.28,dy:(Math.random()-.5)*.28,a:Math.random()*.32+.07}));
+  const canvas=document.getElementById("particles"),ctx=canvas.getContext("2d");
+  function resize(){canvas.width=innerWidth;canvas.height=innerHeight}
+  resize();addEventListener("resize",resize);
+  const pts=Array.from({length:65},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.4+.4,dx:(Math.random()-.5)*.28,dy:(Math.random()-.5)*.28,a:Math.random()*.32+.07}));
   function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(245,166,35,${p.a})`;ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>canvas.width)p.dx*=-1;if(p.y<0||p.y>canvas.height)p.dy*=-1});requestAnimationFrame(draw)}
   draw();
-
-  // Counter animation
-  function animCount(el, target) {
-    if (!el) return;
-    const dur = 2000, step = target / (dur / 16);
-    let c = 0;
-    const iv = setInterval(() => {
-      c += step;
-      if (c >= target) { c = target; clearInterval(iv); }
-      el.textContent = Math.floor(c).toLocaleString();
-    }, 16);
-  }
-  window.animCount = animCount;
-
-  // Roles swiper
-  new Swiper(".roles-swiper", {
-    loop: true, autoplay: { delay: 3800, disableOnInteraction: false },
-    slidesPerView: 1, spaceBetween: 20,
-    pagination: { el: ".roles-swiper .swiper-pagination", clickable: true },
-    navigation: { nextEl: ".roles-swiper .swiper-button-next", prevEl: ".roles-swiper .swiper-button-prev" },
-    breakpoints: { 640: { slidesPerView: 2 }, 960: { slidesPerView: 3 }, 1200: { slidesPerView: 4 } }
-  });
 </script>
 </body>
 </html>
