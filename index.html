@@ -60,8 +60,13 @@
     .btn-signin:hover{border-color:var(--white);background:rgba(255,255,255,.07);color:var(--white)!important}
     .btn-book{background:var(--gold);color:var(--navy)!important;font-size:13px;font-weight:700;padding:8px 22px;border-radius:8px;text-decoration:none;box-shadow:0 4px 18px var(--glow);transition:all .25s}
     .btn-book:hover{background:var(--gold2);transform:translateY(-2px);color:var(--navy)!important}
-    .navbar-toggler{border-color:rgba(255,255,255,.18)}
-    .navbar-toggler-icon{filter:invert(1)}
+    .navbar-toggler{border:1.5px solid rgba(245,166,35,.4);padding:6px 10px;background:rgba(245,166,35,.08)}
+    .navbar-toggler:focus{box-shadow:0 0 0 3px rgba(245,166,35,.2)}
+    .navbar-toggler-icon{filter:invert(1);background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255%2C255%2C255%2C0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e")}
+    @media(max-width:991px){
+      #navbar.scrolled .navbar-collapse,
+      .navbar-collapse.show{background:rgba(7,17,43,.98);border:1px solid rgba(245,166,35,.15);border-radius:14px;margin-top:10px;padding:16px 20px}
+    }
 
     /* SESSION BANNER */
     .session-banner{background:linear-gradient(135deg,rgba(245,166,35,.12),rgba(245,166,35,.04));border:1px solid rgba(245,166,35,.18);border-radius:100px;padding:8px 20px;display:inline-flex;align-items:center;gap:10px;margin-bottom:20px}
@@ -71,7 +76,9 @@
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.9)}}
 
     /* HERO */
-    .hero{min-height:100vh;display:flex;align-items:center;padding:120px 0 80px;position:relative;overflow:hidden}
+    .hero{min-height:100vh;display:flex;flex-direction:column;padding:0;position:relative;overflow:hidden}
+    .hero-ticker{position:relative;z-index:5;background:rgba(245,166,35,.1);border-bottom:1px solid rgba(245,166,35,.18);overflow:hidden;padding:9px 0;margin-top:74px}
+    .hero-body{flex:1;display:flex;align-items:center;padding:50px 0 80px}
     .hero-bg{position:absolute;inset:0;background:linear-gradient(128deg,#07112b 0%,#0c1a3d 42%,#091530 100%)}
     .hero-slice{position:absolute;right:0;top:0;bottom:0;width:52%;background:linear-gradient(150deg,#112060 0%,#0a1840 100%);clip-path:polygon(10% 0,100% 0,100% 100%,0% 100%);border-left:1.5px solid rgba(245,166,35,.13)}
     .hero-glow{position:absolute;right:18%;top:50%;transform:translateY(-50%);width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.11) 0%,transparent 68%);pointer-events:none;animation:pulseOrb 5s ease-in-out infinite}
@@ -252,12 +259,11 @@
     .star-rating i{font-size:24px;color:rgba(255,255,255,.2);cursor:pointer;transition:color .15s}
     .star-rating i.active{color:var(--gold)}
 
-    /* ── ANNOUNCEMENT TICKER (new) ── */
-    .ticker-wrap{background:rgba(245,166,35,.1);border-top:1px solid rgba(245,166,35,.18);border-bottom:1px solid rgba(245,166,35,.18);padding:10px 0;overflow:hidden;position:relative;z-index:2}
-    .ticker-inner{display:flex;white-space:nowrap;animation:tickerScroll 28s linear infinite}
+    /* ── ANNOUNCEMENT TICKER ── */
+    .ticker-inner{display:flex;white-space:nowrap;animation:tickerScroll 30s linear infinite}
     .ticker-inner:hover{animation-play-state:paused}
     .ticker-item{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;padding:0 38px;color:rgba(255,255,255,.85)}
-    .ticker-dot{width:5px;height:5px;border-radius:50%;background:var(--gold)}
+    .ticker-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);flex-shrink:0}
     @keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
     /* CTA */
@@ -355,23 +361,23 @@
   </div>
 </nav>
 
-<!-- ANNOUNCEMENT TICKER -->
-<div class="ticker-wrap" style="margin-top:74px">
-  <div class="ticker-inner" id="tickerInner">
-    <span class="ticker-item"><span class="ticker-dot"></span>🏠 2025/2026 Session Hostel Booking Now Open</span>
-    <span class="ticker-item"><span class="ticker-dot"></span>🔐 Pay securely via Paystack — instant QR approval letter</span>
-    <span class="ticker-item"><span class="ticker-dot"></span>📱 No queues, no paperwork — book from your phone</span>
-    <span class="ticker-item"><span class="ticker-dot"></span>✅ Male & Female hostel blocks available</span>
-    <span class="ticker-item"><span class="ticker-dot"></span>🏠 2025/2026 Session Hostel Booking Now Open</span>
-    <span class="ticker-item"><span class="ticker-dot"></span>🔐 Pay securely via Paystack — instant QR approval letter</span>
-    <span class="ticker-item"><span class="ticker-dot"></span>📱 No queues, no paperwork — book from your phone</span>
-    <span class="ticker-item"><span class="ticker-dot"></span>✅ Male & Female hostel blocks available</span>
-  </div>
-</div>
-
 <!-- HERO -->
 <section class="hero" id="home">
   <div class="hero-bg"></div><div class="hero-slice"></div><div class="hero-glow"></div><div class="hero-dots"></div>
+  <!-- TICKER inside hero, right under navbar -->
+  <div class="hero-ticker">
+    <div class="ticker-inner">
+      <span class="ticker-item"><span class="ticker-dot"></span>🏠 2025/2026 Session Hostel Booking Now Open</span>
+      <span class="ticker-item"><span class="ticker-dot"></span>🔐 Pay securely via Paystack — instant QR approval letter</span>
+      <span class="ticker-item"><span class="ticker-dot"></span>📱 No queues, no paperwork — book from your phone</span>
+      <span class="ticker-item"><span class="ticker-dot"></span>✅ Male &amp; Female hostel blocks available</span>
+      <span class="ticker-item"><span class="ticker-dot"></span>🏠 2025/2026 Session Hostel Booking Now Open</span>
+      <span class="ticker-item"><span class="ticker-dot"></span>🔐 Pay securely via Paystack — instant QR approval letter</span>
+      <span class="ticker-item"><span class="ticker-dot"></span>📱 No queues, no paperwork — book from your phone</span>
+      <span class="ticker-item"><span class="ticker-dot"></span>✅ Male &amp; Female hostel blocks available</span>
+    </div>
+  </div>
+  <div class="hero-body">
   <div class="container position-relative" style="z-index:4">
     <div class="row align-items-center">
       <div class="col-lg-6 hero-content" data-aos="fade-right" data-aos-duration="850">
@@ -418,6 +424,7 @@
       </div>
     </div>
   </div>
+  </div><!-- end hero-body -->
 </section>
 
 <!-- COUNTERS -->
