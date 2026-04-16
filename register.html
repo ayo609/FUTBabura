@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Registration — FUTBabura HMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.22);
+      --white:#fff;--muted:rgba(255,255,255,.52);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.09);
+      --err:#ef4444;--ok:#22c55e;--warn:#f59e0b;
+      --radius:14px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden;min-height:100vh}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}
+    #particles{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+    .page-wrap{min-height:100vh;display:grid;grid-template-columns:360px 1fr;position:relative;z-index:1}
+
+    /* LEFT SIDEBAR */
+    .sidebar{background:linear-gradient(160deg,#07112b 0%,#0c1a3d 45%,#112060 100%);padding:36px 32px;display:flex;flex-direction:column;border-right:1px solid rgba(245,166,35,.1);position:sticky;top:0;height:100vh;overflow:hidden}
+    .sb-glow{position:absolute;bottom:-15%;left:-20%;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.1) 0%,transparent 68%);animation:pulseOrb 6s ease-in-out infinite;pointer-events:none}
+    .sb-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.035) 1px,transparent 1px);background-size:24px 24px;pointer-events:none}
+    .sb-logo{display:flex;align-items:center;gap:11px;text-decoration:none;margin-bottom:40px;position:relative;z-index:2}
+    .sb-logo-img{width:44px;height:44px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;box-shadow:0 0 18px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:1.8px;text-transform:uppercase}
+    .steps-track{position:relative;z-index:2;flex:1}
+    .steps-track h3{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:5px}
+    .steps-track p{font-size:12.5px;color:var(--muted);margin-bottom:30px;line-height:1.6}
+    .step-item{display:flex;align-items:flex-start;gap:14px;margin-bottom:22px}
+    .step-num{width:36px;height:36px;border-radius:50%;border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;transition:all .35s;color:var(--muted)}
+    .step-num.active{background:var(--gold);border-color:var(--gold);color:var(--navy);box-shadow:0 0 0 6px rgba(245,166,35,.15)}
+    .step-num.done{background:rgba(34,197,94,.15);border-color:#22c55e;color:#22c55e}
+    .step-num.done::after{content:'✓';font-size:14px}
+    .step-num.done span{display:none}
+    .step-info .si-title{font-size:13.5px;font-weight:700;color:var(--muted);transition:color .3s;margin-bottom:2px}
+    .step-info .si-title.active{color:var(--white)}
+    .step-info .si-desc{font-size:11.5px;color:rgba(255,255,255,.28);line-height:1.5}
+    .step-connector{width:2px;height:18px;background:rgba(255,255,255,.08);margin-left:17px;margin-bottom:4px;border-radius:2px;transition:background .35s}
+    .step-connector.done{background:rgba(34,197,94,.4)}
+
+    /* Security badges on sidebar */
+    .sec-badges{position:relative;z-index:2;margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,.06)}
+    .sec-title{font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,.3);text-transform:uppercase;margin-bottom:10px}
+    .sec-badge-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+    .sbadge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;padding:4px 9px;border-radius:100px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);color:#86efac}
+    .sbadge i{font-size:9px}
+    .sb-bottom{margin-top:12px}
+    .sb-bottom p{font-size:11.5px;color:rgba(255,255,255,.25)}
+    .sb-bottom a{color:var(--gold);text-decoration:none}
+
+    /* MAIN */
+    .main-content{padding:44px 52px;display:flex;align-items:flex-start;justify-content:center}
+    .form-container{width:100%;max-width:600px}
+    .step-eyebrow{display:inline-flex;align-items:center;gap:7px;background:rgba(245,166,35,.09);border:1px solid rgba(245,166,35,.26);color:var(--gold);font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:16px}
+    .step-eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:blink 1.6s infinite}
+    .step-heading{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;margin-bottom:5px;line-height:1.15}
+    .step-sub{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.65}
+
+    /* progress */
+    .progress-wrap{margin-bottom:32px}
+    .prog-bar{height:4px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden}
+    .prog-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+    /* GLOBAL ALERT */
+    .g-alert{display:none;padding:13px 16px;border-radius:11px;font-size:13px;font-weight:500;margin-bottom:22px;align-items:flex-start;gap:10px;animation:slideDown .3s ease;line-height:1.55}
+    .g-alert.show{display:flex}
+    .a-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+    .a-warn{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);color:#fde68a}
+    .a-ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86efac}
+    .a-info{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);color:#93c5fd}
+
+    /* FIELDS */
+    .field-wrap{margin-bottom:16px}
+    .field-label{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.72);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+    .req{color:var(--err)}
+    .badge-hint{font-size:10px;font-weight:600;padding:2px 7px;border-radius:100px;background:rgba(245,166,35,.1);color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+    .input-rel{position:relative}
+    .fi{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--muted);pointer-events:none}
+    .hms-input{width:100%;background:rgba(255,255,255,.048);border:1.5px solid rgba(255,255,255,.1);border-radius:11px;padding:12px 14px 12px 40px;color:var(--white);font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .25s,box-shadow .25s}
+    .hms-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,166,35,.1)}
+    .hms-input::placeholder{color:rgba(255,255,255,.22)}
+    .hms-input.err{border-color:var(--err)!important;box-shadow:0 0 0 3px rgba(239,68,68,.08)!important}
+    .hms-input.good{border-color:var(--ok)!important}
+    .hms-select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:36px}
+    .sel-arrow{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted);pointer-events:none}
+    .pwd-eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);font-size:15px;cursor:pointer;padding:0;transition:color .2s}
+    .pwd-eye:hover{color:var(--white)}
+    .field-hint{font-size:11px;color:rgba(255,255,255,.3);margin-top:5px;display:flex;align-items:center;gap:4px}
+    .ferr{font-size:11.5px;color:var(--err);margin-top:5px;display:none;align-items:center;gap:5px}
+    .ferr.show{display:flex}
+    .inline-check{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none}
+    .row-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+    /* PHOTO UPLOAD */
+    .photo-upload{border:2px dashed rgba(245,166,35,.25);border-radius:14px;padding:20px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(255,255,255,.02)}
+    .photo-upload:hover{border-color:rgba(245,166,35,.5);background:rgba(245,166,35,.04)}
+    .photo-preview{width:72px;height:72px;border-radius:50%;border:2.5px solid var(--gold);overflow:hidden;margin:0 auto 10px;display:none}
+    .photo-preview img{width:100%;height:100%;object-fit:cover}
+    .pu-icon{font-size:28px;margin-bottom:8px;display:block;color:var(--gold)}
+    .pu-text{font-size:13px;color:var(--muted);margin-bottom:3px}
+    .pu-sub{font-size:11px;color:rgba(255,255,255,.2)}
+
+    /* GENDER CARDS */
+    .gender-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .gender-card{border:1.5px solid rgba(255,255,255,.1);border-radius:11px;padding:14px;cursor:pointer;transition:all .22s;display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.03)}
+    .gender-card:hover{border-color:rgba(245,166,35,.35);background:rgba(245,166,35,.05)}
+    .gender-card.selected{border-color:var(--gold);background:rgba(245,166,35,.1);box-shadow:0 0 0 3px rgba(245,166,35,.1)}
+    .gender-icon{font-size:22px;flex-shrink:0}
+    .gender-name{font-size:13.5px;font-weight:700}
+    .gender-desc{font-size:11px;color:var(--muted)}
+    .gender-radio{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.2);margin-left:auto;flex-shrink:0;transition:all .2s}
+    .gender-card.selected .gender-radio{background:var(--gold);border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,166,35,.2)}
+
+    /* SLOTS DISPLAY */
+    .slots-info{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+    .slot-box{border-radius:11px;padding:12px 14px;text-align:center;border:1.5px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
+    .slot-num{font-family:'Playfair Display',serif;font-size:20px;font-weight:900}
+    .slot-label{font-size:11px;color:var(--muted);margin-top:2px}
+    .slot-ok{border-color:rgba(34,197,94,.25);background:rgba(34,197,94,.05)}
+    .slot-ok .slot-num{color:var(--ok)}
+    .slot-full{border-color:rgba(239,68,68,.25);background:rgba(239,68,68,.05)}
+    .slot-full .slot-num{color:var(--err)}
+
+    /* PASSWORD STRENGTH */
+    .strength-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px}
+    .sb-seg{height:3px;border-radius:100px;background:rgba(255,255,255,.1);transition:background .3s}
+
+    /* CUSTOM CHECKBOX */
+    .custom-cb{width:18px;height:18px;border:1.5px solid rgba(255,255,255,.25);border-radius:5px;background:transparent;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;cursor:pointer}
+    .custom-cb.checked{background:var(--gold);border-color:var(--gold)}
+    .custom-cb.checked::after{content:'✓';font-size:10px;color:var(--navy);font-weight:700}
+
+    /* SECURITY CHECKLIST */
+    .sec-checklist{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.18);border-radius:12px;padding:14px 16px;margin-bottom:20px}
+    .sc-title{font-size:11.5px;font-weight:700;color:#93c5fd;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    .sc-item{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,.55);padding:3px 0}
+    .sc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+    .sc-ok{background:var(--ok)}
+    .sc-no{background:rgba(255,255,255,.2)}
+
+    /* STEP NAV */
+    .step-nav{display:flex;justify-content:flex-end;gap:12px;margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,.06)}
+    .btn-prev{display:flex;align-items:center;gap:7px;padding:11px 22px;border-radius:10px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);color:var(--muted);font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .22s}
+    .btn-prev:hover{background:rgba(255,255,255,.1);color:var(--white)}
+    .btn-next{display:flex;align-items:center;gap:8px;padding:11px 26px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);font-size:13.5px;font-weight:700;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .3s;box-shadow:0 4px 16px rgba(245,166,35,.25)}
+    .btn-next:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(245,166,35,.35)}
+    .btn-next:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+    /* MATRIC FORMAT HINT */
+    .matric-format{background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.18);border-radius:9px;padding:10px 13px;font-size:11.5px;color:#fde68a;margin-bottom:12px;line-height:1.7}
+    .matric-format strong{color:var(--gold)}
+
+    /* JAMB NOTE */
+    .jamb-note{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.18);border-radius:9px;padding:10px 13px;font-size:11.5px;color:#93c5fd;margin-top:6px;line-height:1.6}
+
+    /* SUCCESS */
+    .success-screen{display:none;text-align:center;padding:20px 0;animation:fadeUp .6s ease}
+    .success-screen.show{display:block}
+    .success-icon-wrap{font-size:64px;margin-bottom:16px;animation:bounceIn .6s ease}
+    .success-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;margin-bottom:10px}
+    .success-desc{font-size:14px;color:var(--muted);line-height:1.7;max-width:460px;margin:0 auto 24px}
+    .success-email-box{display:flex;align-items:flex-start;gap:12px;background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);border-radius:12px;padding:16px 20px;margin-bottom:20px;text-align:left;font-size:13.5px;line-height:1.65;color:rgba(255,255,255,.75)}
+    .success-email-box i{font-size:20px;color:var(--gold);flex-shrink:0;margin-top:2px}
+    .success-tips{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.18);border-radius:12px;padding:14px 18px;margin-bottom:24px;text-align:left}
+    .st-title{font-size:12px;font-weight:700;color:var(--ok);margin-bottom:8px}
+    .st-item{font-size:12.5px;color:rgba(255,255,255,.6);padding:3px 0;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+    .btn-goto-login{display:inline-flex;align-items:center;gap:8px;padding:13px 32px;border-radius:11px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);font-size:14px;font-weight:700;text-decoration:none;transition:all .3s;box-shadow:0 4px 16px rgba(245,166,35,.25)}
+    .btn-goto-login:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(245,166,35,.35);color:var(--navy)}
+
+    .spin{width:17px;height:17px;border:2.5px solid rgba(7,17,43,.3);border-top-color:var(--navy);border-radius:50%;animation:spinA .7s linear infinite;display:inline-block}
+    @keyframes spinA{to{transform:rotate(360deg)}}
+    @keyframes pulseOrb{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes bounceIn{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+
+    @media(max-width:900px){
+      .page-wrap{grid-template-columns:1fr}
+      .sidebar{display:none}
+      .main-content{padding:28px 18px}
+      .form-container{max-width:100%}
+      .row-fields{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="page-wrap">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-glow"></div><div class="sb-dots"></div>
+    <a href="index.html" class="sb-logo">
+      <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+      <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Student Registration</div></div>
+    </a>
+    <div class="steps-track">
+      <h3>Create Your Account</h3>
+      <p>Complete all 3 steps to register your hostel account.</p>
+      <div class="step-item"><div class="step-num active" id="sn1"><span>1</span></div><div class="step-info"><div class="si-title active" id="st1">Personal Details</div><div class="si-desc">Name, phone, gender, DOB</div></div></div>
+      <div class="step-connector" id="sc1"></div>
+      <div class="step-item"><div class="step-num" id="sn2"><span>2</span></div><div class="step-info"><div class="si-title" id="st2">Academic Info</div><div class="si-desc">Matric no., JAMB, faculty</div></div></div>
+      <div class="step-connector" id="sc2"></div>
+      <div class="step-item"><div class="step-num" id="sn3"><span>3</span></div><div class="step-info"><div class="si-title" id="st3">Account Setup</div><div class="si-desc">Email, password, photo</div></div></div>
+    </div>
+    <div class="sec-badges">
+      <div class="sec-title">🔐 Security Features Active</div>
+      <div class="sec-badge-row">
+        <span class="sbadge"><i class="bi bi-shield-check-fill"></i> Matric Verified</span>
+        <span class="sbadge"><i class="bi bi-shield-check-fill"></i> JAMB Checked</span>
+        <span class="sbadge"><i class="bi bi-shield-check-fill"></i> No Duplicates</span>
+        <span class="sbadge"><i class="bi bi-shield-check-fill"></i> Email Verified</span>
+        <span class="sbadge"><i class="bi bi-shield-check-fill"></i> Device Tracked</span>
+        <span class="sbadge"><i class="bi bi-shield-check-fill"></i> Rate Limited</span>
+      </div>
+    </div>
+    <div class="sb-bottom">
+      <p>Already registered? <a href="login.html">Sign in here →</a></p>
+      <p style="margin-top:6px">© 2024 FUTBabura HMS</p>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <div class="form-container">
+
+      <!-- PROGRESS BAR -->
+      <div class="progress-wrap" id="progressWrap">
+        <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:33%"></div></div>
+      </div>
+
+      <!-- GLOBAL ALERT -->
+      <div class="g-alert" id="gAlert"><i class="bi" id="gAlertIcon" style="flex-shrink:0;margin-top:2px;font-size:15px"></i><div id="gAlertMsg"></div></div>
+
+      <!-- ══ STEP 1: PERSONAL DETAILS ══ -->
+      <div id="step1">
+        <div class="step-eyebrow"><span class="dot"></span>Step 1 of 3</div>
+        <h2 class="step-heading">Personal Details</h2>
+        <p class="step-sub">Your basic personal information. All fields are required.</p>
+
+        <!-- Photo Upload -->
+        <div class="field-wrap">
+          <label class="field-label">Profile Photo <span style="font-size:11px;color:var(--muted);font-weight:400">(Optional)</span></label>
+          <div class="photo-upload" id="photoUploadArea" onclick="document.getElementById('photoInput').click()">
+            <div class="photo-preview" id="photoPreview"><img id="photoImg" src="" alt=""/></div>
+            <span class="pu-icon" id="puIcon">📷</span>
+            <div class="pu-text" id="puText">Click to upload your photo</div>
+            <div class="pu-sub">JPG, PNG or WEBP · Max 2MB</div>
+          </div>
+          <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(this)"/>
+          <div class="ferr" id="photoErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+        </div>
+
+        <div class="field-wrap">
+          <label class="field-label">Full Name <span class="req">*</span> <span class="badge-hint">As on JAMB result</span></label>
+          <div class="input-rel">
+            <input type="text" class="hms-input" id="fullName" placeholder="e.g. Musa Abdullahi Ibrahim" autocomplete="name"/>
+            <i class="bi bi-person-fill fi"></i>
+          </div>
+          <div class="ferr" id="nameErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+        </div>
+
+        <div class="field-wrap">
+          <label class="field-label">Phone Number <span class="req">*</span> <span class="badge-hint">Nigerian number</span></label>
+          <div class="input-rel">
+            <input type="tel" class="hms-input" id="phone" placeholder="e.g. 08012345678" maxlength="11" autocomplete="tel"/>
+            <i class="bi bi-telephone-fill fi"></i>
+            <span class="inline-check" id="phoneCheck"></span>
+          </div>
+          <div class="field-hint"><i class="bi bi-info-circle"></i> Must be 11 digits, starting with 070, 080, 081, 090 or 091</div>
+          <div class="ferr" id="phoneErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+        </div>
+
+        <div class="field-wrap">
+          <label class="field-label">Gender <span class="req">*</span> <span style="font-size:11px;color:var(--muted);font-weight:400">(Determines which hostel you can book)</span></label>
+          <div class="slots-info" id="slotsInfo" style="display:none">
+            <div class="slot-box" id="maleSlotBox"><div class="slot-num" id="maleSlots">—</div><div class="slot-label">Male Slots Available</div></div>
+            <div class="slot-box" id="femaleSlotBox"><div class="slot-num" id="femaleSlots">—</div><div class="slot-label">Female Slots Available</div></div>
+          </div>
+          <div class="gender-cards">
+            <div class="gender-card" id="gcMale" onclick="selectGender('Male')">
+              <span class="gender-icon">👨</span>
+              <div><div class="gender-name">Male</div><div class="gender-desc">Access to male hostels</div></div>
+              <div class="gender-radio" id="grMale"></div>
+            </div>
+            <div class="gender-card" id="gcFemale" onclick="selectGender('Female')">
+              <span class="gender-icon">👩</span>
+              <div><div class="gender-name">Female</div><div class="gender-desc">Access to female hostels (priority)</div></div>
+              <div class="gender-radio" id="grFemale"></div>
+            </div>
+          </div>
+          <div class="ferr" id="genderErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+        </div>
+
+        <div class="row-fields">
+          <div class="field-wrap">
+            <label class="field-label">Date of Birth <span class="req">*</span></label>
+            <div class="input-rel">
+              <input type="date" class="hms-input" id="dob" style="color-scheme:dark"/>
+              <i class="bi bi-calendar-fill fi"></i>
+            </div>
+            <div class="ferr" id="dobErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">State of Origin <span class="req">*</span></label>
+            <div class="input-rel">
+              <select class="hms-input hms-select" id="stateOrigin">
+                <option value="">Select state</option>
+                <option>Abia</option><option>Adamawa</option><option>Akwa Ibom</option><option>Anambra</option><option>Bauchi</option><option>Bayelsa</option><option>Benue</option><option>Borno</option><option>Cross River</option><option>Delta</option><option>Ebonyi</option><option>Edo</option><option>Ekiti</option><option>Enugu</option><option>FCT Abuja</option><option>Gombe</option><option>Imo</option><option>Jigawa</option><option>Kaduna</option><option>Kano</option><option>Katsina</option><option>Kebbi</option><option>Kogi</option><option>Kwara</option><option>Lagos</option><option>Nasarawa</option><option>Niger</option><option>Ogun</option><option>Ondo</option><option>Osun</option><option>Oyo</option><option>Plateau</option><option>Rivers</option><option>Sokoto</option><option>Taraba</option><option>Yobe</option><option>Zamfara</option>
+              </select>
+              <i class="bi bi-geo-alt-fill fi"></i>
+              <span class="sel-arrow"><i class="bi bi-chevron-down"></i></span>
+            </div>
+            <div class="ferr" id="stateErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <button class="btn-next" onclick="goStep2()">Next: Academic Info <i class="bi bi-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- ══ STEP 2: ACADEMIC INFO ══ -->
+      <div id="step2" style="display:none">
+        <div class="step-eyebrow"><span class="dot"></span>Step 2 of 3</div>
+        <h2 class="step-heading">Academic Information</h2>
+        <p class="step-sub">Your university details. Matric number and JAMB number are uniquely tied to your account.</p>
+
+        <!-- Matric format guide -->
+        <div class="matric-format">
+          <strong>📋 Matric Number Format:</strong> <code style="background:rgba(245,166,35,.15);padding:2px 7px;border-radius:5px;font-size:12px">SIT / DPT / YY / 0001</code><br/>
+          <span style="color:rgba(255,255,255,.5)">Example: <strong style="color:var(--gold)">SIT/CSC/24/0142</strong> means School of IT · Computer Science · Admitted 2024 · Student #0142</span>
+        </div>
+
+        <div class="field-wrap">
+          <label class="field-label">Matriculation Number <span class="req">*</span></label>
+          <div class="input-rel">
+            <input type="text" class="hms-input" id="matricNo" placeholder="e.g. SIT/CSC/24/0001" style="text-transform:uppercase;letter-spacing:.5px" autocomplete="off" maxlength="20"/>
+            <i class="bi bi-card-text fi"></i>
+            <span class="inline-check" id="matricCheck"></span>
+          </div>
+          <div class="field-hint"><i class="bi bi-info-circle"></i> Format: SIT/[3-letter dept code]/[2-digit year]/[4-digit number]</div>
+          <div class="ferr" id="matricErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+        </div>
+
+        <div class="field-wrap">
+          <label class="field-label">JAMB Registration Number <span class="req">*</span> <span class="badge-hint">10 digits</span></label>
+          <div class="input-rel">
+            <input type="text" class="hms-input" id="jambNo" placeholder="e.g. 2024983401" maxlength="11" autocomplete="off" inputmode="numeric"/>
+            <i class="bi bi-fingerprint fi"></i>
+            <span class="inline-check" id="jambCheck"></span>
+          </div>
+          <div class="jamb-note"><i class="bi bi-info-circle-fill"></i> Your JAMB number will be verified by the admin. Your name must match your JAMB record exactly.</div>
+          <div class="ferr" id="jambErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+        </div>
+
+        <div class="row-fields">
+          <div class="field-wrap">
+            <label class="field-label">Faculty <span class="req">*</span></label>
+            <div class="input-rel">
+              <select class="hms-input hms-select" id="faculty" onchange="populateDepts()">
+                <option value="">Select faculty</option>
+                <option>Engineering Technology</option>
+                <option>Agriculture & Agricultural Technology</option>
+                <option>Environmental Technology</option>
+                <option>Management Technology</option>
+                <option>Science & Science Education</option>
+                <option>Computing & Information Technology</option>
+                <option>Library & Information Science</option>
+              </select>
+              <i class="bi bi-building fi"></i>
+              <span class="sel-arrow"><i class="bi bi-chevron-down"></i></span>
+            </div>
+            <div class="ferr" id="facultyErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Department <span class="req">*</span></label>
+            <div class="input-rel">
+              <select class="hms-input hms-select" id="department">
+                <option value="">Select faculty first</option>
+              </select>
+              <i class="bi bi-diagram-3-fill fi"></i>
+              <span class="sel-arrow"><i class="bi bi-chevron-down"></i></span>
+            </div>
+            <div class="ferr" id="deptErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+          </div>
+        </div>
+
+        <div class="row-fields">
+          <div class="field-wrap">
+            <label class="field-label">Current Level <span class="req">*</span></label>
+            <div class="input-rel">
+              <select class="hms-input hms-select" id="level">
+                <option value="">Select level</option>
+                <option>100 Level</option><option>200 Level</option><option>300 Level</option><option>400 Level</option><option>500 Level</option>
+              </select>
+              <i class="bi bi-bar-chart-fill fi"></i>
+              <span class="sel-arrow"><i class="bi bi-chevron-down"></i></span>
+            </div>
+            <div class="ferr" id="levelErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Mode of Entry <span class="req">*</span></label>
+            <div class="input-rel">
+              <select class="hms-input hms-select" id="modeOfEntry">
+                <option value="">Select mode</option>
+                <option>UTME</option><option>Direct Entry</option><option>Transfer</option>
+              </select>
+              <i class="bi bi-arrow-right-circle-fill fi"></i>
+              <span class="sel-arrow"><i class="bi bi-chevron-down"></i></span>
+            </div>
+            <div class="ferr" id="modeErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <button class="btn-prev" onclick="goStep(1)"><i class="bi bi-arrow-left"></i> Back</button>
+          <button class="btn-next" onclick="goStep3()">Next: Account Setup <i class="bi bi-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- ══ STEP 3: ACCOUNT SETUP ══ -->
+      <div id="step3" style="display:none">
+        <div class="step-eyebrow"><span class="dot"></span>Step 3 of 3</div>
+        <h2 class="step-heading">Account Setup</h2>
+        <p class="step-sub">Create your login credentials. A verification email will be sent to your inbox.</p>
+
+        <div class="field-wrap">
+          <label class="field-label">Email Address <span class="req">*</span></label>
+          <div class="input-rel">
+            <input type="email" class="hms-input" id="email" placeholder="e.g. student@gmail.com or student@futbabura.edu.ng" autocomplete="email"/>
+            <i class="bi bi-envelope-fill fi"></i>
+            <span class="inline-check" id="emailCheck"></span>
+          </div>
+          <div class="field-hint"><i class="bi bi-info-circle"></i> Use any email you check regularly. A verification link will be sent there.</div>
+          <div class="ferr" id="emailErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+        </div>
+
+        <!-- Security checklist -->
+        <div class="sec-checklist">
+          <div class="sc-title"><i class="bi bi-shield-lock-fill"></i> Password Requirements</div>
+          <div class="sc-item"><div class="sc-dot sc-no" id="chkLen"></div>At least 8 characters</div>
+          <div class="sc-item"><div class="sc-dot sc-no" id="chkUpper"></div>At least one uppercase letter (A–Z)</div>
+          <div class="sc-item"><div class="sc-dot sc-no" id="chkNum"></div>At least one number (0–9)</div>
+          <div class="sc-item"><div class="sc-dot sc-no" id="chkSpecial"></div>At least one special character (!@#$%)</div>
+        </div>
+
+        <div class="row-fields">
+          <div class="field-wrap">
+            <label class="field-label">Password <span class="req">*</span></label>
+            <div class="input-rel">
+              <input type="password" class="hms-input" id="password" placeholder="Create strong password" autocomplete="new-password" oninput="checkStrength(this.value)"/>
+              <i class="bi bi-lock-fill fi"></i>
+              <button class="pwd-eye" onclick="togglePwd('password','eye1')" type="button"><i class="bi bi-eye-fill" id="eye1"></i></button>
+            </div>
+            <div class="strength-bar">
+              <div class="sb-seg" id="seg1"></div><div class="sb-seg" id="seg2"></div><div class="sb-seg" id="seg3"></div><div class="sb-seg" id="seg4"></div>
+            </div>
+            <div style="font-size:11px;margin-top:4px;color:var(--muted)" id="strengthLabel">Enter a password</div>
+            <div class="ferr" id="pwdErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+          </div>
+          <div class="field-wrap">
+            <label class="field-label">Confirm Password <span class="req">*</span></label>
+            <div class="input-rel">
+              <input type="password" class="hms-input" id="confirmPwd" placeholder="Re-enter password" autocomplete="new-password" oninput="checkMatch()"/>
+              <i class="bi bi-lock-fill fi"></i>
+              <button class="pwd-eye" onclick="togglePwd('confirmPwd','eye2')" type="button"><i class="bi bi-eye-fill" id="eye2"></i></button>
+            </div>
+            <div class="ferr" id="confirmErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+          </div>
+        </div>
+
+        <!-- Terms -->
+        <div style="display:flex;align-items:flex-start;gap:11px;margin-bottom:6px;padding:14px 16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:11px">
+          <div class="custom-cb" id="termsCb" onclick="toggleTerms()"></div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.65">I agree to the <a href="#" style="color:var(--gold);text-decoration:none">Terms & Conditions</a> and <a href="#" style="color:var(--gold);text-decoration:none">Hostel Rules</a> of FUTBabura. I confirm that all information provided is accurate and matches my official academic records.</p>
+        </div>
+        <div class="ferr" id="termsErr" style="margin-bottom:18px"><i class="bi bi-x-circle-fill"></i><span></span></div>
+
+        <div class="step-nav">
+          <button class="btn-prev" onclick="goStep(2)"><i class="bi bi-arrow-left"></i> Back</button>
+          <button class="btn-next" id="submitBtn" onclick="submitRegistration()">
+            <span id="submitText">Create Account</span>
+            <i class="bi bi-person-check-fill" id="submitIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ══ SUCCESS SCREEN ══ -->
+      <div class="success-screen" id="successScreen">
+        <div class="success-icon-wrap">🎉</div>
+        <h2 class="success-title">Account Created!</h2>
+        <p class="success-desc">Your FUTBabura HMS student account is ready. Please verify your email to activate it fully.</p>
+        <div class="success-email-box">
+          <i class="bi bi-envelope-check-fill"></i>
+          <span>A verification link has been sent to <strong id="successEmail" style="color:var(--gold)"></strong>. Click it to verify your account and access all features.</span>
+        </div>
+        <div class="success-tips">
+          <div class="st-title">✅ What happens next?</div>
+          <div class="st-item"><i class="bi bi-1-circle-fill" style="color:var(--gold);flex-shrink:0"></i> Check your inbox (or spam/junk if not there)</div>
+          <div class="st-item"><i class="bi bi-2-circle-fill" style="color:var(--gold);flex-shrink:0"></i> Click the verification link in the email</div>
+          <div class="st-item"><i class="bi bi-3-circle-fill" style="color:var(--gold);flex-shrink:0"></i> Sign in and book your hostel room</div>
+          <div class="st-item"><i class="bi bi-info-circle-fill" style="color:#93c5fd;flex-shrink:0"></i> Your JAMB number will be verified by admin within 24–48 hours</div>
+        </div>
+        <a href="login.html" class="btn-goto-login"><i class="bi bi-box-arrow-in-right"></i> Go to Sign In</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp }     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, query, where, getDocs, setDoc, doc, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+  import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg = {apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app  = initializeApp(cfg);
+  const db   = getFirestore(app);
+  const st   = getStorage(app);
+  const auth = getAuth(app);
+
+  // Load settings on page load (for slot counts)
+  window._loadSlots = async function(){
+    try {
+      const snap = await getDocs(collection(db,"settings"));
+      if(snap.empty) return;
+      const s = snap.docs[0].data();
+      const ms = s.maleSlots   !== undefined ? s.maleSlots   : "N/A";
+      const fs = s.femaleSlots !== undefined ? s.femaleSlots : "N/A";
+      document.getElementById("maleSlots").textContent   = ms;
+      document.getElementById("femaleSlots").textContent = fs;
+      // colour code
+      const mb = document.getElementById("maleSlotBox");
+      const fb = document.getElementById("femaleSlotBox");
+      mb.className = "slot-box " + (ms === 0 ? "slot-full" : "slot-ok");
+      fb.className = "slot-box " + (fs === 0 ? "slot-full" : "slot-ok");
+      document.getElementById("slotsInfo").style.display = "grid";
+      // block gender if slots full
+      if(ms === 0) document.getElementById("gcMale").style.opacity = ".4";
+      if(fs === 0) document.getElementById("gcFemale").style.opacity = ".4";
+    } catch(e){}
+  };
+  window._loadSlots();
+
+  // Phone uniqueness check
+  window._checkPhone = async function(val){
+    if(val.length < 11) return;
+    const chk = document.getElementById("phoneCheck");
+    chk.innerHTML = `<span style="font-size:12px;color:var(--gold)"><i class="bi bi-hourglass-split"></i></span>`;
+    try {
+      const snap = await getDocs(query(collection(db,"users"), where("phone","==", val)));
+      if(!snap.empty){
+        chk.innerHTML = `<i class="bi bi-x-circle-fill" style="color:var(--err)"></i>`;
+        showFieldErr("phone","phoneErr","This phone number is already registered");
+      } else {
+        chk.innerHTML = `<i class="bi bi-check-circle-fill" style="color:var(--ok)"></i>`;
+        document.getElementById("phone").classList.remove("err");
+        document.getElementById("phone").classList.add("good");
+        document.getElementById("phoneErr").classList.remove("show");
+      }
+    } catch{ chk.innerHTML = ""; }
+  };
+
+  // Matric uniqueness + format check
+  window._checkMatric = async function(val){
+    val = val.trim().toUpperCase();
+    document.getElementById("matricNo").value = val;
+    const chk = document.getElementById("matricCheck");
+    const MATRIC_RE = /^SIT\/[A-Z]{3}\/\d{2}\/\d{4}$/;
+    if(!MATRIC_RE.test(val)){
+      chk.innerHTML = `<i class="bi bi-x-circle-fill" style="color:var(--err)"></i>`;
+      showFieldErr("matricNo","matricErr","Format must be: SIT/XXX/YY/0001 (e.g. SIT/CSC/24/0142)");
+      return;
+    }
+    chk.innerHTML = `<span style="font-size:12px;color:var(--gold)"><i class="bi bi-hourglass-split"></i></span>`;
+    try {
+      const snap = await getDocs(query(collection(db,"users"), where("matricNo","==", val)));
+      if(!snap.empty){
+        chk.innerHTML = `<i class="bi bi-x-circle-fill" style="color:var(--err)"></i>`;
+        showFieldErr("matricNo","matricErr","This matric number is already registered");
+      } else {
+        chk.innerHTML = `<i class="bi bi-check-circle-fill" style="color:var(--ok)"></i>`;
+        document.getElementById("matricNo").classList.remove("err");
+        document.getElementById("matricNo").classList.add("good");
+        document.getElementById("matricErr").classList.remove("show");
+      }
+    } catch{ chk.innerHTML = ""; }
+  };
+
+  // JAMB uniqueness check
+  window._checkJamb = async function(val){
+    if(val.length < 10) return;
+    const chk = document.getElementById("jambCheck");
+    chk.innerHTML = `<span style="font-size:12px;color:var(--gold)"><i class="bi bi-hourglass-split"></i></span>`;
+    try {
+      const snap = await getDocs(query(collection(db,"users"), where("jambNo","==", val)));
+      if(!snap.empty){
+        chk.innerHTML = `<i class="bi bi-x-circle-fill" style="color:var(--err)"></i>`;
+        showFieldErr("jambNo","jambErr","This JAMB number is already linked to another account");
+      } else {
+        chk.innerHTML = `<i class="bi bi-check-circle-fill" style="color:var(--ok)"></i>`;
+        document.getElementById("jambNo").classList.remove("err");
+        document.getElementById("jambNo").classList.add("good");
+        document.getElementById("jambErr").classList.remove("show");
+      }
+    } catch{ chk.innerHTML = ""; }
+  };
+
+  // MAIN SUBMIT
+  window._submitReg = async function(){
+    clearAlert();
+    const email   = document.getElementById("email").value.trim().toLowerCase();
+    const pwd     = document.getElementById("password").value;
+    const cpwd    = document.getElementById("confirmPwd").value;
+    const terms   = document.getElementById("termsCb").classList.contains("checked");
+    let valid = true;
+
+    // Email validation
+    if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+      showFieldErr("email","emailErr","Enter a valid email address"); valid=false;
+    }
+
+    // Strong password validation
+    if(!pwd){
+      showFieldErr("password","pwdErr","Password is required"); valid=false;
+    } else if(pwd.length < 8){
+      showFieldErr("password","pwdErr","Password must be at least 8 characters"); valid=false;
+    } else if(!/[A-Z]/.test(pwd)){
+      showFieldErr("password","pwdErr","Password must contain at least one uppercase letter"); valid=false;
+    } else if(!/[0-9]/.test(pwd)){
+      showFieldErr("password","pwdErr","Password must contain at least one number"); valid=false;
+    } else if(!/[!@#$%^&*(),.?":{}|<>_\-]/.test(pwd)){
+      showFieldErr("password","pwdErr","Password must contain at least one special character"); valid=false;
+    }
+
+    if(pwd !== cpwd){
+      showFieldErr("confirmPwd","confirmErr","Passwords do not match"); valid=false;
+    }
+    if(!terms){
+      const te = document.getElementById("termsErr"); te.classList.add("show"); te.querySelector("span").textContent = "You must agree to the terms to continue"; valid=false;
+    }
+    if(!valid) return;
+
+    // Rate limiting — check registration attempts from this device
+    const deviceId = getDeviceFingerprint();
+    const attemptKey = "reg_attempts_" + new Date().toDateString();
+    const attempts = parseInt(localStorage.getItem(attemptKey)||"0");
+    if(attempts >= 3){
+      showAlert("Too many registration attempts from this device today. Please try again tomorrow or contact the admin.", "a-err");
+      return;
+    }
+
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    document.getElementById("submitText").textContent = "Creating Account...";
+    document.getElementById("submitIcon").style.display = "none";
+    const sp = document.createElement("div"); sp.className="spin"; btn.appendChild(sp);
+
+    try {
+      const fd = window._formData;
+
+      // ── 1. RATE LIMIT: Check how many accounts this device already created ──
+      const deviceSnap = await getDocs(query(collection(db,"users"), where("deviceFingerprint","==", deviceId)));
+      if(deviceSnap.size >= 2){
+        showAlert("Multiple accounts detected from this device. Contact the admin if you believe this is a mistake.", "a-err");
+        return;
+      }
+
+      // ── 2. Check all uniqueness in parallel ──
+      const [matricSnap, phoneSnap, jambSnap] = await Promise.all([
+        getDocs(query(collection(db,"users"), where("matricNo","==", fd.matricNo))),
+        getDocs(query(collection(db,"users"), where("phone","==", fd.phone))),
+        getDocs(query(collection(db,"users"), where("jambNo","==", fd.jambNo))),
+      ]);
+
+      if(!matricSnap.empty){ showAlert("This matric number is already registered. Please sign in instead.", "a-err"); return; }
+      if(!phoneSnap.empty){ showAlert("This phone number is already linked to another account.", "a-err"); return; }
+      if(!jambSnap.empty){ showAlert("This JAMB number is already linked to another account.", "a-err"); return; }
+
+      // ── 3. Check gender slot availability ──
+      const ssSnap = await getDocs(collection(db,"settings"));
+      if(!ssSnap.empty){
+        const ss = ssSnap.docs[0].data();
+        const slotKey = fd.gender === "Male" ? "maleSlots" : "femaleSlots";
+        if(ss[slotKey] !== undefined && ss[slotKey] <= 0){
+          showAlert(`Sorry, all ${fd.gender.toLowerCase()} hostel slots are currently full. Please check back later or contact the admin.`, "a-warn");
+          return;
+        }
+      }
+
+      // ── 4. Create Firebase Auth account ──
+      const cred = await createUserWithEmailAndPassword(auth, email, pwd);
+      const user = cred.user;
+
+      // ── 5. Upload photo if provided ──
+      let photoURL = "";
+      if(window._photoFile){
+        const r = ref(st, `profile_photos/${user.uid}`);
+        await uploadBytes(r, window._photoFile);
+        photoURL = await getDownloadURL(r);
+      }
+
+      // ── 6. Update Firebase Auth profile ──
+      await updateProfile(user, { displayName: fd.fullName, photoURL });
+
+      // ── 7. Send verification email (inbox not spam) ──
+      // actionCodeSettings tells Firebase to redirect to login after verification
+      // This also signals the email client it is a legitimate transactional email
+      const actionCodeSettings = {
+        url: window.location.origin + "/login.html?verified=true",
+        handleCodeInApp: false,
+        // dynamicLinkDomain is intentionally omitted so Firebase uses its default
+        // deliverable SMTP relay which has better inbox placement than custom domains
+      };
+      await sendEmailVerification(user, actionCodeSettings);
+
+      // ── 8. Save full profile to Firestore ──
+      await setDoc(doc(db,"users", user.uid), {
+        uid:               user.uid,
+        role:              "student",
+        fullName:          fd.fullName,
+        phone:             fd.phone,
+        gender:            fd.gender,
+        dob:               fd.dob,
+        stateOrigin:       fd.stateOrigin,
+        matricNo:          fd.matricNo,
+        jambNo:            fd.jambNo,
+        jambVerified:      false,       // Admin must verify JAMB manually
+        faculty:           fd.faculty,
+        department:        fd.department,
+        level:             fd.level,
+        modeOfEntry:       fd.modeOfEntry,
+        email:             email,
+        photoURL:          photoURL,
+        isActive:          true,
+        bookingStatus:     "none",
+        deviceFingerprint: deviceId,
+        registrationIP:    "",          // Can be filled server-side if needed
+        createdAt:         serverTimestamp(),
+      });
+
+      // ── 9. Track device attempt ──
+      localStorage.setItem(attemptKey, String(attempts + 1));
+
+      // ── 10. Sign out — force email verification first ──
+      await auth.signOut();
+
+      // ── Show success ──
+      document.getElementById("successEmail").textContent = email;
+      document.getElementById("step3").style.display = "none";
+      document.getElementById("progressWrap").style.display = "none";
+      document.getElementById("successScreen").classList.add("show");
+      markStep(3,"done");
+
+    } catch(e){
+      // Track failed attempt
+      localStorage.setItem(attemptKey, String(attempts + 1));
+      let msg = "Registration failed. Please check your details and try again.";
+      if(e.code === "auth/email-already-in-use") msg = "This email is already registered. Please sign in or use a different email.";
+      else if(e.code === "auth/invalid-email")   msg = "The email address is not valid.";
+      else if(e.code === "auth/weak-password")   msg = "Your password is too weak. Use at least 8 characters with uppercase, number, and special character.";
+      else if(e.code === "auth/network-request-failed") msg = "Network error. Please check your internet connection.";
+      else if(e.code === "auth/too-many-requests") msg = "Too many requests. Please wait a few minutes and try again.";
+      showAlert(msg, "a-err");
+    } finally {
+      btn.disabled = false;
+      document.getElementById("submitText").textContent = "Create Account";
+      document.getElementById("submitIcon").style.display = "";
+      document.querySelector(".spin")?.remove();
+    }
+  };
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // ── PARTICLES ──
+  const canvas = document.getElementById("particles"), ctx = canvas.getContext("2d");
+  function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
+  resize(); addEventListener("resize", resize);
+  const pts = Array.from({length:55},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.3+.35,dx:(Math.random()-.5)*.22,dy:(Math.random()-.5)*.22,a:Math.random()*.25+.06}));
+  function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); pts.forEach(p=>{ ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle=`rgba(245,166,35,${p.a})`; ctx.fill(); p.x+=p.dx; p.y+=p.dy; if(p.x<0||p.x>canvas.width)p.dx*=-1; if(p.y<0||p.y>canvas.height)p.dy*=-1; }); requestAnimationFrame(draw); }
+  draw();
+
+  // ── STATE ──
+  window._formData = {};
+  window._photoFile = null;
+  let _gender = "", _terms = false;
+
+  // ── DEVICE FINGERPRINT ──
+  // Creates a pseudo-unique ID from browser properties — no server needed
+  function getDeviceFingerprint(){
+    const stored = localStorage.getItem("__hms_dfp");
+    if(stored) return stored;
+    const raw = [
+      navigator.userAgent,
+      navigator.language,
+      screen.width + "x" + screen.height,
+      screen.colorDepth,
+      new Date().getTimezoneOffset(),
+      navigator.hardwareConcurrency || "",
+      navigator.platform || "",
+    ].join("|");
+    // Simple hash
+    let hash = 0;
+    for(let i = 0; i < raw.length; i++){ hash = ((hash << 5) - hash) + raw.charCodeAt(i); hash |= 0; }
+    const fp = "dfp_" + Math.abs(hash).toString(36) + "_" + Date.now().toString(36);
+    localStorage.setItem("__hms_dfp", fp);
+    return fp;
+  }
+  window.getDeviceFingerprint = getDeviceFingerprint;
+
+  // ── HELPERS ──
+  function showFieldErr(inputId, errId, msg){
+    const inp = document.getElementById(inputId);
+    if(inp){ inp.classList.add("err"); inp.classList.remove("good"); }
+    const e = document.getElementById(errId);
+    if(e){ e.classList.add("show"); e.querySelector("span").textContent = msg; }
+  }
+  function clearFieldErr(inputId, errId){
+    const inp = document.getElementById(inputId);
+    if(inp){ inp.classList.remove("err"); }
+    const e = document.getElementById(errId);
+    if(e) e.classList.remove("show");
+  }
+  function showAlert(msg, cls){
+    const el = document.getElementById("gAlert");
+    el.className = "g-alert show " + cls;
+    const icons = {
+      "a-err":  "bi-exclamation-circle-fill",
+      "a-warn": "bi-exclamation-triangle-fill",
+      "a-ok":   "bi-check-circle-fill",
+      "a-info": "bi-info-circle-fill",
+    };
+    document.getElementById("gAlertIcon").className = "bi " + (icons[cls]||"bi-info-circle-fill");
+    document.getElementById("gAlertMsg").innerHTML = msg;
+    el.scrollIntoView({ behavior:"smooth", block:"nearest" });
+  }
+  function clearAlert(){ document.getElementById("gAlert").className = "g-alert"; }
+
+  // ── STEP MANAGEMENT ──
+  function markStep(n, state){
+    const num = document.getElementById("sn"+n);
+    const title = document.getElementById("st"+n);
+    if(num){ num.className = "step-num " + state; }
+    if(title){ title.classList.toggle("active", state==="active"); }
+    if(n < 3){ const conn = document.getElementById("sc"+n); if(conn) conn.classList.toggle("done", state==="done"); }
+  }
+  function showStep(n){
+    [1,2,3].forEach(i => document.getElementById("step"+i).style.display = i===n?"block":"none");
+    document.getElementById("progFill").style.width = (n/3*100) + "%";
+    window.scrollTo({top:0,behavior:"smooth"});
+    [1,2,3].forEach(i => {
+      if(i < n) markStep(i,"done");
+      else if(i === n) markStep(i,"active");
+    });
+  }
+  window.goStep = function(n){ showStep(n); };
+
+  // ── STEP 1 → 2 VALIDATION ──
+  window.goStep2 = function(){
+    clearAlert(); let valid = true;
+    const name = document.getElementById("fullName").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const dob = document.getElementById("dob").value;
+    const state = document.getElementById("stateOrigin").value;
+
+    if(!name || name.split(" ").filter(Boolean).length < 2){
+      showFieldErr("fullName","nameErr","Enter your full name (at least first and last name)"); valid=false;
+    } else clearFieldErr("fullName","nameErr");
+
+    // Nigerian phone validation
+    const PHONE_RE = /^(070|080|081|090|091)\d{8}$/;
+    if(!phone){ showFieldErr("phone","phoneErr","Phone number is required"); valid=false; }
+    else if(!PHONE_RE.test(phone)){ showFieldErr("phone","phoneErr","Enter a valid 11-digit Nigerian number (070, 080, 081, 090, 091)"); valid=false; }
+    else clearFieldErr("phone","phoneErr");
+
+    if(!_gender){ document.getElementById("genderErr").classList.add("show"); document.getElementById("genderErr").querySelector("span").textContent="Please select your gender"; valid=false; }
+    else document.getElementById("genderErr").classList.remove("show");
+
+    if(!dob){ showFieldErr("dob","dobErr","Date of birth is required"); valid=false; }
+    else {
+      const age = Math.floor((Date.now() - new Date(dob)) / 31557600000);
+      if(age < 15 || age > 60){ showFieldErr("dob","dobErr","Date of birth looks invalid (age must be between 15–60)"); valid=false; }
+      else clearFieldErr("dob","dobErr");
+    }
+
+    if(!state){ showFieldErr("stateOrigin","stateErr","State of origin is required"); valid=false; }
+    else clearFieldErr("stateOrigin","stateErr");
+
+    if(!valid) return;
+
+    window._formData.fullName    = name;
+    window._formData.phone       = phone;
+    window._formData.gender      = _gender;
+    window._formData.dob         = dob;
+    window._formData.stateOrigin = state;
+    showStep(2);
+    window._checkPhone(phone);
+  };
+
+  // ── STEP 2 → 3 VALIDATION ──
+  window.goStep3 = function(){
+    clearAlert(); let valid = true;
+    const matric = document.getElementById("matricNo").value.trim().toUpperCase();
+    const jamb   = document.getElementById("jambNo").value.trim();
+    const faculty = document.getElementById("faculty").value;
+    const dept    = document.getElementById("department").value;
+    const level   = document.getElementById("level").value;
+    const mode    = document.getElementById("modeOfEntry").value;
+
+    // Matric format: SIT/XXX/YY/0001
+    const MATRIC_RE = /^SIT\/[A-Z]{3}\/\d{2}\/\d{4}$/;
+    if(!matric){ showFieldErr("matricNo","matricErr","Matric number is required"); valid=false; }
+    else if(!MATRIC_RE.test(matric)){ showFieldErr("matricNo","matricErr","Invalid format. Must be: SIT/XXX/YY/0001 (e.g. SIT/CSC/24/0142)"); valid=false; }
+    else clearFieldErr("matricNo","matricErr");
+
+    // JAMB: exactly 10 digits
+    if(!jamb){ showFieldErr("jambNo","jambErr","JAMB registration number is required"); valid=false; }
+    else if(!/^\d{10}$/.test(jamb)){ showFieldErr("jambNo","jambErr","JAMB number must be exactly 10 digits"); valid=false; }
+    else clearFieldErr("jambNo","jambErr");
+
+    if(!faculty){ showFieldErr("faculty","facultyErr","Please select your faculty"); valid=false; }
+    else clearFieldErr("faculty","facultyErr");
+    if(!dept || dept === "Select faculty first"){ showFieldErr("department","deptErr","Please select your department"); valid=false; }
+    else clearFieldErr("department","deptErr");
+    if(!level){ showFieldErr("level","levelErr","Please select your level"); valid=false; }
+    else clearFieldErr("level","levelErr");
+    if(!mode){ showFieldErr("modeOfEntry","modeErr","Please select mode of entry"); valid=false; }
+    else clearFieldErr("modeOfEntry","modeErr");
+
+    if(!valid) return;
+
+    window._formData.matricNo   = matric;
+    window._formData.jambNo     = jamb;
+    window._formData.faculty    = faculty;
+    window._formData.department = dept;
+    window._formData.level      = level;
+    window._formData.modeOfEntry= mode;
+
+    showStep(3);
+    // Run async uniqueness checks silently
+    window._checkMatric(matric);
+    window._checkJamb(jamb);
+  };
+
+  // ── SUBMIT (calls module function) ──
+  window.submitRegistration = function(){ window._submitReg(); };
+
+  // ── GENDER SELECT ──
+  window.selectGender = function(g){
+    _gender = g;
+    document.getElementById("gcMale").classList.toggle("selected", g==="Male");
+    document.getElementById("gcFemale").classList.toggle("selected", g==="Female");
+    document.getElementById("genderErr").classList.remove("show");
+  };
+
+  // ── PHOTO HANDLER ──
+  window.handlePhoto = function(input){
+    const file = input.files[0];
+    if(!file) return;
+    if(file.size > 2 * 1024 * 1024){
+      document.getElementById("photoErr").classList.add("show");
+      document.getElementById("photoErr").querySelector("span").textContent = "Photo must be under 2MB";
+      return;
+    }
+    document.getElementById("photoErr").classList.remove("show");
+    window._photoFile = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById("photoImg").src = e.target.result;
+      document.getElementById("photoPreview").style.display = "block";
+      document.getElementById("puIcon").style.display = "none";
+      document.getElementById("puText").textContent = file.name;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // ── TOGGLE PASSWORD ──
+  window.togglePwd = function(id, iconId){
+    const inp = document.getElementById(id);
+    inp.type = inp.type === "password" ? "text" : "password";
+    document.getElementById(iconId).className = inp.type === "password" ? "bi bi-eye-fill" : "bi bi-eye-slash-fill";
+  };
+
+  // ── TERMS ──
+  window.toggleTerms = function(){
+    _terms = !_terms;
+    document.getElementById("termsCb").classList.toggle("checked", _terms);
+    if(_terms) document.getElementById("termsErr").classList.remove("show");
+  };
+
+  // ── PASSWORD STRENGTH ──
+  window.checkStrength = function(val){
+    const hasLen     = val.length >= 8;
+    const hasUpper   = /[A-Z]/.test(val);
+    const hasNum     = /[0-9]/.test(val);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>_\-]/.test(val);
+    const score = [hasLen, hasUpper, hasNum, hasSpecial].filter(Boolean).length;
+
+    // Update checklist dots
+    document.getElementById("chkLen").className     = "sc-dot " + (hasLen     ? "sc-ok":"sc-no");
+    document.getElementById("chkUpper").className   = "sc-dot " + (hasUpper   ? "sc-ok":"sc-no");
+    document.getElementById("chkNum").className     = "sc-dot " + (hasNum     ? "sc-ok":"sc-no");
+    document.getElementById("chkSpecial").className = "sc-dot " + (hasSpecial ? "sc-ok":"sc-no");
+
+    // Strength bar
+    const colors = ["","#ef4444","#f59e0b","#3b82f6","#22c55e"];
+    const labels = ["","Weak","Fair","Good","Strong 🔒"];
+    [1,2,3,4].forEach(i => {
+      document.getElementById("seg"+i).style.background = i <= score ? colors[score] : "rgba(255,255,255,.1)";
+    });
+    document.getElementById("strengthLabel").textContent = score > 0 ? labels[score] : "Enter a password";
+    document.getElementById("strengthLabel").style.color = colors[score] || "var(--muted)";
+  };
+
+  // ── CONFIRM MATCH ──
+  window.checkMatch = function(){
+    const p = document.getElementById("password").value;
+    const c = document.getElementById("confirmPwd").value;
+    if(c && p !== c){
+      showFieldErr("confirmPwd","confirmErr","Passwords do not match");
+    } else {
+      clearFieldErr("confirmPwd","confirmErr");
+      if(c) document.getElementById("confirmPwd").classList.add("good");
+    }
+  };
+
+  // ── FACULTY → DEPARTMENT MAP (Complete FUTBabura Departments) ──
+  const deptMap = {
+    "Engineering Technology": [
+      "Agricultural & Bioresource Engineering",
+      "Chemical Engineering",
+      "Civil Engineering",
+      "Computer Engineering",
+      "Electrical & Electronics Engineering",
+      "Mechanical Engineering",
+      "Mechatronics Engineering",
+    ],
+    "Agriculture & Agricultural Technology": [
+      "Agricultural Economics & Extension",
+      "Animal Science & Husbandry",
+      "Crop Production & Horticulture",
+      "Fisheries & Aquaculture Technology",
+      "Forestry & Wildlife Management",
+      "Soil Science & Land Management",
+    ],
+    "Environmental Technology": [
+      "Architecture",
+      "Building Technology",
+      "Estate Management & Valuation",
+      "Quantity Surveying",
+      "Surveying & Geo-Informatics",
+      "Urban & Regional Planning",
+    ],
+    "Management Technology": [
+      "Accountancy",
+      "Business Administration & Management",
+      "Marketing",
+      "Office Technology & Management",
+      "Public Administration",
+      "Entrepreneurship & Business Studies",
+    ],
+    "Science & Science Education": [
+      "Biology / Biology Education",
+      "Chemistry / Chemistry Education",
+      "Integrated Science Education",
+      "Mathematics / Mathematics Education",
+      "Physics / Physics Education",
+      "Science Laboratory Technology",
+      "Statistics",
+    ],
+    "Computing & Information Technology": [
+      "Computer Science",
+      "Cyber Security Science",
+      "Information Technology",
+      "Software Engineering",
+      "Data Science & Analytics",
+      "Artificial Intelligence",
+    ],
+    "Library & Information Science": [
+      "Library & Information Science",
+      "Archival Studies",
+      "Records Management",
+    ],
+  };
+  window.populateDepts = function(){
+    const faculty = document.getElementById("faculty").value;
+    const sel = document.getElementById("department");
+    sel.innerHTML = `<option value="">Select department</option>`;
+    (deptMap[faculty]||[]).forEach(d => { const o = document.createElement("option"); o.value=d; o.textContent=d; sel.appendChild(o); });
+  };
+
+  // ── REAL-TIME CHECKS ON BLUR ──
+  document.getElementById("phone").addEventListener("blur", function(){ window._checkPhone(this.value.trim()); });
+  document.getElementById("matricNo").addEventListener("blur", function(){ if(this.value.trim()) window._checkMatric(this.value); });
+  document.getElementById("jambNo").addEventListener("blur", function(){ window._checkJamb(this.value.trim()); });
+  document.getElementById("matricNo").addEventListener("input", function(){ this.value = this.value.toUpperCase(); });
+  document.getElementById("jambNo").addEventListener("input", function(){ this.value = this.value.replace(/\D/g,"").slice(0,10); });
+  document.getElementById("phone").addEventListener("input", function(){ this.value = this.value.replace(/\D/g,"").slice(0,11); });
+</script>
+</body>
+</html>
