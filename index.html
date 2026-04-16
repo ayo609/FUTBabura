@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FUTBabura HMS — Smart Hostel Management System</title>
+  <meta name="description" content="The official digital hostel management platform for Federal University of Technology Babura. Register, book your room, pay online and manage your stay — all in one place."/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--gold3:#ffc35a;
+      --glow:rgba(245,166,35,.22);--glow2:rgba(245,166,35,.45);
+      --white:#fff;--muted:rgba(255,255,255,.52);
+      --card:rgba(255,255,255,.038);--border:rgba(255,255,255,.085);
+      --radius:18px;--ok:#22c55e;--err:#ef4444;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+    #particles{position:fixed;inset:0;z-index:0;pointer-events:none}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--navy)}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}
+    #readingProgress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold3));z-index:99999;width:0%;transition:width .12s linear}
+    .scroll-btn{position:fixed;right:22px;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;z-index:9999;border:none;transition:all .35s cubic-bezier(.34,1.56,.64,1);box-shadow:0 6px 22px rgba(0,0,0,.4)}
+    #scrollToBottom{background:var(--gold);color:var(--navy);bottom:78px;opacity:0;visibility:hidden;transform:translateY(12px)}
+    #scrollToTop{background:rgba(255,255,255,.08);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.18);color:var(--white);bottom:22px;opacity:0;visibility:hidden;transform:translateY(12px)}
+    #scrollToBottom.show,#scrollToTop.show{opacity:1;visibility:visible;transform:translateY(0)}
+    #scrollToBottom:hover{background:var(--gold2);transform:scale(1.1)!important}
+    #scrollToTop:hover{background:rgba(255,255,255,.15);transform:scale(1.1)!important}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
+    @keyframes pulseOrb{0%,100%{opacity:.8;transform:scale(1) translateY(-50%)}50%{opacity:1;transform:scale(1.06) translateY(-50%)}}
+    @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes slideInRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+    .typing-cursor{display:inline-block;width:3px;height:clamp(24px,3.5vw,44px);background:var(--gold);margin-left:6px;animation:blink 1s infinite;vertical-align:middle}
+
+    /* NAVBAR */
+    #navbar{position:fixed;top:0;left:0;right:0;z-index:9999;padding:14px 0;transition:all .4s}
+    #navbar.scrolled{background:rgba(7,17,43,.97);backdrop-filter:blur(22px);box-shadow:0 4px 32px rgba(0,0,0,.4);border-bottom:1px solid var(--border);padding:9px 0}
+    .nb-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .nb-logo{width:42px;height:42px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;flex-shrink:0;box-shadow:0 0 16px var(--glow)}
+    .nb-logo img{width:100%;height:100%;object-fit:cover}
+    .nb-name{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:700;color:var(--white);line-height:1.1}
+    .nb-sub{font-size:9px;color:var(--gold);letter-spacing:1.8px;text-transform:uppercase}
+    .nav-link{color:var(--muted)!important;font-size:13px;font-weight:500;transition:color .2s;position:relative;padding-bottom:4px!important}
+    .nav-link::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1.5px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .25s}
+    .nav-link:hover,#navbar .nav-link.active{color:var(--white)!important}
+    .nav-link:hover::after,#navbar .nav-link.active::after{transform:scaleX(1)}
+    .btn-signin{border:1.5px solid rgba(255,255,255,.22);color:var(--white)!important;font-size:13px;font-weight:600;padding:7px 18px;border-radius:8px;text-decoration:none;transition:all .25s}
+    .btn-signin:hover{border-color:var(--white);background:rgba(255,255,255,.07);color:var(--white)!important}
+    .btn-book{background:var(--gold);color:var(--navy)!important;font-size:13px;font-weight:700;padding:8px 20px;border-radius:8px;text-decoration:none;box-shadow:0 4px 16px var(--glow);transition:all .25s}
+    .btn-book:hover{background:var(--gold2);transform:translateY(-2px);color:var(--navy)!important}
+    .navbar-toggler{border:1.5px solid rgba(245,166,35,.4);padding:6px 10px;background:rgba(245,166,35,.08)}
+    .navbar-toggler:focus{box-shadow:0 0 0 3px rgba(245,166,35,.2)}
+    .navbar-toggler-icon{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255%2C255%2C255%2C0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e")}
+    @media(max-width:991px){#navbar.scrolled .navbar-collapse,.navbar-collapse.show{background:rgba(7,17,43,.98);border:1px solid rgba(245,166,35,.15);border-radius:14px;margin-top:10px;padding:16px 20px}}
+
+    /* SESSION BANNER */
+    .session-banner{background:linear-gradient(135deg,rgba(245,166,35,.1),rgba(245,166,35,.04));border:1px solid rgba(245,166,35,.18);border-radius:100px;padding:8px 20px;display:inline-flex;align-items:center;gap:10px;margin-bottom:20px}
+    .sb-dot{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pulse 1.5s infinite}
+    .sb-text{font-size:13px;font-weight:600}
+    .sb-text span{color:var(--gold)}
+
+    /* HERO */
+    .hero{min-height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden}
+    .hero-ticker{position:relative;z-index:5;background:rgba(245,166,35,.09);border-bottom:1px solid rgba(245,166,35,.15);overflow:hidden;padding:8px 0;margin-top:72px}
+    .ticker-track{display:flex;gap:0;animation:ticker 28s linear infinite;width:max-content}
+    .ticker-item{display:inline-flex;align-items:center;gap:8px;padding:0 36px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.6);white-space:nowrap}
+    .ticker-item span{color:var(--gold)}
+    @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    .hero-body{flex:1;display:flex;align-items:center;padding:50px 0 90px}
+    .hero-bg{position:absolute;inset:0;background:linear-gradient(128deg,#07112b 0%,#0c1a3d 42%,#091530 100%)}
+    .hero-slice{position:absolute;right:0;top:0;bottom:0;width:50%;background:linear-gradient(150deg,#112060 0%,#0a1840 100%);clip-path:polygon(10% 0,100% 0,100% 100%,0% 100%);border-left:1px solid rgba(245,166,35,.1)}
+    .hero-glow{position:absolute;right:20%;top:50%;transform:translateY(-50%);width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.1) 0%,transparent 68%);pointer-events:none;animation:pulseOrb 5s ease-in-out infinite}
+    .hero-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
+    .hero-content{position:relative;z-index:4}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(245,166,35,.09);border:1px solid rgba(245,166,35,.3);color:var(--gold);font-size:10.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:24px}
+    .eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 1.6s infinite}
+    .hero h1{font-family:'Playfair Display',serif;font-size:clamp(36px,5.5vw,70px);font-weight:900;line-height:1.07;margin-bottom:20px}
+    .hero h1 .gold{color:var(--gold)}
+    .hero-p{font-size:16px;font-weight:300;color:rgba(255,255,255,.65);line-height:1.8;max-width:490px;margin-bottom:36px}
+    .hero-btns{display:flex;gap:12px;flex-wrap:wrap}
+    .btn-primary-hero{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:var(--navy);font-weight:700;font-size:14px;padding:13px 30px;border-radius:10px;text-decoration:none;box-shadow:0 6px 24px var(--glow);transition:all .3s}
+    .btn-primary-hero:hover{background:var(--gold2);transform:translateY(-3px);box-shadow:0 10px 32px var(--glow);color:var(--navy)}
+    .btn-ghost-hero{display:inline-flex;align-items:center;gap:8px;border:1.5px solid rgba(255,255,255,.26);color:var(--white);font-size:14px;font-weight:500;padding:13px 26px;border-radius:10px;text-decoration:none;transition:all .3s}
+    .btn-ghost-hero:hover{border-color:var(--white);background:rgba(255,255,255,.06);color:var(--white)}
+
+    /* HERO TRUST BADGES */
+    .hero-trust{display:flex;gap:18px;flex-wrap:wrap;margin-top:32px}
+    .ht-item{display:flex;align-items:center;gap:7px;font-size:12.5px;color:rgba(255,255,255,.5);font-weight:500}
+    .ht-item i{color:var(--ok);font-size:14px}
+
+    /* HERO RIGHT CARD — replaced rooms with welcome info card */
+    .welcome-card{background:rgba(255,255,255,.048);backdrop-filter:blur(26px);border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:28px;box-shadow:0 28px 60px rgba(0,0,0,.4)}
+    .wc-header{display:flex;align-items:center;gap:12px;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.07)}
+    .wc-icon{width:42px;height:42px;border-radius:11px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--navy);flex-shrink:0}
+    .wc-title{font-weight:700;font-size:14.5px}
+    .wc-sub{font-size:11px;color:var(--muted)}
+    .session-live-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block;animation:pulse 1.5s infinite;margin-right:4px}
+    .info-row{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);margin-bottom:8px;font-size:13px}
+    .ir-label{color:var(--muted);font-size:12px}
+    .ir-val{font-weight:700;font-size:13px}
+    .ir-val.gold{color:var(--gold)}
+    .ir-val.ok{color:var(--ok)}
+    .ir-val.err{color:var(--err)}
+    .wc-steps{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+    .wcs-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.12);font-size:12.5px;font-weight:600}
+    .wcs-num{width:22px;height:22px;border-radius:50%;background:var(--gold);color:var(--navy);font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .wc-cta{display:block;margin-top:18px;background:var(--gold);color:var(--navy);font-weight:700;font-size:13.5px;padding:12px;border-radius:11px;text-align:center;text-decoration:none;transition:all .25s;box-shadow:0 4px 16px var(--glow)}
+    .wc-cta:hover{background:var(--gold2);color:var(--navy);transform:translateY(-2px)}
+    .fbadge{position:absolute;background:rgba(7,17,43,.93);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:10px 14px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:600;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+    .fb1{top:-16px;left:-18px;animation:floatY 3.2s ease-in-out infinite}
+    .fb2{bottom:-16px;right:-10px;animation:floatY 3.2s ease-in-out 1.6s infinite}
+
+    /* STATS BAND */
+    .stats-band{padding:56px 0;background:rgba(245,166,35,.06);border-top:1px solid rgba(245,166,35,.12);border-bottom:1px solid rgba(245,166,35,.12);position:relative;z-index:2}
+    .ctr-box{text-align:center;padding:14px 28px}
+    .ctr-box:not(:last-child){border-right:1px solid rgba(255,255,255,.06)}
+    .ctr-icon{font-size:24px;color:var(--gold);opacity:.7;margin-bottom:7px}
+    .ctr-num{font-family:'Playfair Display',serif;font-size:clamp(32px,4vw,50px);font-weight:900;color:var(--gold);line-height:1}
+    .ctr-label{font-size:12px;color:var(--muted);margin-top:5px}
+
+    /* SECTION SHARED */
+    .stag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);background:rgba(245,166,35,.09);border:1px solid rgba(245,166,35,.22);padding:5px 15px;border-radius:100px;margin-bottom:14px}
+    .stitle{font-family:'Playfair Display',serif;font-size:clamp(24px,3.4vw,42px);font-weight:900;line-height:1.12;margin-bottom:14px}
+    .ssub{font-size:15px;color:var(--muted);line-height:1.78;max-width:540px}
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.1) 50%,rgba(255,255,255,.06) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+
+    /* SHOWCASE */
+    .showcase-section{padding:90px 0;background:linear-gradient(180deg,var(--navy) 0%,#060f24 100%);position:relative;overflow:hidden}
+    .showcase-inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+    .showcase-img-placeholder{width:100%;border-radius:24px;aspect-ratio:4/3;background:linear-gradient(135deg,#0d2359 0%,#1a3c8f 40%,#0c1a3d 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;position:relative;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+    .showcase-img-placeholder::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.03) 1px,transparent 1px);background-size:22px 22px}
+    .sib{position:absolute;bottom:20px;left:20px;background:rgba(7,17,43,.9);backdrop-filter:blur(16px);border:1px solid rgba(245,166,35,.3);border-radius:14px;padding:12px 18px;display:flex;align-items:center;gap:12px}
+    .sib-title{font-size:13px;font-weight:700}
+    .sib-sub{font-size:11px;color:var(--muted)}
+    .showcase-glow{position:absolute;top:50%;right:-80px;transform:translateY(-50%);width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.07) 0%,transparent 70%);pointer-events:none}
+    .showcase-list{list-style:none}
+    .showcase-list li{display:flex;align-items:flex-start;gap:13px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+    .showcase-list li:last-child{border:none}
+    .sl-icon{width:38px;height:38px;border-radius:10px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.18);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;margin-top:2px}
+    .sl-title{font-size:14px;font-weight:700;margin-bottom:3px}
+    .sl-desc{font-size:12.5px;color:var(--muted);line-height:1.6}
+
+    /* FEATURES BENTO */
+    .feat-section{padding:96px 0}
+    .bento{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+    .bc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px;position:relative;overflow:hidden;transition:all .3s}
+    .bc:hover{border-color:rgba(245,166,35,.36);transform:translateY(-5px);box-shadow:0 16px 44px rgba(0,0,0,.28)}
+    .b1{grid-column:span 5}.b2{grid-column:span 7}.b3{grid-column:span 4}.b4{grid-column:span 4}.b5{grid-column:span 4}.b6{grid-column:span 6}.b7{grid-column:span 6}
+    .bc-icon{width:50px;height:50px;border-radius:13px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.17);display:flex;align-items:center;justify-content:center;font-size:23px;margin-bottom:16px}
+    .bc-title{font-size:16px;font-weight:700;margin-bottom:8px}
+    .bc-desc{font-size:13px;color:var(--muted);line-height:1.74}
+    .bc-num{font-family:'Playfair Display',serif;font-size:clamp(40px,5vw,68px);font-weight:900;color:rgba(245,166,35,.05);position:absolute;bottom:-10px;right:16px;pointer-events:none}
+
+    /* SECURITY SECTION */
+    .security-section{padding:90px 0;background:linear-gradient(180deg,#060f24 0%,var(--navy) 100%);position:relative;overflow:hidden}
+    .security-section::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.03) 1px,transparent 1px);background-size:30px 30px;pointer-events:none}
+    .sec-glow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(34,197,94,.05) 0%,transparent 68%);pointer-events:none}
+    .sec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:14px}
+    .sec-card{background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.14);border-radius:16px;padding:24px;text-align:center;transition:all .3s}
+    .sec-card:hover{border-color:rgba(34,197,94,.3);transform:translateY(-4px);background:rgba(34,197,94,.07)}
+    .sec-card-icon{font-size:36px;margin-bottom:12px;display:block;filter:drop-shadow(0 0 14px rgba(34,197,94,.3))}
+    .sec-card-title{font-size:15px;font-weight:700;margin-bottom:7px}
+    .sec-card-desc{font-size:12.5px;color:var(--muted);line-height:1.65}
+    .sec-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:#86efac;font-size:10px;font-weight:700;padding:4px 10px;border-radius:100px;margin-top:10px;letter-spacing:.5px}
+
+    /* HOW IT WORKS */
+    .how-section{padding:96px 0;position:relative}
+    .how-line{position:absolute;top:0;left:50%;transform:translateX(-50%);width:1px;height:100%;background:linear-gradient(180deg,transparent 5%,rgba(245,166,35,.25) 50%,transparent 95%)}
+    .tstep{display:grid;grid-template-columns:1fr 76px 1fr;align-items:center;margin-bottom:44px}
+    .ts-left{text-align:right;padding-right:38px}
+    .ts-right{padding-left:38px}
+    .ts-node{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:19px;font-weight:900;color:var(--navy);margin:0 auto;box-shadow:0 0 0 9px rgba(245,166,35,.09)}
+    .ts-title{font-size:16px;font-weight:700;margin-bottom:7px}
+    .ts-desc{font-size:13px;color:var(--muted);line-height:1.7}
+    .tstep.right .ts-left{display:none}
+    .tstep.left .ts-right{display:none}
+
+    /* ROLES */
+    .roles-section{padding:90px 0;background:linear-gradient(180deg,var(--navy) 0%,#060f24 100%)}
+    .role-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;height:100%;transition:all .3s;text-align:center}
+    .role-card:hover{border-color:rgba(245,166,35,.35);transform:translateY(-6px);box-shadow:0 20px 50px rgba(0,0,0,.3)}
+    .r-emoji{font-size:42px;display:block;margin-bottom:14px;filter:drop-shadow(0 0 12px rgba(245,166,35,.25))}
+    .r-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;margin-bottom:14px}
+    .r-list{list-style:none;text-align:left}
+    .r-list li{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted);padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+    .r-list li:last-child{border:none}
+    .r-list li .bi{color:var(--gold);font-size:12px;flex-shrink:0}
+    .swiper-button-prev,.swiper-button-next{color:var(--gold)!important;width:38px!important;height:38px!important;background:rgba(245,166,35,.1);border-radius:50%;border:1px solid rgba(245,166,35,.25)}
+    .swiper-button-prev::after,.swiper-button-next::after{font-size:14px!important;font-weight:700}
+    .swiper-pagination-bullet{background:rgba(255,255,255,.3)!important}
+    .swiper-pagination-bullet-active{background:var(--gold)!important}
+
+    /* TESTIMONIALS */
+    .testi-section{padding:90px 0}
+    .testi-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;height:100%;position:relative;transition:all .3s}
+    .testi-card:hover{border-color:rgba(245,166,35,.28);box-shadow:0 14px 40px rgba(0,0,0,.22)}
+    .tstars{color:var(--gold);font-size:14px;letter-spacing:2px;margin-bottom:12px}
+    .testi-quote-icon{font-family:'Playfair Display',serif;font-size:64px;color:rgba(245,166,35,.1);line-height:1;margin-bottom:-12px}
+    .testi-text{font-size:13.5px;color:rgba(255,255,255,.7);line-height:1.76;margin-bottom:18px}
+    .testi-author{display:flex;align-items:center;gap:11px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06)}
+    .tav{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--navy);flex-shrink:0}
+    .tname{font-size:13px;font-weight:700}
+    .sk-testi{height:200px;border-radius:18px}
+    .btn-review{display:inline-flex;align-items:center;gap:8px;background:rgba(245,166,35,.1);border:1.5px solid rgba(245,166,35,.3);color:var(--gold);font-size:13.5px;font-weight:700;padding:11px 26px;border-radius:10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .25s}
+    .btn-review:hover{background:rgba(245,166,35,.18);transform:translateY(-2px)}
+
+    /* NOTICE BAND */
+    .notice-band{background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(59,130,246,.04));border-top:1px solid rgba(59,130,246,.18);border-bottom:1px solid rgba(59,130,246,.18);padding:20px 0;position:relative;z-index:2}
+    .notice-inner{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;text-align:center}
+    .notice-icon{font-size:22px;flex-shrink:0}
+    .notice-text{font-size:14px;font-weight:600;color:rgba(255,255,255,.8);line-height:1.6}
+    .notice-text strong{color:#93c5fd}
+
+    /* CTA */
+    .cta-section{padding:110px 0;position:relative;overflow:hidden;background:linear-gradient(135deg,#07112b 0%,#0c1a3d 50%,#091530 100%)}
+    .cta-glow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:700px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.09) 0%,transparent 68%);pointer-events:none}
+    .cta-content{position:relative;z-index:2;text-align:center}
+    .cta-title{font-family:'Playfair Display',serif;font-size:clamp(30px,4.5vw,58px);font-weight:900;line-height:1.1;margin-bottom:14px}
+    .cta-sub{font-size:16px;color:var(--muted);margin-bottom:34px;line-height:1.7}
+    .cta-urgency{display:inline-flex;align-items:center;gap:8px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22);color:#fca5a5;font-size:12px;font-weight:700;padding:6px 16px;border-radius:100px;margin-bottom:22px}
+
+    /* FOOTER */
+    footer{background:linear-gradient(180deg,#060f24 0%,#030a1a 100%);padding:64px 0 28px;border-top:1px solid rgba(245,166,35,.1)}
+    .ft-desc{font-size:13px;color:var(--muted);line-height:1.72;margin:14px 0 18px}
+    .ft-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.18);color:#86efac;font-size:11.5px;font-weight:600;padding:5px 13px;border-radius:100px}
+    .ft-col h5{font-size:13px;font-weight:700;color:var(--white);margin-bottom:14px;text-transform:uppercase;letter-spacing:1px}
+    .ft-col a{display:block;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:9px;transition:color .2s}
+    .ft-col a:hover{color:var(--gold)}
+    .ft-hr{border-color:rgba(255,255,255,.07);margin:36px 0 22px}
+    .ft-bottom{font-size:12px;color:rgba(255,255,255,.28)}
+
+    /* REVIEW MODAL */
+    .review-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);z-index:9998;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all .3s;padding:20px}
+    .review-modal-overlay.open{opacity:1;visibility:visible}
+    .review-modal{background:linear-gradient(160deg,#0c1a3d,#07112b);border:1px solid rgba(245,166,35,.22);border-radius:22px;padding:34px;max-width:480px;width:100%;position:relative;animation:fadeUp .3s ease}
+    .rm-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--white);width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s}
+    .rm-close:hover{background:rgba(255,255,255,.12)}
+    .star-rating{display:flex;gap:6px;margin-bottom:18px}
+    .star-rating i{font-size:24px;color:rgba(255,255,255,.2);cursor:pointer;transition:color .15s}
+    .star-rating i.active{color:var(--gold)}
+    .form-label-hms{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.7);display:block;margin-bottom:7px}
+    .form-control-hms{width:100%;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:11px;padding:12px 14px;color:var(--white);font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;resize:vertical;transition:border-color .25s;min-height:100px}
+    .form-control-hms:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,166,35,.1)}
+
+    @media(max-width:1100px){.bento{grid-template-columns:repeat(6,1fr)}.b1,.b2,.b3,.b4,.b5{grid-column:span 3}.b6,.b7{grid-column:span 6}}
+    @media(max-width:991px){.showcase-inner{grid-template-columns:1fr}.sec-grid{grid-template-columns:1fr 1fr}.how-line{display:none}.tstep{grid-template-columns:1fr}.tstep.right .ts-left,.tstep.left .ts-right{display:block}.tstep .ts-node{display:none}.ts-left,.ts-right{text-align:left;padding:0;margin-bottom:6px}}
+    @media(max-width:768px){.bento{grid-template-columns:1fr}.bc{grid-column:span 1!important}.sec-grid{grid-template-columns:1fr}.hero-btns{flex-direction:column}.hero-btns a{text-align:center;justify-content:center}.fb1,.fb2{display:none}}
+  </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div id="readingProgress"></div>
+<button class="scroll-btn" id="scrollToBottom"><i class="bi bi-chevron-double-down"></i></button>
+<button class="scroll-btn" id="scrollToTop"><i class="bi bi-arrow-up"></i></button>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar navbar-expand-lg" id="navbar">
+  <div class="container">
+    <a class="navbar-brand nb-brand" href="index.html">
+      <div class="nb-logo"><img src="logo.jpg" alt="FUTBabura"/></div>
+      <div><div class="nb-name">FUTBabura HMS</div><div class="nb-sub">Hostel Management</div></div>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end gap-4" id="navMenu">
+      <ul class="navbar-nav gap-1 me-3">
+        <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+        <li class="nav-item"><a class="nav-link" href="#security">Security</a></li>
+        <li class="nav-item"><a class="nav-link" href="#how">How It Works</a></li>
+        <li class="nav-item"><a class="nav-link" href="#roles">Roles</a></li>
+        <li class="nav-item"><a class="nav-link" href="#reviews">Reviews</a></li>
+      </ul>
+      <div class="d-flex gap-2">
+        <a href="login.html" class="btn-signin">Sign In</a>
+        <a href="register.html" class="btn-book">Book a Room</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div><div class="hero-slice"></div><div class="hero-glow"></div><div class="hero-dots"></div>
+
+  <!-- TICKER -->
+  <div class="hero-ticker">
+    <div class="ticker-track" id="tickerTrack">
+      <span class="ticker-item">🎓 FUTBabura Official HMS</span>
+      <span class="ticker-item">📅 Session: <span id="tickerSession">2025/2026</span></span>
+      <span class="ticker-item">🔐 Verified Students Only</span>
+      <span class="ticker-item">💳 Pay Securely via Paystack</span>
+      <span class="ticker-item">📲 Access Your Dashboard Anytime</span>
+      <span class="ticker-item">🛡️ Matric & JAMB Verified</span>
+      <span class="ticker-item">✅ QR-Coded Approval Letters</span>
+      <span class="ticker-item">👮 Real-Time Security Validation</span>
+      <!-- duplicate for seamless loop -->
+      <span class="ticker-item">🎓 FUTBabura Official HMS</span>
+      <span class="ticker-item">📅 Session: <span>2025/2026</span></span>
+      <span class="ticker-item">🔐 Verified Students Only</span>
+      <span class="ticker-item">💳 Pay Securely via Paystack</span>
+      <span class="ticker-item">📲 Access Your Dashboard Anytime</span>
+      <span class="ticker-item">🛡️ Matric & JAMB Verified</span>
+      <span class="ticker-item">✅ QR-Coded Approval Letters</span>
+      <span class="ticker-item">👮 Real-Time Security Validation</span>
+    </div>
+  </div>
+
+  <div class="hero-body">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6 hero-content" data-aos="fade-right" data-aos-duration="800">
+          <div class="session-banner">
+            <div class="sb-dot"></div>
+            <div class="sb-text"><span id="sessionName">2025/2026</span> Session — <span id="bookingStatus">Bookings Open</span></div>
+          </div>
+          <div class="eyebrow"><span class="pulse"></span>Official University Platform</div>
+          <h1>Your Hostel.<br><span class="gold"><span id="heroTypingText">Book Smart.</span></span><span class="typing-cursor"></span><br>No Queues.</h1>
+          <p class="hero-p">The official, secure hostel management platform for Federal University of Technology Babura. Register once, book your room online, pay digitally, and access your hostel with a verified QR code — all in minutes.</p>
+          <div class="hero-btns">
+            <a href="register.html" class="btn-primary-hero"><i class="bi bi-person-plus-fill"></i>Create Student Account</a>
+            <a href="login.html" class="btn-ghost-hero"><i class="bi bi-box-arrow-in-right"></i>Sign In</a>
+          </div>
+          <div class="hero-trust">
+            <div class="ht-item"><i class="bi bi-shield-fill-check"></i>Verified Students Only</div>
+            <div class="ht-item"><i class="bi bi-lock-fill"></i>Secure & Encrypted</div>
+            <div class="ht-item"><i class="bi bi-patch-check-fill"></i>Official Platform</div>
+            <div class="ht-item"><i class="bi bi-phone-fill"></i>Mobile Friendly</div>
+          </div>
+        </div>
+
+        <div class="col-lg-6" data-aos="fade-left" data-aos-duration="850" data-aos-delay="150">
+          <div class="position-relative ps-lg-3">
+            <div class="fbadge fb1"><span style="font-size:18px">✅</span><div><div style="font-size:12px;font-weight:700">Booking Confirmed!</div><div style="font-size:10px;color:var(--muted)">Room successfully reserved</div></div></div>
+            <div class="welcome-card">
+              <div class="wc-header">
+                <div class="wc-icon">🏠</div>
+                <div>
+                  <div class="wc-title">Hostel Booking Portal</div>
+                  <div class="wc-sub"><span class="session-live-dot"></span><span id="hc-session">2025/2026 Session</span> · Live</div>
+                </div>
+              </div>
+              <div class="info-row">
+                <span class="ir-label"><i class="bi bi-calendar3"></i> Current Session</span>
+                <span class="ir-val gold" id="wcSession">2025/2026</span>
+              </div>
+              <div class="info-row">
+                <span class="ir-label"><i class="bi bi-door-open-fill"></i> Booking Status</span>
+                <span class="ir-val ok" id="wcBookingStatus">Open</span>
+              </div>
+              <div class="info-row">
+                <span class="ir-label"><i class="bi bi-clock-fill"></i> Deadline</span>
+                <span class="ir-val" id="wcDeadline" style="font-size:12px">—</span>
+              </div>
+              <div class="info-row">
+                <span class="ir-label"><i class="bi bi-shield-check-fill"></i> Platform Status</span>
+                <span class="ir-val ok">Operational</span>
+              </div>
+              <div class="wc-steps">
+                <div class="wcs-item"><div class="wcs-num">1</div>Create your verified student account</div>
+                <div class="wcs-item"><div class="wcs-num">2</div>Browse & select your room</div>
+                <div class="wcs-item"><div class="wcs-num">3</div>Pay online & get your QR letter</div>
+              </div>
+              <a href="register.html" class="wc-cta"><i class="bi bi-person-plus-fill"></i> Register Now — It's Free</a>
+            </div>
+            <div class="fbadge fb2"><span style="font-size:18px">🔐</span><div><div style="font-size:12px;font-weight:700">QR Code Generated</div><div style="font-size:10px;color:var(--muted)">Approval letter ready</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ STATS BAND ══ -->
+<section class="stats-band">
+  <div class="container">
+    <div class="row g-0">
+      <div class="col-6 col-md-3"><div class="ctr-box" data-aos="fade-up"><div class="ctr-icon"><i class="bi bi-people-fill"></i></div><div class="ctr-num"><span id="cnt-students">0</span><span style="font-size:.55em">+</span></div><div class="ctr-label">Registered Students</div></div></div>
+      <div class="col-6 col-md-3"><div class="ctr-box" data-aos="fade-up" data-aos-delay="90"><div class="ctr-icon"><i class="bi bi-clock-fill"></i></div><div class="ctr-num">24<span style="font-size:.55em">/7</span></div><div class="ctr-label">Online Access</div></div></div>
+      <div class="col-6 col-md-3"><div class="ctr-box" data-aos="fade-up" data-aos-delay="180"><div class="ctr-icon"><i class="bi bi-shield-check-fill"></i></div><div class="ctr-num">100<span style="font-size:.55em">%</span></div><div class="ctr-label">Secure & Verified</div></div></div>
+      <div class="col-6 col-md-3"><div class="ctr-box" data-aos="fade-up" data-aos-delay="270"><div class="ctr-icon"><i class="bi bi-lightning-charge-fill"></i></div><div class="ctr-num">5<span style="font-size:.55em">min</span></div><div class="ctr-label">Average Booking Time</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SHOWCASE ══ -->
+<section class="showcase-section" id="showcase">
+  <div class="container">
+    <div class="showcase-inner">
+      <div data-aos="fade-right" data-aos-duration="900">
+        <div class="position-relative">
+          <div class="showcase-img-placeholder">
+            <svg width="300" height="220" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:relative;z-index:2;max-width:100%">
+              <rect x="30" y="40" width="260" height="170" rx="6" fill="rgba(255,255,255,0.03)" stroke="rgba(245,166,35,0.15)" stroke-width="1.5"/>
+              <line x1="30" y1="195" x2="290" y2="195" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+              <rect x="40" y="140" width="90" height="50" rx="5" fill="#1a3c8f" stroke="rgba(245,166,35,0.3)" stroke-width="1.5"/>
+              <rect x="40" y="140" width="90" height="18" rx="4" fill="#112060"/>
+              <rect x="45" y="162" width="80" height="24" rx="3" fill="#1e4ca0" opacity="0.7"/>
+              <rect x="44" y="143" width="35" height="12" rx="3" fill="rgba(245,166,35,0.15)" stroke="rgba(245,166,35,0.25)" stroke-width="1"/>
+              <rect x="175" y="140" width="100" height="8" rx="3" fill="#0d2359" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+              <rect x="180" y="148" width="8" height="47" rx="2" fill="#0d2359"/>
+              <rect x="259" y="148" width="8" height="47" rx="2" fill="#0d2359"/>
+              <rect x="195" y="120" width="48" height="30" rx="3" fill="#1e3a6e" stroke="rgba(245,166,35,0.35)" stroke-width="1.2"/>
+              <rect x="197" y="122" width="44" height="24" rx="2" fill="#0a1a3a"/>
+              <rect x="199" y="124" width="40" height="20" rx="1.5" fill="rgba(245,166,35,0.08)"/>
+              <text x="219" y="137" fill="rgba(245,166,35,0.5)" font-size="7" text-anchor="middle" font-family="monospace">&gt;_</text>
+              <rect x="193" y="150" width="52" height="4" rx="2" fill="#1a3060"/>
+              <rect x="110" y="55" width="80" height="60" rx="4" fill="rgba(17,32,96,0.5)" stroke="rgba(245,166,35,0.25)" stroke-width="1.5"/>
+              <line x1="150" y1="55" x2="150" y2="115" stroke="rgba(245,166,35,0.2)" stroke-width="1"/>
+              <line x1="110" y1="85" x2="190" y2="85" stroke="rgba(245,166,35,0.2)" stroke-width="1"/>
+              <rect x="112" y="57" width="36" height="26" rx="2" fill="rgba(245,166,35,0.06)"/>
+              <circle cx="218" cy="100" r="12" fill="#D4956A"/>
+              <path d="M206 98 Q208 87 218 86 Q228 87 230 98 Q226 92 218 91 Q210 92 206 98Z" fill="#2C1810"/>
+              <rect x="207" y="112" width="22" height="30" rx="4" fill="#1a3c8f"/>
+              <path d="M212 112 L218 118 L224 112" stroke="white" stroke-width="1.2" fill="none"/>
+              <rect x="197" y="112" width="10" height="22" rx="4" fill="#1a3c8f"/>
+              <rect x="229" y="112" width="10" height="22" rx="4" fill="#1a3c8f"/>
+              <circle cx="202" cy="136" r="5" fill="#D4956A"/>
+              <circle cx="234" cy="136" r="5" fill="#D4956A"/>
+              <rect x="210" y="142" width="8" height="25" rx="3" fill="#1a2a5e"/>
+              <rect x="218" y="142" width="8" height="25" rx="3" fill="#1a2a5e"/>
+              <ellipse cx="214" cy="169" rx="7" ry="4" fill="#0d1f4a"/>
+              <ellipse cx="222" cy="169" rx="7" ry="4" fill="#0d1f4a"/>
+              <rect x="40" y="70" width="55" height="55" rx="3" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+              <rect x="43" y="80" width="10" height="40" rx="1" fill="#c0392b" opacity="0.7"/>
+              <rect x="55" y="83" width="8" height="37" rx="1" fill="#27ae60" opacity="0.7"/>
+              <rect x="65" y="78" width="10" height="42" rx="1" fill="#2980b9" opacity="0.7"/>
+              <rect x="77" y="82" width="8" height="38" rx="1" fill="#f39c12" opacity="0.7"/>
+              <rect x="40" y="119" width="55" height="3" rx="1" fill="rgba(255,255,255,0.15)"/>
+              <ellipse cx="85" cy="200" rx="50" ry="8" fill="rgba(245,166,35,0.06)" stroke="rgba(245,166,35,0.12)" stroke-width="1"/>
+            </svg>
+            <div style="font-size:13px;color:var(--muted);position:relative;z-index:2;margin-top:4px">FUTBabura Student Hostel Room</div>
+          </div>
+          <div class="sib">
+            <span style="font-size:22px">🎓</span>
+            <div><div class="sib-title">Comfort Meets Academics</div><div class="sib-sub">Designed for student success</div></div>
+          </div>
+          <div class="showcase-glow"></div>
+        </div>
+      </div>
+      <div data-aos="fade-left" data-aos-duration="900" data-aos-delay="150">
+        <span class="stag">Why Choose HMS</span>
+        <h2 class="stitle">A Hostel Experience<br><span style="color:var(--gold)">Designed for You</span></h2>
+        <p class="ssub" style="margin-bottom:28px">Your comfort, security, and academic progress are at the heart of FUTBabura HMS. Every feature is built to make student life simpler, safer and stress-free.</p>
+        <ul class="showcase-list">
+          <li><div class="sl-icon">🏠</div><div><div class="sl-title">Clean, Well-Maintained Rooms</div><div class="sl-desc">Every room is managed and maintained by dedicated staff. Submit complaints instantly and track repairs in real time.</div></div></li>
+          <li><div class="sl-icon">🔐</div><div><div class="sl-title">Secure Digital Gate Access</div><div class="sl-desc">Your QR-coded approval letter grants verified entry at the gate — no paper forms, no fake letters, no stress.</div></div></li>
+          <li><div class="sl-icon">💳</div><div><div class="sl-title">Pay Safely with Paystack</div><div class="sl-desc">Secure Paystack-powered payments. Instant digital receipt generated immediately after payment.</div></div></li>
+          <li><div class="sl-icon">📲</div><div><div class="sl-title">Always Accessible on Mobile</div><div class="sl-desc">Manage your booking, complaints, visitors and profile from any device — phone, tablet or laptop.</div></div></li>
+          <li><div class="sl-icon">👥</div><div><div class="sl-title">Visitor Management</div><div class="sl-desc">Register your visitors digitally before they arrive. Security validates their digital pass at the gate instantly.</div></div></li>
+        </ul>
+        <a href="register.html" class="btn-primary-hero mt-4" style="font-size:13.5px;padding:11px 28px"><i class="bi bi-person-plus-fill"></i>Get Started Now</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FEATURES ══ -->
+<section class="feat-section" id="features">
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <span class="stag">Platform Features</span>
+      <h2 class="stitle">Everything You Need,<br>All in One Platform</h2>
+      <p class="ssub mx-auto">From booking to access verification — the entire hostel experience, fully digitised, fully real.</p>
+    </div>
+    <div class="bento">
+      <div class="bc b1" data-aos="slide-right"><div class="bc-icon">🔍</div><h3 class="bc-title">Room Booking System</h3><p class="bc-desc">Browse available rooms filtered by your gender, select your preferred type, and confirm your booking in seconds — all from your phone or laptop.</p><div class="bc-num">01</div></div>
+      <div class="bc b2" data-aos="slide-left"><div class="bc-icon">💳</div><h3 class="bc-title">Secure Payment via Paystack</h3><p class="bc-desc">Pay hostel fees directly through Paystack — Nigeria's most trusted payment gateway. Instant digital receipt issued after payment. All transactions are logged, auditable, and synced in real time with admin records.</p><div class="bc-num">02</div></div>
+      <div class="bc b3" data-aos="fade-up"><div class="bc-icon">📄</div><h3 class="bc-title">QR Approval Letter</h3><p class="bc-desc">Auto-generated, printable letter with a unique QR code issued immediately after payment. Security scans to verify before granting gate access.</p><div class="bc-num">03</div></div>
+      <div class="bc b4" data-aos="fade-up" data-aos-delay="100"><div class="bc-icon">🔧</div><h3 class="bc-title">Maintenance Complaints</h3><p class="bc-desc">Report room issues directly from your dashboard. Track status live — Received, Assigned, In Progress, Resolved.</p><div class="bc-num">04</div></div>
+      <div class="bc b5" data-aos="fade-up" data-aos-delay="200"><div class="bc-icon">👥</div><h3 class="bc-title">Visitor Management</h3><p class="bc-desc">Register your visitors before they arrive. Digital visitor passes generated for gate security to validate on arrival.</p><div class="bc-num">05</div></div>
+      <div class="bc b6" data-aos="slide-right"><div class="bc-icon">📊</div><h3 class="bc-title">Admin Dashboard & Reports</h3><p class="bc-desc">Real-time occupancy stats, revenue reports, complaint tracking, and full student record management — all in one powerful admin panel.</p><div class="bc-num">06</div></div>
+      <div class="bc b7" data-aos="slide-left"><div class="bc-icon">🔐</div><h3 class="bc-title">Role-Based Access Control</h3><p class="bc-desc">Five dedicated roles — Student, Hostel Admin, Security Officer, Maintenance Staff, and Super Admin — each with their own specialised dashboard and permissions.</p><div class="bc-num">07</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SECURITY SECTION (NEW) ══ -->
+<section class="security-section" id="security">
+  <div class="sec-glow"></div>
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <span class="stag" style="background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.25);color:#86efac">Security & Verification</span>
+      <h2 class="stitle">Only Real FUTBabura<br><span style="color:#86efac">Students Get Access</span></h2>
+      <p class="ssub mx-auto">This is not an open platform. Every account is verified against official university records before any booking can be made.</p>
+    </div>
+    <div class="sec-grid">
+      <div class="sec-card" data-aos="fade-up">
+        <span class="sec-card-icon">🎓</span>
+        <div class="sec-card-title">Matric Number Verified</div>
+        <div class="sec-card-desc">Your matric number must match the official FUTBabura format (SIT/XXX/YY/0001) and is checked for uniqueness before registration completes.</div>
+        <div class="sec-badge"><i class="bi bi-check-circle-fill"></i> Active</div>
+      </div>
+      <div class="sec-card" data-aos="fade-up" data-aos-delay="80">
+        <span class="sec-card-icon">📋</span>
+        <div class="sec-card-title">JAMB Number Required</div>
+        <div class="sec-card-desc">Your JAMB registration number is collected and cross-verified by the admin team. Your name must match your JAMB record to be fully approved.</div>
+        <div class="sec-badge"><i class="bi bi-check-circle-fill"></i> Active</div>
+      </div>
+      <div class="sec-card" data-aos="fade-up" data-aos-delay="160">
+        <span class="sec-card-icon">📧</span>
+        <div class="sec-card-title">Email Verification</div>
+        <div class="sec-card-desc">A verification link is sent to your email immediately after registration. You cannot book a room until your email address is confirmed.</div>
+        <div class="sec-badge"><i class="bi bi-check-circle-fill"></i> Active</div>
+      </div>
+      <div class="sec-card" data-aos="fade-up" data-aos-delay="80">
+        <span class="sec-card-icon">🚫</span>
+        <div class="sec-card-title">No Duplicate Accounts</div>
+        <div class="sec-card-desc">One matric number, one phone number, one JAMB number, one email per student — strictly enforced. Duplicate registration attempts are blocked in real time.</div>
+        <div class="sec-badge"><i class="bi bi-check-circle-fill"></i> Active</div>
+      </div>
+      <div class="sec-card" data-aos="fade-up" data-aos-delay="160">
+        <span class="sec-card-icon">📱</span>
+        <div class="sec-card-title">Device Fingerprinting</div>
+        <div class="sec-card-desc">Each device is fingerprinted on registration. Multiple account creation attempts from the same device are automatically flagged and blocked.</div>
+        <div class="sec-badge"><i class="bi bi-check-circle-fill"></i> Active</div>
+      </div>
+      <div class="sec-card" data-aos="fade-up" data-aos-delay="240">
+        <span class="sec-card-icon">🔒</span>
+        <div class="sec-card-title">Firestore Security Rules</div>
+        <div class="sec-card-desc">Every database operation is protected by server-side Firestore security rules. No student can read, write or modify another student's data — ever.</div>
+        <div class="sec-badge"><i class="bi bi-check-circle-fill"></i> Active</div>
+      </div>
+    </div>
+    <!-- Notice band -->
+    <div class="notice-band mt-5" data-aos="fade-up">
+      <div class="notice-inner">
+        <span class="notice-icon">ℹ️</span>
+        <div class="notice-text">This platform is exclusively for <strong>admitted FUTBabura students</strong>. Unauthorised access attempts are logged and reported to the university's IT security team.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ HOW IT WORKS ══ -->
+<section class="how-section" id="how">
+  <div class="how-line"></div>
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <span class="stag">Simple Process</span>
+      <h2 class="stitle">Secure Your Room in<br>4 Easy Steps</h2>
+      <p class="ssub mx-auto">No queues, no paperwork, no cash — a fully digital journey from registration to room access.</p>
+    </div>
+    <div>
+      <div class="tstep left" data-aos="fade-right">
+        <div class="ts-left"><h3 class="ts-title">Create Your Verified Account</h3><p class="ts-desc">Register with your matric number, JAMB number, faculty, department, gender and email. Verify your email to activate your account fully.</p></div>
+        <div class="d-flex justify-content-center"><div class="ts-node">1</div></div>
+        <div class="ts-right"></div>
+      </div>
+      <div class="tstep right" data-aos="fade-left">
+        <div class="ts-left"></div>
+        <div class="d-flex justify-content-center"><div class="ts-node">2</div></div>
+        <div class="ts-right"><h3 class="ts-title">Browse & Select Your Room</h3><p class="ts-desc">Your gender automatically filters which hostel rooms you can view. Choose your preferred room type and confirm your booking.</p></div>
+      </div>
+      <div class="tstep left" data-aos="fade-right">
+        <div class="ts-left"><h3 class="ts-title">Pay Your Hostel Fee Online</h3><p class="ts-desc">Complete payment securely via Paystack. Your room is reserved the moment payment is confirmed — no cash, no queues.</p></div>
+        <div class="d-flex justify-content-center"><div class="ts-node">3</div></div>
+        <div class="ts-right"></div>
+      </div>
+      <div class="tstep right" data-aos="fade-left">
+        <div class="ts-left"></div>
+        <div class="d-flex justify-content-center"><div class="ts-node">4</div></div>
+        <div class="ts-right"><h3 class="ts-title">Get Your QR Approval Letter</h3><p class="ts-desc">Download and print your unique QR-coded approval letter. Present it at the hostel gate for instant, verified entry — no paper letters needed.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ROLES ══ -->
+<section class="roles-section" id="roles">
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <span class="stag">User Roles</span>
+      <h2 class="stitle">Built for Everyone<br>in the Hostel Ecosystem</h2>
+      <p class="ssub mx-auto">Five dedicated roles — each with their own dashboard, permissions, and tools.</p>
+    </div>
+    <div class="swiper roles-swiper">
+      <div class="swiper-wrapper" id="rolesWrapper"></div>
+      <div class="swiper-pagination" style="margin-top:20px;position:relative"></div>
+      <div class="swiper-button-prev"></div><div class="swiper-button-next"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TESTIMONIALS ══ -->
+<section class="testi-section" id="reviews">
+  <div class="container">
+    <div class="text-center mb-4" data-aos="fade-up">
+      <span class="stag">Student Reviews</span>
+      <h2 class="stitle">What Students Are Saying</h2>
+      <p class="ssub mx-auto">Real reviews from real FUTBabura students using the HMS platform.</p>
+    </div>
+    <div class="text-center mb-5">
+      <button class="btn-review" id="openReviewBtn"><i class="bi bi-star-fill"></i>Leave a Review</button>
+    </div>
+    <div id="testi-container">
+      <div class="row g-4" id="testi-skeletons">
+        <div class="col-md-4"><div class="skeleton sk-testi"></div></div>
+        <div class="col-md-4"><div class="skeleton sk-testi"></div></div>
+        <div class="col-md-4"><div class="skeleton sk-testi"></div></div>
+      </div>
+      <div class="swiper testi-swiper d-none" id="testi-swiper-wrap">
+        <div class="swiper-wrapper" id="testi-swiper-inner"></div>
+        <div class="swiper-pagination" style="margin-top:20px;position:relative"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA ══ -->
+<section class="cta-section" id="cta">
+  <div class="cta-glow"></div>
+  <div class="container cta-content" data-aos="zoom-in">
+    <div class="cta-urgency"><i class="bi bi-exclamation-triangle-fill"></i> Rooms fill up fast — don't miss your spot</div>
+    <h2 class="cta-title">Ready to Secure<br>Your <span style="color:var(--gold)">Room?</span></h2>
+    <p class="cta-sub">Create your account today and complete your booking online in under 5 minutes.<br>No paperwork. No queues. No stress.</p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="register.html" class="btn-primary-hero"><i class="bi bi-person-plus-fill"></i>Create Account — It's Free</a>
+      <a href="login.html" class="btn-ghost-hero">Already registered? Sign In <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div style="margin-top:28px;display:flex;gap:24px;justify-content:center;flex-wrap:wrap">
+      <div style="font-size:12.5px;color:rgba(255,255,255,.4);display:flex;align-items:center;gap:6px"><i class="bi bi-shield-fill-check" style="color:var(--ok)"></i>Verified Students Only</div>
+      <div style="font-size:12.5px;color:rgba(255,255,255,.4);display:flex;align-items:center;gap:6px"><i class="bi bi-lock-fill" style="color:var(--gold)"></i>Secure & Encrypted</div>
+      <div style="font-size:12.5px;color:rgba(255,255,255,.4);display:flex;align-items:center;gap:6px"><i class="bi bi-phone-fill" style="color:var(--gold)"></i>Works on Any Device</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer id="footer">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <a href="index.html" class="nb-brand d-inline-flex mb-2">
+          <div class="nb-logo"><img src="logo.jpg" alt="FUTBabura"/></div>
+          <div><div class="nb-name">FUTBabura HMS</div><div class="nb-sub">Hostel Management</div></div>
+        </a>
+        <p class="ft-desc">The official digital hostel management platform for Federal University of Technology Babura, Jigawa State, Nigeria. Built to serve only verified FUTBabura students.</p>
+        <div class="ft-badge"><i class="bi bi-shield-fill-check"></i> Official & Secure Platform</div>
+      </div>
+      <div class="col-6 col-lg-2 ft-col">
+        <h5>Platform</h5>
+        <a href="#features">Features</a>
+        <a href="#security">Security</a>
+        <a href="#how">How It Works</a>
+        <a href="#roles">User Roles</a>
+        <a href="#reviews">Reviews</a>
+      </div>
+      <div class="col-6 col-lg-2 ft-col">
+        <h5>Account</h5>
+        <a href="register.html">Create Account</a>
+        <a href="login.html">Student Login</a>
+        <a href="admin-login.html">Admin Login</a>
+      </div>
+      <div class="col-6 col-lg-2 ft-col">
+        <h5>Session</h5>
+        <a href="#" id="ftSession">2025/2026 Session</a>
+        <a href="#">Hostel Guidelines</a>
+        <a href="#">Fee Structure</a>
+        <a href="#">Contact Admin</a>
+      </div>
+      <div class="col-6 col-lg-2 ft-col">
+        <h5>University</h5>
+        <a href="#">FUTBabura Official Site</a>
+        <a href="#">Student Portal</a>
+        <a href="#">ICT Directorate</a>
+      </div>
+    </div>
+    <hr class="ft-hr"/>
+    <div class="d-flex justify-content-between flex-wrap gap-2 ft-bottom">
+      <p>© <span id="ftYear">2025</span> FUTBabura Hostel Management System. All rights reserved.</p>
+      <p>Built with ❤️ for FUTBabura Students · Jigawa State, Nigeria</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ══ REVIEW MODAL ══ -->
+<div class="review-modal-overlay" id="reviewOverlay">
+  <div class="review-modal">
+    <button class="rm-close" id="closeReviewBtn"><i class="bi bi-x-lg"></i></button>
+    <h4 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:5px">Leave a Review</h4>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:22px">Share your experience to help other students</p>
+    <div id="review-auth-check"><p style="font-size:13px;color:var(--muted);text-align:center;padding:16px 0">Checking...</p></div>
+    <div id="review-form-wrap" style="display:none">
+      <label class="form-label-hms">Your Rating</label>
+      <div class="star-rating" id="starRating">
+        <i class="bi bi-star-fill active" data-val="1"></i><i class="bi bi-star-fill active" data-val="2"></i><i class="bi bi-star-fill active" data-val="3"></i><i class="bi bi-star-fill active" data-val="4"></i><i class="bi bi-star-fill active" data-val="5"></i>
+      </div>
+      <label class="form-label-hms">Your Review</label>
+      <textarea class="form-control-hms" id="reviewText" rows="4" placeholder="Tell other students about your experience..."></textarea>
+      <div class="mt-3 d-flex gap-2">
+        <button class="btn-primary-hero" id="submitReviewBtn" style="font-size:13.5px;padding:10px 24px">Submit Review</button>
+      </div>
+    </div>
+    <div id="review-login-prompt" style="display:none;text-align:center;padding:10px 0">
+      <p style="font-size:13.5px;color:var(--muted);margin-bottom:16px">You need to be signed in to leave a review.</p>
+      <a href="login.html" class="btn-primary-hero" style="font-size:13px;padding:10px 24px">Sign In to Review</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FIREBASE ══ -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, addDoc, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg = {apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app = initializeApp(cfg), db = getFirestore(app), auth = getAuth(app);
+
+  // TYPING EFFECT
+  const phrases = ["Book Smart.","Live Better.","Zero Queues.","Fully Digital.","Your Room Awaits."];
+  let pi = 0, ci = 0, del = false;
+  const typingEl = document.getElementById("heroTypingText");
+  function type(){ const cur = phrases[pi]; if(del) ci--; else ci++; typingEl.textContent = cur.substring(0,ci); if(!del && ci === cur.length){del=true;setTimeout(type,1600);}else if(del && ci===0){del=false;pi=(pi+1)%phrases.length;setTimeout(type,220);}else setTimeout(type,del?48:95); }
+  type();
+
+  // LOAD SETTINGS
+  async function loadSettings(){
+    try{
+      const snap = await getDocs(collection(db,"settings"));
+      if(snap.empty) return;
+      const s = snap.docs[0].data();
+      const session = s.currentSession || "2025/2026";
+      const open = s.sessionOpen !== false;
+      const deadline = s.bookingDeadline || "";
+      // Update all session references
+      document.querySelectorAll("#sessionName,#wcSession").forEach(el => el.textContent = session);
+      document.getElementById("tickerSession").textContent = session;
+      document.getElementById("hc-session").textContent = session + " Session";
+      document.getElementById("ftSession").textContent = session + " Session";
+      document.getElementById("bookingStatus").textContent = open ? "Bookings Open" : "Bookings Closed";
+      document.getElementById("wcBookingStatus").textContent = open ? "Open" : "Closed";
+      document.getElementById("wcBookingStatus").className = "ir-val " + (open ? "ok" : "err");
+      if(deadline){ const d = new Date(deadline); document.getElementById("wcDeadline").textContent = d.toLocaleDateString("en-NG",{day:"numeric",month:"long",year:"numeric"}); }
+      else document.getElementById("wcDeadline").textContent = "To be announced";
+    }catch(e){}
+  }
+
+  // STUDENT COUNT (only public-safe stat)
+  async function loadStudentCount(){
+    try{
+      const snap = await getDocs(query(collection(db,"users"),where("role","==","student")));
+      // Animate counter
+      const target = snap.size;
+      const el = document.getElementById("cnt-students");
+      let current = 0;
+      const step = Math.max(1, Math.floor(target / 60));
+      const timer = setInterval(() => {
+        current = Math.min(current + step, target);
+        el.textContent = current;
+        if(current >= target) clearInterval(timer);
+      }, 28);
+    }catch(e){}
+  }
+
+  // REVIEWS
+  async function loadReviews(){
+    try{
+      const q = query(collection(db,"reviews"), orderBy("createdAt","desc"), limit(20));
+      const snap = await getDocs(q);
+      document.getElementById("testi-skeletons")?.remove();
+      const wrap = document.getElementById("testi-swiper-wrap"), inner = document.getElementById("testi-swiper-inner");
+      wrap.classList.remove("d-none");
+      if(snap.empty){ inner.innerHTML = `<div class="swiper-slide"><div class="testi-card" style="text-align:center;padding:40px;color:var(--muted)">No reviews yet. Be the first!</div></div>`; new Swiper(".testi-swiper",{slidesPerView:1,pagination:{el:".swiper-pagination",clickable:true}}); return; }
+      snap.forEach(d => {
+        const r = d.data();
+        const slide = document.createElement("div"); slide.className = "swiper-slide";
+        slide.innerHTML = `<div class="testi-card"><div class="tstars">${"★".repeat(r.rating||5)}</div><div class="testi-quote-icon">"</div><p class="testi-text">${r.review||""}</p><div class="testi-author"><div class="tav">${(r.studentName||"S").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2)}</div><div><div class="tname">${r.studentName||"Student"}</div><div style="font-size:11px;color:var(--muted)">${r.department||""}</div></div></div></div>`;
+        inner.appendChild(slide);
+      });
+      new Swiper(".testi-swiper",{loop:true,autoplay:{delay:4500,disableOnInteraction:false},slidesPerView:1,spaceBetween:20,pagination:{el:".swiper-pagination",clickable:true},breakpoints:{640:{slidesPerView:2},960:{slidesPerView:3}}});
+    }catch(e){}
+  }
+
+  // REVIEW MODAL AUTH
+  let currentUser = null, selectedRating = 5;
+  onAuthStateChanged(auth, user => {
+    currentUser = user;
+    document.getElementById("review-auth-check").style.display = "none";
+    document.getElementById("review-form-wrap").style.display = user ? "block" : "none";
+    document.getElementById("review-login-prompt").style.display = user ? "none" : "block";
+  });
+  document.querySelectorAll("#starRating i").forEach(s => {
+    s.addEventListener("click", () => {
+      selectedRating = +s.dataset.val;
+      document.querySelectorAll("#starRating i").forEach((st,i) => st.classList.toggle("active", i < selectedRating));
+    });
+  });
+  document.getElementById("submitReviewBtn")?.addEventListener("click", async () => {
+    const text = document.getElementById("reviewText").value.trim();
+    if(!text || !currentUser) return;
+    try{
+      const prof = await getDocs(query(collection(db,"users"), where("uid","==",currentUser.uid)));
+      let name = currentUser.displayName||"Student", dept="", level="";
+      if(!prof.empty){ const p=prof.docs[0].data(); name=p.fullName||name; dept=p.department||""; level=p.level||""; }
+      await addDoc(collection(db,"reviews"),{studentName:name,department:dept,level,rating:selectedRating,review:text,uid:currentUser.uid,createdAt:serverTimestamp()});
+      document.getElementById("reviewOverlay").classList.remove("open");
+      document.getElementById("reviewText").value = "";
+      setTimeout(loadReviews, 500);
+    }catch(e){ alert("Error submitting review. Please try again."); }
+  });
+  document.getElementById("openReviewBtn")?.addEventListener("click", () => document.getElementById("reviewOverlay").classList.add("open"));
+  document.getElementById("closeReviewBtn")?.addEventListener("click", () => document.getElementById("reviewOverlay").classList.remove("open"));
+
+  // ROLES SWIPER
+  const roles = [
+    {emoji:"👨‍🎓",title:"Student",items:["Register & verify your account","Browse & book hostel rooms","Pay securely via Paystack","Download QR approval letter","Submit maintenance complaints","Register & manage visitors","View personal dashboard"]},
+    {emoji:"🏠",title:"Hostel Admin",items:["Manage room inventory","View bookings & payments","Handle maintenance complaints","Monitor real-time occupancy","Generate financial reports","Manage student records"]},
+    {emoji:"👮",title:"Security Officer",items:["Verify student QR codes at gate","Validate visitor digital passes","Record daily access logs","View today's expected visitors","Real-time gate control dashboard"]},
+    {emoji:"🔧",title:"Maintenance Staff",items:["View assigned complaints","Update repair progress status","Flag unresolved issues","Access full maintenance history","Receive admin notifications"]},
+    {emoji:"⚙️",title:"Super Admin",items:["Full system control & access","Manage all staff accounts","Configure session settings","Set room slot allocations","Access audit logs","System health monitoring"]}
+  ];
+  document.getElementById("rolesWrapper").innerHTML = roles.map(r => `<div class="swiper-slide"><div class="role-card"><span class="r-emoji">${r.emoji}</span><h3 class="r-title">${r.title}</h3><ul class="r-list">${r.items.map(i=>`<li><i class="bi bi-check-circle-fill"></i>${i}</li>`).join("")}</ul></div></div>`).join("");
+  new Swiper(".roles-swiper",{loop:true,autoplay:{delay:4000,disableOnInteraction:false},slidesPerView:1,spaceBetween:20,pagination:{el:".swiper-pagination",clickable:true},navigation:{nextEl:".swiper-button-next",prevEl:".swiper-button-prev"},breakpoints:{640:{slidesPerView:2},960:{slidesPerView:3},1200:{slidesPerView:4}}});
+
+  // BOOT
+  await loadSettings();
+  loadStudentCount();
+  loadReviews();
+  document.getElementById("ftYear").textContent = new Date().getFullYear();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+  AOS.init({once:true,offset:60,duration:680});
+  document.getElementById("ftYear").textContent = new Date().getFullYear();
+
+  // NAVBAR
+  window.addEventListener("scroll",()=>{
+    document.getElementById("navbar").classList.toggle("scrolled",scrollY>50);
+    const scrolled=window.scrollY,total=document.body.scrollHeight-window.innerHeight,nearBottom=scrolled>total-120;
+    document.getElementById("scrollToBottom").classList.toggle("show",scrolled>200&&!nearBottom);
+    document.getElementById("scrollToTop").classList.toggle("show",scrolled>400);
+    document.getElementById("readingProgress").style.width=(total>0?(scrolled/total*100):0)+"%";
+  });
+  document.getElementById("scrollToBottom").addEventListener("click",()=>window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"}));
+  document.getElementById("scrollToTop").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+
+  // PARTICLES
+  const canvas=document.getElementById("particles"),ctx=canvas.getContext("2d");
+  function resize(){canvas.width=innerWidth;canvas.height=innerHeight}
+  resize();addEventListener("resize",resize);
+  const pts=Array.from({length:60},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.4+.35,dx:(Math.random()-.5)*.24,dy:(Math.random()-.5)*.24,a:Math.random()*.28+.06}));
+  function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(245,166,35,${p.a})`;ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>canvas.width)p.dx*=-1;if(p.y<0||p.y>canvas.height)p.dy*=-1});requestAnimationFrame(draw)}
+  draw();
+
+  // Close review modal on backdrop click
+  document.getElementById("reviewOverlay").addEventListener("click",function(e){if(e.target===this)this.classList.remove("open");});
+</script>
+</body>
+</html>
