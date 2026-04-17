@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — FUTBabura HMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.2);
+      --white:#fff;--muted:rgba(255,255,255,.5);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.085);
+      --ok:#22c55e;--err:#ef4444;--warn:#f59e0b;--info:#3b82f6;
+      --sidebar-w:264px;--topbar-h:68px;--radius:15px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden;transition:background .35s,color .35s}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(245,166,35,.4);border-radius:3px}
+
+    /* ── LIGHT MODE ── */
+    body.light{
+      --navy:#eef2fb;--navy2:#e2eaf8;--navy3:#d6e0f5;
+      --white:#0f1b3d;--muted:rgba(15,27,61,.5);
+      --card:rgba(255,255,255,.9);--border:rgba(0,0,0,.09);
+      background:#eef2fb;color:#0f1b3d;
+    }
+    body.light .sidebar{background:linear-gradient(180deg,#1a2c6b 0%,#0f1b3d 100%)}
+    body.light .topbar{background:rgba(240,244,255,.97);border-bottom-color:rgba(245,166,35,.18)}
+    body.light .welcome-banner{background:linear-gradient(135deg,rgba(245,166,35,.1),rgba(245,166,35,.04))}
+    body.light .stat-card{background:#fff;border-color:rgba(0,0,0,.09);box-shadow:0 2px 14px rgba(0,0,0,.06)}
+    body.light .card{background:#fff;border-color:rgba(0,0,0,.09);box-shadow:0 2px 14px rgba(0,0,0,.04)}
+    body.light .chart-card{background:#fff;border-color:rgba(0,0,0,.09)}
+    body.light .revenue-card{background:rgba(245,166,35,.06);border-color:rgba(245,166,35,.2)}
+    body.light .rev-item{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.08)}
+    body.light .rev-amount{color:var(--gold2)}
+    body.light .admin-table th{background:rgba(0,0,0,.03);color:rgba(15,27,61,.45)}
+    body.light .admin-table td{color:#0f1b3d;border-bottom-color:rgba(0,0,0,.05)}
+    body.light .admin-table tr:hover td{background:rgba(245,166,35,.04)}
+    body.light .stat-label,.light .wb-greeting{color:rgba(15,27,61,.5)}
+    body.light .tbl-empty{color:rgba(15,27,61,.4)}
+    body.light .dropdown-menu-hms{background:#fff;border-color:rgba(0,0,0,.1)}
+    body.light .dm-item{color:rgba(15,27,61,.55)}
+    body.light .dm-item:hover{background:rgba(245,166,35,.08);color:#0f1b3d}
+    body.light .dm-divider{background:rgba(0,0,0,.07)}
+    body.light .quick-access-card{background:#fff;border-color:rgba(0,0,0,.09)}
+    body.light .qa-icon{background:rgba(0,0,0,.04)}
+    body.light .qa-card:hover{background:rgba(245,166,35,.06);border-color:rgba(245,166,35,.3)}
+    body.light .activity-item{border-bottom-color:rgba(0,0,0,.05)}
+    body.light .card-header{border-bottom-color:rgba(0,0,0,.07)}
+
+    /* ── THEME TOGGLE BUTTON ── */
+    .theme-btn{width:62px;height:31px;border-radius:100px;background:var(--card);border:1.5px solid var(--border);cursor:pointer;position:relative;transition:all .3s;flex-shrink:0}
+    .theme-knob{position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:12px;transition:transform .35s cubic-bezier(.34,1.56,.64,1);box-shadow:0 2px 8px rgba(245,166,35,.35)}
+    .theme-btn.light-on .theme-knob{transform:translateX(31px)}
+
+    /* ── SIDEBAR ── */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:linear-gradient(180deg,#060f24 0%,#07112b 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:200;transition:transform .3s}
+    .sb-logo{display:flex;align-items:center;gap:11px;padding:20px 22px;border-bottom:1px solid rgba(245,166,35,.1);text-decoration:none}
+    .sb-logo-img{width:40px;height:40px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;box-shadow:0 0 16px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:1.8px;text-transform:uppercase}
+    .sb-nav{flex:1;padding:18px 14px;overflow-y:auto}
+    .sb-sec{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.22);padding:0 10px;margin:18px 0 8px}
+    .sb-sec:first-child{margin-top:0}
+    .sb-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--muted);font-size:13.5px;font-weight:500;transition:all .22s;margin-bottom:2px}
+    .sb-link i{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+    .sb-link:hover{background:rgba(245,166,35,.07);color:var(--white)}
+    .sb-link.active{background:rgba(245,166,35,.13);color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+    .sb-badge{margin-left:auto;background:var(--err);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px}
+    .sb-bottom{padding:16px 14px;border-top:1px solid rgba(245,166,35,.08)}
+    .sb-admin{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;background:rgba(245,166,35,.055);border:1px solid rgba(245,166,35,.1)}
+    .sb-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#c53030,#991b1b);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0;overflow:hidden}
+    .sb-ava img{width:100%;height:100%;object-fit:cover}
+    .sb-name{font-size:12.5px;font-weight:700}
+    .sb-role{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+    .sb-so{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.28);font-size:16px;cursor:pointer;padding:4px;transition:color .2s}
+    .sb-so:hover{color:var(--err)}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199}
+    .sb-overlay.show{display:block}
+
+    /* ── TOPBAR ── */
+    .topbar{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--topbar-h);background:rgba(7,17,43,.97);backdrop-filter:blur(22px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:150;transition:left .3s}
+    .tb-left{display:flex;align-items:center;gap:14px}
+    .tb-menu{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;display:none;padding:4px}
+    .tb-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}
+    .tb-right{display:flex;align-items:center;gap:11px}
+    .tb-session{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.22);color:var(--gold);font-size:10.5px;font-weight:700;padding:5px 13px;border-radius:100px;letter-spacing:.8px}
+    .icon-btn{background:var(--card);border:1px solid var(--border);border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all .22s;position:relative;flex-shrink:0}
+    .icon-btn:hover{background:rgba(245,166,35,.1);color:var(--gold)}
+    .notif-dot{position:absolute;top:-4px;right:-4px;background:var(--err);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:100px;display:none}
+    .notif-dot.show{display:block}
+    .um-btn{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px 12px 6px 6px;cursor:pointer;transition:all .22s}
+    .um-btn:hover{background:rgba(255,255,255,.07)}
+    .um-ava{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#c53030,#991b1b);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;overflow:hidden;flex-shrink:0}
+    .um-ava img{width:100%;height:100%;object-fit:cover}
+    .um-name{font-size:13px;font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dd-menu{position:absolute;top:calc(100% + 8px);right:0;background:#0c1a3d;border:1px solid var(--border);border-radius:13px;padding:8px;min-width:196px;box-shadow:0 18px 44px rgba(0,0,0,.45);z-index:500;display:none;animation:slideDown .2s ease}
+    .dd-menu.open{display:block}
+    .dd-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none}
+    .dd-item:hover{background:rgba(255,255,255,.07);color:var(--white)}
+    .dd-item.danger{color:rgba(239,68,68,.8)}
+    .dd-item.danger:hover{background:rgba(239,68,68,.08);color:var(--err)}
+    .dd-divider{height:1px;background:var(--border);margin:6px 0}
+
+    /* ── MAIN ── */
+    .main{margin-left:var(--sidebar-w);padding-top:var(--topbar-h);min-height:100vh;transition:margin-left .3s}
+    .content{padding:28px 28px 56px}
+
+    /* ── WELCOME BANNER ── */
+    .welcome-banner{background:linear-gradient(135deg,#0c1a3d 0%,#112060 55%,#0a1840 100%);border:1px solid rgba(245,166,35,.13);border-radius:20px;padding:24px 30px;margin-bottom:24px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px}
+    .wb-glow{position:absolute;right:-5%;top:-40%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.1) 0%,transparent 68%);pointer-events:none}
+    .wb-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+    .wb-left{position:relative;z-index:2}
+    .wb-greeting{font-size:13px;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+    .wb-live{display:inline-flex;align-items:center;gap:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.22);color:var(--ok);font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px}
+    .wb-live-dot{width:5px;height:5px;border-radius:50%;background:var(--ok);animation:pulseDot 1.5s infinite}
+    @keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+    .wb-name{font-family:'Playfair Display',serif;font-size:clamp(18px,2.3vw,26px);font-weight:900;margin-bottom:6px}
+    .wb-meta{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+    .wm-item{display:flex;align-items:center;gap:5px}
+    .wb-right{display:flex;gap:9px;position:relative;z-index:2;flex-wrap:wrap}
+    .btn-q{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:'Plus Jakarta Sans',sans-serif;transition:all .26s;text-decoration:none;white-space:nowrap}
+    .bq-gold{background:var(--gold);color:var(--navy);box-shadow:0 4px 14px var(--glow)}
+    .bq-gold:hover{background:var(--gold2);color:var(--navy);transform:translateY(-2px);box-shadow:0 8px 20px var(--glow)}
+    .bq-outline{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.13);color:var(--white)}
+    .bq-outline:hover{background:rgba(255,255,255,.1);color:var(--white)}
+
+    /* ── STATS ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:24px}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;position:relative;overflow:hidden;transition:all .26s;cursor:pointer}
+    .stat-card:hover{border-color:rgba(245,166,35,.28);transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.22)}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
+    .sc-gold::before{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+    .sc-red::before{background:linear-gradient(90deg,var(--err),#dc2626)}
+    .sc-green::before{background:linear-gradient(90deg,var(--ok),#16a34a)}
+    .sc-blue::before{background:linear-gradient(90deg,var(--info),#2563eb)}
+    .sc-purple::before{background:linear-gradient(90deg,#a855f7,#9333ea)}
+    .sc-teal::before{background:linear-gradient(90deg,#14b8a6,#0d9488)}
+    .stat-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:12px}
+    .si-gold{background:rgba(245,166,35,.12)} .si-red{background:rgba(239,68,68,.12)} .si-green{background:rgba(34,197,94,.12)} .si-blue{background:rgba(59,130,246,.12)} .si-purple{background:rgba(168,85,247,.12)} .si-teal{background:rgba(20,184,166,.12)}
+    .stat-num{font-family:'Playfair Display',serif;font-size:clamp(20px,2.2vw,28px);font-weight:900;line-height:1;margin-bottom:4px}
+    .stat-label{font-size:11.5px;color:var(--muted)}
+    .stat-trend{font-size:11px;margin-top:6px;display:flex;align-items:center;gap:3px;color:var(--muted)}
+    .trend-up{color:var(--ok)} .trend-down{color:var(--err)}
+
+    /* ── QUICK ACCESS ROW (new) ── */
+    .quick-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+    .qa-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;gap:14px;text-decoration:none;transition:all .26s;cursor:pointer}
+    .qa-card:hover{border-color:rgba(245,166,35,.3);background:rgba(245,166,35,.06);transform:translateY(-3px);box-shadow:0 10px 26px rgba(0,0,0,.18)}
+    .qa-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .qa-title{font-size:13.5px;font-weight:700;margin-bottom:2px;color:var(--white)}
+    .qa-sub{font-size:11px;color:var(--muted)}
+    .qa-arrow{margin-left:auto;font-size:14px;color:var(--muted);transition:transform .22s}
+    .qa-card:hover .qa-arrow{transform:translateX(4px);color:var(--gold)}
+
+    /* ── CARD ── */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:22px}
+    .card-header{padding:15px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .card-title{font-size:14.5px;font-weight:700;display:flex;align-items:center;gap:9px}
+    .view-all{font-size:12.5px;color:var(--gold);text-decoration:none;font-weight:600;transition:color .2s}
+    .view-all:hover{color:var(--gold2)}
+
+    /* ── TABLE ── */
+    .admin-table{width:100%;border-collapse:collapse}
+    .admin-table th{padding:11px 18px;font-size:11px;font-weight:700;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);text-align:left;background:rgba(255,255,255,.02)}
+    .admin-table td{padding:12px 18px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+    .admin-table tr:last-child td{border-bottom:none}
+    .admin-table tr:hover td{background:rgba(245,166,35,.035)}
+    .tbadge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+    .tb-active{background:rgba(34,197,94,.12);color:var(--ok);border:1px solid rgba(34,197,94,.2)}
+    .tb-pending{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+    .tb-expired{background:rgba(239,68,68,.1);color:var(--err);border:1px solid rgba(239,68,68,.18)}
+    .tb-received{background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.2)}
+    .tb-progress{background:rgba(168,85,247,.12);color:#d8b4fe;border:1px solid rgba(168,85,247,.2)}
+    .tb-resolved{background:rgba(34,197,94,.12);color:var(--ok);border:1px solid rgba(34,197,94,.2)}
+    .tb-none{background:rgba(255,255,255,.06);color:var(--muted)}
+    .btn-tbl{padding:5px 12px;border-radius:7px;font-size:11.5px;font-weight:600;border:none;cursor:pointer;transition:all .22s;font-family:'Plus Jakarta Sans',sans-serif;display:inline-flex;align-items:center;gap:5px}
+    .bt-view{background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.2)}
+    .bt-view:hover{background:rgba(59,130,246,.22);color:#bfdbfe}
+    .bt-manage{background:rgba(245,166,35,.1);color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+    .bt-manage:hover{background:rgba(245,166,35,.2);color:var(--gold)}
+    .s-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--navy);overflow:hidden;flex-shrink:0}
+    .s-ava img{width:100%;height:100%;object-fit:cover}
+
+    /* ── CHARTS ROW ── */
+    .charts-row{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;margin-bottom:22px}
+    .chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .chart-body{padding:20px}
+
+    /* ── REVENUE CARD ── */
+    .revenue-card{background:linear-gradient(135deg,rgba(245,166,35,.07) 0%,rgba(245,166,35,.02) 100%);border:1px solid rgba(245,166,35,.16);border-radius:var(--radius);padding:22px;margin-bottom:22px;position:relative;overflow:hidden}
+    .rc-glow{position:absolute;right:-5%;top:-50%;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.07) 0%,transparent 68%);pointer-events:none}
+    .rev-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+    .rev-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:11px;padding:16px;transition:all .25s}
+    .rev-item:hover{border-color:rgba(245,166,35,.22);transform:translateY(-2px)}
+    .rev-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+    .rev-amount{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--gold)}
+    .rev-sub{font-size:11px;color:var(--muted);margin-top:3px}
+
+    /* ── ACTIVITY FEED (new) ── */
+    .activity-item{display:flex;align-items:flex-start;gap:13px;padding:13px 18px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .2s}
+    .activity-item:hover{background:rgba(245,166,35,.035)}
+    .activity-item:last-child{border-bottom:none}
+    .ai-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+    .aii-booking{background:rgba(34,197,94,.1);color:var(--ok)}
+    .aii-complaint{background:rgba(239,68,68,.1);color:var(--err)}
+    .aii-student{background:rgba(59,130,246,.1);color:#93c5fd}
+    .aii-payment{background:rgba(245,166,35,.1);color:var(--gold)}
+    .aii-visitor{background:rgba(168,85,247,.1);color:#d8b4fe}
+    .ai-title{font-size:13px;font-weight:600;margin-bottom:2px}
+    .ai-desc{font-size:12px;color:var(--muted);line-height:1.5}
+    .ai-time{font-size:11px;color:rgba(255,255,255,.25);margin-top:3px}
+
+    /* ── BOTTOM GRID ── */
+    .bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+
+    /* skeleton */
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .tbl-empty{text-align:center;padding:38px;color:var(--muted);font-size:13.5px}
+
+    @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+
+    @media(max-width:1350px){.stats-grid{grid-template-columns:repeat(3,1fr)}.rev-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:1100px){.charts-row,.bottom-grid{grid-template-columns:1fr}.quick-row{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0}.main{margin-left:0}
+      .tb-menu{display:block}
+      .content{padding:18px 14px 44px}
+      .stats-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+      .welcome-banner{flex-direction:column}
+      .tb-session,.um-name{display:none}
+      .quick-row{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:480px){.stats-grid{grid-template-columns:1fr 1fr}.rev-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSb()"></div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar" id="sidebar">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+    <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Admin Panel</div></div>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-sec">Main</div>
+    <a href="admin-dashboard.html" class="sb-link active"><i class="bi bi-grid-fill"></i>Dashboard</a>
+    <a href="admin-rooms.html" class="sb-link"><i class="bi bi-door-open-fill"></i>Rooms</a>
+    <a href="admin-bookings.html" class="sb-link"><i class="bi bi-house-check-fill"></i>Bookings <span class="sb-badge" id="pendingBadge" style="display:none">0</span></a>
+    <a href="admin-complaints.html" class="sb-link"><i class="bi bi-tools"></i>Complaints <span class="sb-badge" id="openBadge" style="display:none">0</span></a>
+    <a href="admin-visitors.html" class="sb-link"><i class="bi bi-people-fill"></i>Visitors</a>
+    <div class="sb-sec">Management</div>
+    <a href="admin-students.html" class="sb-link"><i class="bi bi-mortarboard-fill"></i>Students</a>
+    <a href="admin-reports.html" class="sb-link"><i class="bi bi-bar-chart-fill"></i>Reports</a>
+    <div class="sb-sec">System</div>
+    <a href="admin-settings.html" class="sb-link"><i class="bi bi-gear-fill"></i>Settings</a>
+    <a href="admin-login.html" class="sb-link" id="sideSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-admin">
+      <div class="sb-ava" id="sbAva">A</div>
+      <div><div class="sb-name" id="sbName">Loading...</div><div class="sb-role">Hostel Admin</div></div>
+      <button class="sb-so" id="sbSignOut"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar" id="topbar">
+  <div class="tb-left">
+    <button class="tb-menu" onclick="toggleSb()"><i class="bi bi-list"></i></button>
+    <div class="tb-title">Admin Dashboard</div>
+  </div>
+  <div class="tb-right">
+    <span class="tb-session" id="tbSession">Loading...</span>
+    <!-- THEME TOGGLE -->
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle Day/Night mode">
+      <div class="theme-knob" id="themeKnob">🌙</div>
+    </button>
+    <div class="icon-btn" id="notifBtn" title="Notifications">
+      <i class="bi bi-bell-fill"></i>
+      <span class="notif-dot" id="notifDot"></span>
+    </div>
+    <div style="position:relative">
+      <div class="um-btn" id="umBtn" onclick="toggleDd()">
+        <div class="um-ava" id="umAva">A</div>
+        <span class="um-name" id="umName">Admin</span>
+        <i class="bi bi-chevron-down" style="font-size:11px;color:var(--muted)"></i>
+      </div>
+      <div class="dd-menu" id="ddMenu">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);margin-bottom:6px">
+          <div style="font-size:13px;font-weight:700" id="ddName">Admin</div>
+          <div style="font-size:11px;color:var(--gold)">Hostel Admin</div>
+        </div>
+        <a href="admin-settings.html" class="dd-item"><i class="bi bi-gear-fill"></i>Settings</a>
+        <div class="dd-divider"></div>
+        <div class="dd-item danger" id="dropSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+  <div class="content fade-up">
+
+    <!-- WELCOME BANNER -->
+    <div class="welcome-banner">
+      <div class="wb-glow"></div><div class="wb-dots"></div>
+      <div class="wb-left">
+        <div class="wb-greeting">
+          <span id="wbGreeting">Good morning 👋</span>
+          <div class="wb-live"><div class="wb-live-dot"></div>Live</div>
+        </div>
+        <div class="wb-name" id="wbName">Admin Dashboard</div>
+        <div class="wb-meta">
+          <span class="wm-item"><i class="bi bi-calendar3"></i><span id="wbDate"></span></span>
+          <span class="wm-item"><i class="bi bi-clock-fill"></i><span id="wbTime"></span></span>
+        </div>
+      </div>
+      <div class="wb-right">
+        <a href="admin-rooms.html" class="btn-q bq-gold"><i class="bi bi-plus-lg"></i>Add Room</a>
+        <a href="admin-bookings.html" class="btn-q bq-outline"><i class="bi bi-house-check-fill"></i>Bookings</a>
+        <a href="admin-reports.html" class="btn-q bq-outline"><i class="bi bi-bar-chart-fill"></i>Reports</a>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card sc-gold" onclick="window.location.href='admin-rooms.html'">
+        <div class="stat-icon si-gold">🏠</div>
+        <div class="stat-num" id="sTotalRooms"><div class="skeleton" style="width:50px;height:24px"></div></div>
+        <div class="stat-label">Total Rooms</div>
+        <div class="stat-trend trend-flat"><i class="bi bi-dot"></i>All blocks</div>
+      </div>
+      <div class="stat-card sc-red">
+        <div class="stat-icon si-red">🔴</div>
+        <div class="stat-num" id="sOccupied"><div class="skeleton" style="width:50px;height:24px"></div></div>
+        <div class="stat-label">Occupied</div>
+        <div class="stat-trend" id="occTrend" style="color:var(--muted)"></div>
+      </div>
+      <div class="stat-card sc-green" onclick="window.location.href='admin-rooms.html'">
+        <div class="stat-icon si-green">🟢</div>
+        <div class="stat-num" id="sAvailable"><div class="skeleton" style="width:50px;height:24px"></div></div>
+        <div class="stat-label">Available</div>
+        <div class="stat-trend trend-up"><i class="bi bi-arrow-up-short"></i>Slots open</div>
+      </div>
+      <div class="stat-card sc-blue" onclick="window.location.href='admin-bookings.html'">
+        <div class="stat-icon si-blue">📋</div>
+        <div class="stat-num" id="sBookings"><div class="skeleton" style="width:50px;height:24px"></div></div>
+        <div class="stat-label">Active Bookings</div>
+        <div class="stat-trend trend-flat"><i class="bi bi-dot"></i>This session</div>
+      </div>
+      <div class="stat-card sc-teal">
+        <div class="stat-icon si-teal">💰</div>
+        <div class="stat-num" id="sRevenue"><div class="skeleton" style="width:72px;height:24px"></div></div>
+        <div class="stat-label">Revenue Collected</div>
+        <div class="stat-trend trend-up"><i class="bi bi-arrow-up-short"></i>Confirmed only</div>
+      </div>
+      <div class="stat-card sc-purple" onclick="window.location.href='admin-complaints.html'">
+        <div class="stat-icon si-purple">🔧</div>
+        <div class="stat-num" id="sComplaints"><div class="skeleton" style="width:50px;height:24px"></div></div>
+        <div class="stat-label">Open Complaints</div>
+        <div class="stat-trend" id="compTrend" style="color:var(--muted)"></div>
+      </div>
+    </div>
+
+    <!-- QUICK ACCESS -->
+    <div class="quick-row">
+      <a href="admin-bookings.html" class="qa-card">
+        <div class="qa-icon si-blue">📋</div>
+        <div><div class="qa-title">Manage Bookings</div><div class="qa-sub">Review & approve</div></div>
+        <i class="bi bi-chevron-right qa-arrow"></i>
+      </a>
+      <a href="admin-students.html" class="qa-card">
+        <div class="qa-icon si-gold">🎓</div>
+        <div><div class="qa-title">View Students</div><div class="qa-sub">Records & profiles</div></div>
+        <i class="bi bi-chevron-right qa-arrow"></i>
+      </a>
+      <a href="admin-complaints.html" class="qa-card">
+        <div class="qa-icon si-purple">🔧</div>
+        <div><div class="qa-title">Complaints</div><div class="qa-sub">Assign & resolve</div></div>
+        <i class="bi bi-chevron-right qa-arrow"></i>
+      </a>
+      <a href="admin-settings.html" class="qa-card">
+        <div class="qa-icon si-teal">⚙️</div>
+        <div><div class="qa-title">Settings</div><div class="qa-sub">Session & hostel config</div></div>
+        <i class="bi bi-chevron-right qa-arrow"></i>
+      </a>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="card-header">
+          <span class="card-title"><i class="bi bi-bar-chart-fill" style="color:var(--gold)"></i>Occupancy by Block</span>
+          <span style="font-size:11.5px;color:var(--muted)" id="chartSession"></span>
+        </div>
+        <div class="chart-body"><canvas id="occupancyChart" height="200"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="card-header">
+          <span class="card-title"><i class="bi bi-pie-chart-fill" style="color:var(--gold)"></i>Booking Status</span>
+        </div>
+        <div class="chart-body" style="display:flex;align-items:center;justify-content:center">
+          <canvas id="bookingPie" height="190" style="max-width:240px"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVENUE SUMMARY -->
+    <div class="revenue-card">
+      <div class="rc-glow"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:relative;z-index:2">
+        <div>
+          <div style="font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px"><i class="bi bi-cash-coin" style="color:var(--gold)"></i>Revenue Summary</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px" id="revSession">Current Session</div>
+        </div>
+        <a href="admin-reports.html" class="btn-q bq-outline" style="font-size:12.5px;padding:8px 16px"><i class="bi bi-download"></i>Export Report</a>
+      </div>
+      <div class="rev-grid" style="position:relative;z-index:2">
+        <div class="rev-item">
+          <div class="rev-label">Total Collected</div>
+          <div class="rev-amount" id="revTotal">₦—</div>
+          <div class="rev-sub">Confirmed payments</div>
+        </div>
+        <div class="rev-item">
+          <div class="rev-label">Pending Payments</div>
+          <div class="rev-amount" style="color:var(--warn)" id="revPending">₦—</div>
+          <div class="rev-sub">Awaiting payment</div>
+        </div>
+        <div class="rev-item">
+          <div class="rev-label">Expected Total</div>
+          <div class="rev-amount" style="color:var(--info)" id="revExpected">₦—</div>
+          <div class="rev-sub">If all pay</div>
+        </div>
+        <div class="rev-item">
+          <div class="rev-label">Collection Rate</div>
+          <div class="rev-amount" style="color:var(--ok)" id="revRate">—%</div>
+          <div class="rev-sub">Paid vs expected</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT BOOKINGS -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="bi bi-house-check-fill" style="color:var(--gold)"></i>Recent Bookings</span>
+        <a href="admin-bookings.html" class="view-all">View All →</a>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Student</th><th>Matric No.</th><th>Room</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="bookingsTbody">
+            <tr><td colspan="7"><div class="skeleton" style="height:40px;margin:12px;border-radius:8px"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- BOTTOM GRID -->
+    <div class="bottom-grid">
+
+      <!-- COMPLAINTS -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header">
+          <span class="card-title"><i class="bi bi-tools" style="color:#d8b4fe"></i>Recent Complaints</span>
+          <a href="admin-complaints.html" class="view-all">Manage →</a>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="admin-table">
+            <thead><tr><th>Student</th><th>Category</th><th>Priority</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="complaintsTbody">
+              <tr><td colspan="5"><div class="skeleton" style="height:36px;margin:12px;border-radius:8px"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ACTIVITY FEED (new) -->
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header">
+          <span class="card-title"><i class="bi bi-activity" style="color:var(--gold)"></i>Live Activity</span>
+          <a href="admin-students.html" class="view-all">Students →</a>
+        </div>
+        <div id="activityFeed">
+          <div style="padding:18px"><div class="skeleton" style="height:38px;border-radius:9px;margin-bottom:10px"></div><div class="skeleton" style="height:38px;border-radius:9px"></div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RECENT STUDENTS -->
+    <div class="card" style="margin-top:22px">
+      <div class="card-header">
+        <span class="card-title"><i class="bi bi-mortarboard-fill" style="color:var(--gold)"></i>Recently Registered Students</span>
+        <a href="admin-students.html" class="view-all">View All →</a>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="admin-table">
+          <thead><tr><th>Student</th><th>Department</th><th>Level</th><th>Gender</th><th>JAMB Verified</th><th>Booking</th></tr></thead>
+          <tbody id="studentsTbody">
+            <tr><td colspan="6"><div class="skeleton" style="height:36px;margin:12px;border-radius:8px"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ FIREBASE ═══ -->
+<script type="module">
+  import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, query, where, getDocs, orderBy, limit }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg={apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app=initializeApp(cfg), db=getFirestore(app), auth=getAuth(app);
+  let occupancyChart=null, pieChart=null, settings={};
+
+  // ── AUTH GUARD ──
+  onAuthStateChanged(auth, async user=>{
+    if(!user){ window.location.href="admin-login.html"; return; }
+    const snap=await getDocs(query(collection(db,"users"),where("uid","==",user.uid)));
+    if(snap.empty){ await signOut(auth); window.location.href="admin-login.html"; return; }
+    const d=snap.docs[0].data();
+    if(!["hostel_admin","super_admin"].includes(d.role)){
+      const map={security:"security-dashboard.html",maintenance:"maintenance-dashboard.html"};
+      window.location.href=map[d.role]||"admin-login.html"; return;
+    }
+    renderAdminUI(d);
+    await loadSettings();
+    await Promise.all([loadStats(), loadBookings(), loadComplaints(), loadStudents(), loadActivity()]);
+  });
+
+  function renderAdminUI(a){
+    const init=(a.fullName||"A").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    ["sbAva","umAva"].forEach(id=>{
+      const el=document.getElementById(id); if(!el) return;
+      if(a.photoURL) el.innerHTML=`<img src="${a.photoURL}"/>`; else el.textContent=init;
+    });
+    document.getElementById("sbName").textContent = a.fullName||"Admin";
+    document.getElementById("umName").textContent = (a.fullName||"Admin").split(" ")[0];
+    document.getElementById("ddName").textContent = a.fullName||"Admin";
+    const h=new Date().getHours();
+    document.getElementById("wbGreeting").textContent = `${h<12?"Good morning":h<17?"Good afternoon":"Good evening"} 👋`;
+    document.getElementById("wbName").textContent = `Welcome, ${(a.fullName||"Admin").split(" ")[0]}`;
+  }
+
+  async function loadSettings(){
+    try{
+      const snap=await getDocs(collection(db,"settings"));
+      if(!snap.empty){ settings=snap.docs[0].data(); }
+      const session=settings.currentSession||"2024/2025";
+      document.getElementById("tbSession").textContent = session;
+      document.getElementById("chartSession").textContent = session;
+      document.getElementById("revSession").textContent = session+" Academic Session";
+    }catch(e){}
+  }
+
+  async function loadStats(){
+    try{
+      const session=settings.currentSession||"2024/2025";
+      const [roomsSnap, bookSnap, compSnap]=await Promise.all([
+        getDocs(collection(db,"rooms")),
+        getDocs(query(collection(db,"bookings"),where("session","==",session))),
+        getDocs(query(collection(db,"complaints"),where("status","!=","resolved"))),
+      ]);
+
+      // Rooms
+      let totalSlots=0, occupiedSlots=0;
+      roomsSnap.forEach(d=>{
+        const r=d.data();
+        totalSlots+=(r.totalSlots||1);
+        occupiedSlots+=((r.totalSlots||1)-(r.slotsLeft!==undefined?r.slotsLeft:(r.totalSlots||1)));
+      });
+      const available=totalSlots-occupiedSlots;
+      document.getElementById("sTotalRooms").textContent=roomsSnap.size;
+      document.getElementById("sOccupied").textContent=occupiedSlots;
+      document.getElementById("sAvailable").textContent=available;
+      const pct=totalSlots>0?Math.round(occupiedSlots/totalSlots*100):0;
+      document.getElementById("occTrend").innerHTML=`<i class="bi bi-graph-up-arrow"></i>${pct}% occupancy`;
+      document.getElementById("occTrend").className=`stat-trend ${pct>75?"trend-down":pct>40?"trend-flat":"trend-up"}`;
+
+      // Bookings & revenue
+      let activeCount=0, pendingCount=0, totalRev=0, pendingRev=0, expectedRev=0;
+      bookSnap.forEach(d=>{
+        const b=d.data();
+        const amt=Number(b.amount||0), paid=Number(b.amountPaid||0);
+        expectedRev+=amt;
+        if(b.status==="active"){activeCount++;totalRev+=paid;}
+        else if(b.status==="pending_payment"){pendingCount++;pendingRev+=amt;}
+      });
+      const fmt=v=>v>=1000000?"₦"+(v/1000000).toFixed(1)+"M":"₦"+(v/1000).toFixed(0)+"K";
+      document.getElementById("sBookings").textContent=activeCount;
+      document.getElementById("sRevenue").textContent=fmt(totalRev);
+      document.getElementById("revTotal").textContent=fmt(totalRev);
+      document.getElementById("revPending").textContent=fmt(pendingRev);
+      document.getElementById("revExpected").textContent=fmt(expectedRev);
+      const rate=expectedRev>0?Math.round(totalRev/expectedRev*100):0;
+      document.getElementById("revRate").textContent=rate+"%";
+
+      // Complaints
+      document.getElementById("sComplaints").textContent=compSnap.size;
+      if(compSnap.size>0){
+        const b=document.getElementById("openBadge"); b.textContent=compSnap.size; b.style.display="";
+        document.getElementById("notifDot").classList.add("show");
+        document.getElementById("compTrend").innerHTML=`<i class="bi bi-exclamation-triangle-fill" style="color:var(--warn)"></i>Needs attention`;
+        document.getElementById("compTrend").className="stat-trend trend-down";
+      }
+
+      // Pending bookings badge
+      if(pendingCount>0){const pb=document.getElementById("pendingBadge");pb.textContent=pendingCount;pb.style.display="";}
+
+      // Render charts
+      renderOccupancyChart(roomsSnap);
+      renderPieChart(activeCount,pendingCount,bookSnap.size-activeCount-pendingCount);
+    }catch(e){console.error(e);}
+  }
+
+  function renderOccupancyChart(roomsSnap){
+    const blockData={};
+    roomsSnap.forEach(d=>{
+      const r=d.data(); const bn=r.blockName||"Other";
+      if(!blockData[bn]) blockData[bn]={total:0,occupied:0};
+      blockData[bn].total+=(r.totalSlots||1);
+      blockData[bn].occupied+=((r.totalSlots||1)-(r.slotsLeft!==undefined?r.slotsLeft:(r.totalSlots||1)));
+    });
+    const labels=Object.keys(blockData);
+    const ctx=document.getElementById("occupancyChart").getContext("2d");
+    if(occupancyChart) occupancyChart.destroy();
+    occupancyChart=new Chart(ctx,{
+      type:"bar",
+      data:{labels,datasets:[
+        {label:"Occupied",data:labels.map(b=>blockData[b].occupied),backgroundColor:"rgba(239,68,68,.72)",borderRadius:7,borderSkipped:false},
+        {label:"Available",data:labels.map(b=>blockData[b].total-blockData[b].occupied),backgroundColor:"rgba(34,197,94,.55)",borderRadius:7,borderSkipped:false},
+      ]},
+      options:{responsive:true,maintainAspectRatio:true,
+        plugins:{legend:{labels:{color:"rgba(255,255,255,.55)",font:{size:11}}}},
+        scales:{
+          x:{stacked:true,ticks:{color:"rgba(255,255,255,.48)"},grid:{color:"rgba(255,255,255,.04)"}},
+          y:{stacked:true,ticks:{color:"rgba(255,255,255,.48)"},grid:{color:"rgba(255,255,255,.04)"},beginAtZero:true}
+        }
+      }
+    });
+  }
+
+  function renderPieChart(active,pending,other){
+    const ctx=document.getElementById("bookingPie").getContext("2d");
+    if(pieChart) pieChart.destroy();
+    pieChart=new Chart(ctx,{
+      type:"doughnut",
+      data:{
+        labels:["Active","Pending Payment","Other"],
+        datasets:[{data:[active,pending,other],backgroundColor:["rgba(34,197,94,.75)","rgba(245,166,35,.75)","rgba(239,68,68,.6)"],borderWidth:0,hoverOffset:7}]
+      },
+      options:{responsive:true,maintainAspectRatio:true,cutout:"70%",
+        plugins:{legend:{position:"bottom",labels:{color:"rgba(255,255,255,.55)",font:{size:11},padding:14}}}
+      }
+    });
+  }
+
+  async function loadBookings(){
+    try{
+      const session=settings.currentSession||"2024/2025";
+      const snap=await getDocs(query(collection(db,"bookings"),where("session","==",session),orderBy("createdAt","desc"),limit(8)));
+      const tbody=document.getElementById("bookingsTbody");
+      if(snap.empty){tbody.innerHTML=`<tr><td colspan="7" class="tbl-empty">No bookings yet this session</td></tr>`;return;}
+      const stMap={
+        active:{cls:"tb-active",lbl:"Active"},
+        pending_payment:{cls:"tb-pending",lbl:"Pending"},
+        expired:{cls:"tb-expired",lbl:"Expired"},
+      };
+      tbody.innerHTML=snap.docs.map(d=>{
+        const b=d.data(); const sm=stMap[b.status]||stMap.pending_payment;
+        const dt=b.createdAt?.toDate?.()?.toLocaleDateString("en-NG",{day:"numeric",month:"short",year:"numeric"})||"—";
+        const init=(b.studentName||"S").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+        return `<tr>
+          <td><div style="display:flex;align-items:center;gap:10px"><div class="s-ava">${init}</div><div style="font-size:13px;font-weight:600">${b.studentName||"—"}</div></div></td>
+          <td style="color:var(--muted);font-size:12px;font-family:monospace">${b.matricNo||"—"}</td>
+          <td><span style="font-weight:600">${b.blockName||"—"}</span> · Rm ${b.roomNumber||"—"}</td>
+          <td style="color:var(--gold);font-weight:700">₦${Number(b.amountPaid||b.amount||0).toLocaleString()}</td>
+          <td><span class="tbadge ${sm.cls}">${sm.lbl}</span></td>
+          <td style="color:var(--muted);font-size:12px">${dt}</td>
+          <td><a href="admin-bookings.html" class="btn-tbl bt-view"><i class="bi bi-eye-fill"></i>View</a></td>
+        </tr>`;
+      }).join("");
+    }catch(e){document.getElementById("bookingsTbody").innerHTML=`<tr><td colspan="7" class="tbl-empty">Failed to load bookings</td></tr>`;}
+  }
+
+  async function loadComplaints(){
+    try{
+      const snap=await getDocs(query(collection(db,"complaints"),orderBy("createdAt","desc"),limit(6)));
+      const tbody=document.getElementById("complaintsTbody");
+      if(snap.empty){tbody.innerHTML=`<tr><td colspan="5" class="tbl-empty">No complaints yet</td></tr>`;return;}
+      const stMap={
+        received:{cls:"tb-received",lbl:"Received"},
+        assigned:{cls:"tb-pending",lbl:"Assigned"},
+        in_progress:{cls:"tb-progress",lbl:"In Progress"},
+        resolved:{cls:"tb-resolved",lbl:"Resolved"},
+      };
+      const prioMap={low:"🟢 Low",medium:"🟡 Medium",high:"🔴 High",urgent:"🚨 Urgent"};
+      tbody.innerHTML=snap.docs.map(d=>{
+        const c=d.data(); const sm=stMap[c.status]||stMap.received;
+        return `<tr>
+          <td style="font-weight:600;font-size:13px">${c.studentName||"—"}<div style="font-size:11px;color:var(--muted)">${c.title||""}</div></td>
+          <td style="font-size:12px;color:var(--muted)">${c.category||"—"}</td>
+          <td style="font-size:12px">${prioMap[c.priority]||"—"}</td>
+          <td><span class="tbadge ${sm.cls}">${sm.lbl}</span></td>
+          <td><a href="admin-complaints.html" class="btn-tbl bt-manage"><i class="bi bi-arrow-right-circle"></i>Manage</a></td>
+        </tr>`;
+      }).join("");
+    }catch(e){document.getElementById("complaintsTbody").innerHTML=`<tr><td colspan="5" class="tbl-empty">Failed to load</td></tr>`;}
+  }
+
+  async function loadStudents(){
+    try{
+      const session=settings.currentSession||"2024/2025";
+      const snap=await getDocs(query(collection(db,"users"),where("role","==","student"),orderBy("createdAt","desc"),limit(6)));
+      const tbody=document.getElementById("studentsTbody");
+      if(snap.empty){tbody.innerHTML=`<tr><td colspan="6" class="tbl-empty">No students registered yet</td></tr>`;return;}
+      const uids=snap.docs.map(d=>d.data().uid).filter(Boolean);
+      const bMap={};
+      if(uids.length){
+        const bSnap=await getDocs(query(collection(db,"bookings"),where("session","==",session)));
+        bSnap.forEach(d=>{bMap[d.data().studentUid]=d.data().status;});
+      }
+      tbody.innerHTML=snap.docs.map(d=>{
+        const s=d.data();
+        const bs=bMap[s.uid];
+        const bBadge=bs?`<span class="tbadge ${bs==="active"?"tb-active":bs==="pending_payment"?"tb-pending":"tb-expired"}">${bs==="active"?"Active":bs==="pending_payment"?"Pending":"Expired"}</span>`:`<span class="tbadge tb-none">No Booking</span>`;
+        const jBadge=s.jambVerified?`<span class="tbadge tb-active"><i class="bi bi-check-circle-fill"></i>Verified</span>`:`<span class="tbadge tb-pending"><i class="bi bi-hourglass-split"></i>Pending</span>`;
+        const init=(s.fullName||"S").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+        return `<tr>
+          <td><div style="display:flex;align-items:center;gap:10px">
+            <div class="s-ava" style="width:30px;height:30px;font-size:11px">${s.photoURL?`<img src="${s.photoURL}"/>`:init}</div>
+            <div><div style="font-size:13px;font-weight:600">${s.fullName||"—"}</div><div style="font-size:11px;color:var(--muted);font-family:monospace">${s.matricNo||"—"}</div></div>
+          </div></td>
+          <td style="font-size:12.5px;color:var(--muted);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.department||"—"}</td>
+          <td style="font-size:12.5px">${s.level||"—"}</td>
+          <td style="font-size:12.5px">${s.gender||"—"}</td>
+          <td>${jBadge}</td>
+          <td>${bBadge}</td>
+        </tr>`;
+      }).join("");
+    }catch(e){document.getElementById("studentsTbody").innerHTML=`<tr><td colspan="6" class="tbl-empty">Failed to load</td></tr>`;}
+  }
+
+  async function loadActivity(){
+    try{
+      const feed=document.getElementById("activityFeed");
+      // Load most recent events from bookings + complaints + visitors combined
+      const [bSnap,cSnap,vSnap]=await Promise.all([
+        getDocs(query(collection(db,"bookings"),orderBy("createdAt","desc"),limit(3))),
+        getDocs(query(collection(db,"complaints"),orderBy("createdAt","desc"),limit(2))),
+        getDocs(query(collection(db,"visitors"),orderBy("createdAt","desc"),limit(2))),
+      ]);
+      const items=[];
+      bSnap.forEach(d=>{const b=d.data();items.push({type:"booking",title:`${b.studentName||"Student"} booked a room`,desc:`${b.blockName||"Block"} · Rm ${b.roomNumber||"—"} · ₦${Number(b.amount||0).toLocaleString()}`,icon:"aii-booking",emoji:"🏠",ts:b.createdAt?.toDate?.()??new Date(0)});});
+      cSnap.forEach(d=>{const c=d.data();items.push({type:"complaint",title:`Complaint: ${c.title||"Issue reported"}`,desc:`${c.studentName||"Student"} · ${c.category||"General"} · ${c.priority||""}`,icon:"aii-complaint",emoji:"🔧",ts:c.createdAt?.toDate?.()??new Date(0)});});
+      vSnap.forEach(d=>{const v=d.data();items.push({type:"visitor",title:`Visitor registered`,desc:`${v.visitorName||"Visitor"} visiting ${v.studentName||"student"}`,icon:"aii-visitor",emoji:"👥",ts:v.createdAt?.toDate?.()??new Date(0)});});
+      items.sort((a,b)=>b.ts-a.ts);
+      if(!items.length){feed.innerHTML=`<div class="tbl-empty" style="padding:24px">No recent activity</div>`;return;}
+      feed.innerHTML=items.slice(0,5).map(it=>{
+        const ago=timeAgo(it.ts);
+        return `<div class="activity-item">
+          <div class="ai-icon ${it.icon}">${it.emoji}</div>
+          <div style="flex:1;min-width:0">
+            <div class="ai-title">${it.title}</div>
+            <div class="ai-desc">${it.desc}</div>
+            <div class="ai-time">${ago}</div>
+          </div>
+        </div>`;
+      }).join("");
+    }catch(e){document.getElementById("activityFeed").innerHTML=`<div class="tbl-empty" style="padding:24px">Failed to load activity</div>`;}
+  }
+
+  function timeAgo(date){
+    if(!date) return "—";
+    const s=Math.floor((Date.now()-date.getTime())/1000);
+    if(s<60) return "Just now";
+    if(s<3600) return Math.floor(s/60)+"m ago";
+    if(s<86400) return Math.floor(s/3600)+"h ago";
+    return Math.floor(s/86400)+"d ago";
+  }
+
+  // Sign out
+  const doSignOut=async()=>{await signOut(auth);window.location.href="admin-login.html";};
+  ["sideSignOut","sbSignOut","dropSignOut"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener("click",async e=>{e.preventDefault();doSignOut();});
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // ── SIDEBAR & DROPDOWN ──
+  function toggleSb(){document.getElementById("sidebar").classList.toggle("open");document.getElementById("sbOverlay").classList.toggle("show");}
+  function toggleDd(){document.getElementById("ddMenu").classList.toggle("open");}
+  document.addEventListener("click",e=>{if(!e.target.closest("#umBtn")&&!e.target.closest("#ddMenu"))document.getElementById("ddMenu").classList.remove("open");});
+
+  // ── CLOCK ──
+  function updateClock(){
+    const now=new Date();
+    document.getElementById("wbDate").textContent=now.toLocaleDateString("en-NG",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    document.getElementById("wbTime").textContent=now.toLocaleTimeString("en-NG",{hour:"2-digit",minute:"2-digit"});
+  }
+  updateClock(); setInterval(updateClock,60000);
+
+  // ── DAY / NIGHT THEME TOGGLE ──
+  function toggleTheme(){
+    const isLight=document.body.classList.toggle("light");
+    localStorage.setItem("hms_theme",isLight?"light":"dark");
+    const btn=document.getElementById("themeBtn");
+    const knob=document.getElementById("themeKnob");
+    if(isLight){btn.classList.add("light-on");knob.textContent="☀️";}
+    else{btn.classList.remove("light-on");knob.textContent="🌙";}
+  }
+  // Apply saved theme on load
+  (function(){
+    if(localStorage.getItem("hms_theme")==="light"){
+      document.body.classList.add("light");
+      const btn=document.getElementById("themeBtn");
+      const knob=document.getElementById("themeKnob");
+      if(btn) btn.classList.add("light-on");
+      if(knob) knob.textContent="☀️";
+    }
+  })();
+</script>
+</body>
+</html>
