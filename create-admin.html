@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Admin — FUTBabura HMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.2);
+      --white:#fff;--muted:rgba(255,255,255,.48);
+      --card:rgba(255,255,255,.038);--border:rgba(255,255,255,.08);
+      --ok:#22c55e;--err:#ef4444;--warn:#f59e0b;
+      --sidebar-w:278px;--topbar-h:68px;--radius:15px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(245,166,35,.35);border-radius:3px}
+
+    /* ── REDIRECT BANNER (always visible at top) ── */
+    .redirect-banner{
+      background:linear-gradient(90deg,#065f46 0%,#047857 60%,#065f46 100%);
+      color:#d1fae5;padding:10px 24px;
+      display:flex;align-items:center;justify-content:center;gap:12px;
+      font-size:13px;font-weight:600;
+      box-shadow:0 4px 20px rgba(0,0,0,.4);
+      position:relative;z-index:9999;
+      animation:slideFromTop .5s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    .rb-dot{width:8px;height:8px;border-radius:50%;background:#86efac;animation:pulseDot 1.5s infinite;flex-shrink:0}
+    .rb-back{margin-left:auto;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#d1fae5;font-size:12px;font-weight:700;padding:5px 14px;border-radius:100px;text-decoration:none;transition:all .2s}
+    .rb-back:hover{background:rgba(255,255,255,.22);color:#fff}
+
+    @keyframes slideFromTop{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+    @keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .fade-up{animation:fadeUp .5s ease both}
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px}
+
+    /* ── SIDEBAR ── */
+    .sidebar{
+      position:fixed;top:42px;left:0;bottom:0;width:var(--sidebar-w);
+      background:linear-gradient(180deg,#060e22 0%,#07112b 100%);
+      border-right:1px solid rgba(245,166,35,.1);
+      display:flex;flex-direction:column;z-index:200;transition:transform .3s;
+    }
+    .sb-logo{display:flex;align-items:center;gap:11px;padding:18px 20px;border-bottom:1px solid rgba(245,166,35,.1);text-decoration:none}
+    .sb-logo-img{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;box-shadow:0 0 14px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+    .sb-god{margin-left:auto;background:linear-gradient(135deg,#c53030,#991b1b);color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:100px;text-transform:uppercase}
+    .sb-nav{flex:1;padding:16px 12px;overflow-y:auto}
+    .sb-lbl{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.2);padding:0 10px;margin:16px 0 7px}
+    .sb-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;text-decoration:none;color:var(--muted);font-size:13px;font-weight:500;transition:all .22s;margin-bottom:2px}
+    .sb-link i{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+    .sb-link:hover{background:rgba(245,166,35,.08);color:var(--white)}
+    .sb-link.active{background:rgba(245,166,35,.13);color:var(--gold);border:1px solid rgba(245,166,35,.18)}
+    .sb-bottom{padding:14px 12px;border-top:1px solid rgba(245,166,35,.08)}
+    .sb-user{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:10px;background:rgba(245,166,35,.055);border:1px solid rgba(245,166,35,.1)}
+    .sb-ava{width:33px;height:33px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;overflow:hidden}
+    .sb-ava img{width:100%;height:100%;object-fit:cover}
+    .sb-uname{font-size:12.5px;font-weight:700}
+    .sb-urole{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+    .sb-so{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.25);font-size:15px;cursor:pointer;padding:3px;transition:color .2s}
+    .sb-so:hover{color:var(--err)}
+    .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:199}
+    .sb-overlay.show{display:block}
+
+    /* ── TOPBAR ── */
+    .topbar{
+      position:fixed;top:42px;left:var(--sidebar-w);right:0;height:var(--topbar-h);
+      background:rgba(6,14,34,.97);backdrop-filter:blur(22px);
+      border-bottom:1px solid rgba(245,166,35,.08);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 28px;z-index:150;
+    }
+    .tb-left{display:flex;align-items:center;gap:12px}
+    .tb-menu{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;display:none;padding:4px}
+    .tb-back{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);color:var(--muted);font-size:13px;font-weight:600;padding:7px 16px;border-radius:9px;text-decoration:none;transition:all .22s}
+    .tb-back:hover{background:rgba(255,255,255,.1);color:var(--white)}
+    .tb-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700}
+    .tb-tag{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.22);color:var(--gold);font-size:10px;font-weight:700;padding:5px 13px;border-radius:100px}
+
+    /* ── MAIN ── */
+    .main{margin-left:var(--sidebar-w);padding-top:calc(var(--topbar-h) + 42px);min-height:100vh}
+    .content{padding:30px 32px 60px;max-width:1080px;margin:0 auto}
+
+    /* ── PAGE HEADER ── */
+    .page-header{
+      background:linear-gradient(135deg,rgba(245,166,35,.07),rgba(245,166,35,.02));
+      border:1px solid rgba(245,166,35,.13);border-radius:20px;
+      padding:26px 30px;margin-bottom:26px;
+      display:flex;align-items:center;justify-content:space-between;
+      flex-wrap:wrap;gap:16px;position:relative;overflow:hidden;
+    }
+    .ph-glow{position:absolute;right:-5%;top:-50%;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.07) 0%,transparent 68%);pointer-events:none}
+    .ph-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+    .ph-icon{width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,rgba(245,166,35,.14),rgba(245,166,35,.05));border:1.5px solid rgba(245,166,35,.22);display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:13px;position:relative;z-index:2}
+    .ph-title{font-family:'Playfair Display',serif;font-size:21px;font-weight:900;margin-bottom:5px;position:relative;z-index:2}
+    .ph-sub{font-size:13px;color:var(--muted);line-height:1.65;max-width:480px;position:relative;z-index:2}
+    .ph-stats{display:flex;gap:16px;flex-wrap:wrap;position:relative;z-index:2}
+    .ph-stat{text-align:center;padding:10px 18px;background:rgba(255,255,255,.038);border:1px solid rgba(255,255,255,.07);border-radius:11px;min-width:80px}
+    .phs-num{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--gold)}
+    .phs-lbl{font-size:10.5px;color:var(--muted);margin-top:2px}
+
+    /* ── LAYOUT ── */
+    .form-layout{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;align-items:start}
+
+    /* ── FORM CARD ── */
+    .form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .fc-hdr{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+    .fc-title{font-size:14.5px;font-weight:700;display:flex;align-items:center;gap:9px}
+    .fc-body{padding:24px}
+
+    /* ── ROLE SELECTOR ── */
+    .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+    .role-opt{border:1.5px solid rgba(255,255,255,.09);border-radius:12px;padding:14px 12px;cursor:pointer;transition:all .22s;display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.025);user-select:none}
+    .role-opt:hover{border-color:rgba(245,166,35,.35);background:rgba(245,166,35,.05)}
+    .role-opt.selected{border-color:var(--gold)!important;background:rgba(245,166,35,.1)!important;box-shadow:0 0 0 3px rgba(245,166,35,.1)}
+    .ro-emoji{font-size:22px;flex-shrink:0}
+    .ro-name{font-size:13px;font-weight:700;line-height:1.2}
+    .ro-desc{font-size:10.5px;color:var(--muted);margin-top:1px}
+    .ro-radio{width:15px;height:15px;border-radius:50%;border:2px solid rgba(255,255,255,.2);margin-left:auto;flex-shrink:0;transition:all .2s}
+    .role-opt.selected .ro-radio{background:var(--gold);border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,166,35,.2)}
+
+    /* ── FIELDS ── */
+    .field-wrap{margin-bottom:17px}
+    .field-label{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:7px;display:flex;align-items:center;gap:5px}
+    .req{color:var(--err)}
+    .input-rel{position:relative}
+    .fi{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--muted);pointer-events:none}
+    .hms-input{width:100%;background:rgba(255,255,255,.045);border:1.5px solid rgba(255,255,255,.09);border-radius:11px;padding:11px 14px 11px 40px;color:var(--white);font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .25s,box-shadow .25s}
+    .hms-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,166,35,.1)}
+    .hms-input::placeholder{color:rgba(255,255,255,.2)}
+    .hms-input.err{border-color:var(--err)!important;box-shadow:0 0 0 3px rgba(239,68,68,.08)!important}
+    .hms-input.good{border-color:var(--ok)!important}
+    .hms-select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:36px}
+    .sel-arr{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted);pointer-events:none}
+    .pwd-eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);font-size:15px;cursor:pointer;padding:0;transition:color .2s}
+    .pwd-eye:hover{color:var(--white)}
+    .ferr{font-size:11.5px;color:var(--err);margin-top:5px;display:none;align-items:center;gap:4px}
+    .ferr.show{display:flex}
+    .field-hint{font-size:11px;color:rgba(255,255,255,.28);margin-top:4px;display:flex;align-items:center;gap:4px}
+    .row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+    /* ── PASSWORD STRENGTH ── */
+    .pwd-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:7px}
+    .pb-seg{height:3px;border-radius:100px;background:rgba(255,255,255,.07);transition:background .3s}
+    .pb-label{font-size:11px;margin-top:4px;color:var(--muted)}
+
+    /* ── GENERATE BTN ── */
+    .btn-gen{display:inline-flex;align-items:center;gap:6px;background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);color:var(--gold);font-size:12px;font-weight:700;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s;margin-top:7px}
+    .btn-gen:hover{background:rgba(245,166,35,.14);transform:translateY(-1px)}
+
+    /* ── GLOBAL ALERT ── */
+    .g-alert{display:none;padding:14px 17px;border-radius:12px;font-size:13px;font-weight:500;margin-bottom:20px;align-items:flex-start;gap:11px;animation:fadeUp .3s ease;line-height:1.6}
+    .g-alert.show{display:flex}
+    .a-ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86efac}
+    .a-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+    .a-warn{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);color:#fde68a}
+
+    /* ── SUBMIT BTN ── */
+    .btn-submit{width:100%;padding:14px;border-radius:11px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);font-size:15px;font-weight:800;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;font-family:'Plus Jakarta Sans',sans-serif;transition:all .3s;box-shadow:0 4px 18px var(--glow);margin-top:6px}
+    .btn-submit:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 26px var(--glow)}
+    .btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none!important}
+
+    /* ── RIGHT PANEL ── */
+    .info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:18px}
+    .ic-title{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--gold)}
+    .perm-item{padding:11px 0;border-bottom:1px solid rgba(255,255,255,.045)}
+    .perm-item:last-child{border:none}
+    .pi-row{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+    .pi-emoji{font-size:17px}
+    .pi-name{font-size:13px;font-weight:700}
+    .pi-perms{list-style:none}
+    .pi-perms li{font-size:12px;color:rgba(255,255,255,.45);padding:2px 0;display:flex;align-items:center;gap:6px}
+    .pi-perms li::before{content:"✓";color:var(--ok);font-size:10px;flex-shrink:0}
+
+    /* ── EXISTING ADMINS ── */
+    .admins-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .ac-hdr{padding:14px 18px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+    .ar{display:flex;align-items:center;gap:11px;padding:11px 18px;border-bottom:1px solid rgba(255,255,255,.04);transition:background .2s}
+    .ar:hover{background:rgba(255,255,255,.025)}
+    .ar:last-child{border:none}
+    .ar-ava{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#fff;flex-shrink:0;overflow:hidden}
+    .ar-name{font-size:13px;font-weight:600}
+    .ar-email{font-size:11px;color:var(--muted)}
+    .ar-badge{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:100px;text-transform:uppercase;margin-left:auto;flex-shrink:0;white-space:nowrap}
+    .ab-super{background:rgba(245,166,35,.12);color:var(--gold)}
+    .ab-hostel{background:rgba(239,68,68,.12);color:#fca5a5}
+    .ab-security{background:rgba(59,130,246,.12);color:#93c5fd}
+    .ab-maintenance{background:rgba(34,197,94,.12);color:var(--ok)}
+
+    /* SUCCESS CARD */
+    .success-card{display:none;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.25);border-radius:16px;padding:24px;text-align:center;animation:fadeUp .4s ease}
+    .success-card.show{display:block}
+    .cred-box{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px 18px;font-family:monospace;font-size:13px;text-align:left;margin:14px 0;line-height:1.9}
+
+    .spin{width:18px;height:18px;border:2.5px solid rgba(7,17,43,.3);border-top-color:var(--navy);border-radius:50%;animation:spinA .7s linear infinite}
+    @keyframes spinA{to{transform:rotate(360deg)}}
+
+    @media(max-width:1050px){.form-layout{grid-template-columns:1fr}}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar,.main{left:0;margin-left:0}
+      .topbar{left:0}
+      .tb-menu{display:block}
+      .content{padding:18px 14px 40px}
+      .row-2,.role-grid{grid-template-columns:1fr}
+      .ph-stats{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ REDIRECT BANNER (always visible) ══ -->
+<div class="redirect-banner">
+  <div class="rb-dot"></div>
+  <i class="bi bi-shield-plus-fill" style="font-size:15px"></i>
+  <span>Redirected from Super Admin Dashboard — <strong>Admin Account Creation Portal</strong></span>
+  <span style="opacity:.55;font-size:12px">· Super Admins only</span>
+  <a href="superadmin-dashboard.html" class="rb-back"><i class="bi bi-arrow-left"></i>Back to Dashboard</a>
+</div>
+
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSb()"></div>
+
+<!-- ══ SIDEBAR ══ -->
+<div class="sidebar" id="sidebar">
+  <a href="index.html" class="sb-logo">
+    <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+    <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Super Admin</div></div>
+    <span class="sb-god">GOD MODE</span>
+  </a>
+  <nav class="sb-nav">
+    <div class="sb-lbl">Navigation</div>
+    <a href="superadmin-dashboard.html" class="sb-link"><i class="bi bi-grid-fill"></i>Dashboard</a>
+    <a href="create-admin.html" class="sb-link active"><i class="bi bi-person-plus-fill"></i>Create Admin</a>
+    <div class="sb-lbl">Management</div>
+    <a href="admin-students.html" class="sb-link"><i class="bi bi-mortarboard-fill"></i>Students</a>
+    <a href="admin-rooms.html" class="sb-link"><i class="bi bi-door-open-fill"></i>Rooms</a>
+    <a href="admin-bookings.html" class="sb-link"><i class="bi bi-house-check-fill"></i>Bookings</a>
+    <a href="admin-complaints.html" class="sb-link"><i class="bi bi-tools"></i>Complaints</a>
+    <div class="sb-lbl">System</div>
+    <a href="admin-settings.html" class="sb-link"><i class="bi bi-gear-fill"></i>Settings</a>
+    <div class="sb-lbl">Account</div>
+    <a href="admin-login.html" class="sb-link" id="sideSignOut"><i class="bi bi-box-arrow-left"></i>Sign Out</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-ava" id="sbAva">SA</div>
+      <div><div class="sb-uname" id="sbName">Super Admin</div><div class="sb-urole">Super Admin</div></div>
+      <button class="sb-so" id="sbSignOut"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOPBAR ══ -->
+<div class="topbar">
+  <div class="tb-left">
+    <button class="tb-menu" onclick="toggleSb()"><i class="bi bi-list"></i></button>
+    <a href="superadmin-dashboard.html" class="tb-back"><i class="bi bi-arrow-left"></i>Dashboard</a>
+    <div class="tb-title">Create Admin Account</div>
+  </div>
+  <div class="tb-right">
+    <span class="tb-tag">⚙️ Super Admin Only</span>
+  </div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <div class="content fade-up">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div class="ph-glow"></div><div class="ph-dots"></div>
+      <div>
+        <div class="ph-icon">👮</div>
+        <h2 class="ph-title">Create New Admin Account</h2>
+        <p class="ph-sub">Grant FUTBabura staff access to the HMS admin panel. Choose their role carefully — each role gives access to a dedicated dashboard with specific permissions.</p>
+      </div>
+      <div class="ph-stats">
+        <div class="ph-stat"><div class="phs-num" id="phTotal">—</div><div class="phs-lbl">Total Admins</div></div>
+        <div class="ph-stat"><div class="phs-num" id="phActive">—</div><div class="phs-lbl">Active</div></div>
+        <div class="ph-stat"><div class="phs-num">4</div><div class="phs-lbl">Roles</div></div>
+      </div>
+    </div>
+
+    <!-- GLOBAL ALERT -->
+    <div class="g-alert" id="gAlert">
+      <i class="bi" id="gIcon" style="flex-shrink:0;font-size:16px;margin-top:1px"></i>
+      <div id="gMsg"></div>
+    </div>
+
+    <!-- SUCCESS CARD (shown after creation) -->
+    <div class="success-card" id="successCard">
+      <div style="font-size:48px;margin-bottom:12px">🎉</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;margin-bottom:6px">Admin Created!</h3>
+      <p style="font-size:13.5px;color:var(--muted);margin-bottom:4px">Share these login credentials with the new admin:</p>
+      <div class="cred-box" id="credBox"></div>
+      <p style="font-size:12px;color:rgba(255,255,255,.35);margin-bottom:16px">⚠️ Tell the admin to change their password after first login.</p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button onclick="resetForm()" style="padding:10px 24px;border-radius:10px;background:var(--gold);color:var(--navy);font-size:13.5px;font-weight:700;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif">+ Create Another</button>
+        <a href="superadmin-dashboard.html" style="padding:10px 24px;border-radius:10px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);color:var(--white);font-size:13.5px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:7px"><i class="bi bi-arrow-left"></i>Back to Dashboard</a>
+      </div>
+    </div>
+
+    <div id="formWrap">
+      <div class="form-layout">
+
+        <!-- ── FORM ── -->
+        <div>
+          <div class="form-card">
+            <div class="fc-hdr">
+              <div class="fc-title"><i class="bi bi-person-plus-fill" style="color:var(--gold)"></i>Admin Details</div>
+            </div>
+            <div class="fc-body">
+
+              <!-- ROLE -->
+              <div class="field-wrap">
+                <label class="field-label">Role <span class="req">*</span> <span style="font-size:11px;font-weight:400;color:var(--muted)">— determines which dashboard they access</span></label>
+                <div class="role-grid">
+                  <div class="role-opt" id="ro_hostel_admin" onclick="pickRole('hostel_admin',this)">
+                    <span class="ro-emoji">🏠</span>
+                    <div><div class="ro-name">Hostel Admin</div><div class="ro-desc">Rooms, bookings & reports</div></div>
+                    <div class="ro-radio"></div>
+                  </div>
+                  <div class="role-opt" id="ro_security" onclick="pickRole('security',this)">
+                    <span class="ro-emoji">👮</span>
+                    <div><div class="ro-name">Security Officer</div><div class="ro-desc">Gate & visitor control</div></div>
+                    <div class="ro-radio"></div>
+                  </div>
+                  <div class="role-opt" id="ro_maintenance" onclick="pickRole('maintenance',this)">
+                    <span class="ro-emoji">🔧</span>
+                    <div><div class="ro-name">Maintenance</div><div class="ro-desc">Complaints & repairs</div></div>
+                    <div class="ro-radio"></div>
+                  </div>
+                  <div class="role-opt" id="ro_super_admin" onclick="pickRole('super_admin',this)">
+                    <span class="ro-emoji">⚙️</span>
+                    <div><div class="ro-name">Super Admin</div><div class="ro-desc">Full system access</div></div>
+                    <div class="ro-radio"></div>
+                  </div>
+                </div>
+                <div class="ferr" id="roleErr"><i class="bi bi-x-circle-fill"></i><span>Please select a role first</span></div>
+              </div>
+
+              <div class="row-2">
+                <div class="field-wrap">
+                  <label class="field-label">Full Name <span class="req">*</span></label>
+                  <div class="input-rel">
+                    <input type="text" class="hms-input" id="fName" placeholder="e.g. Ibrahim Yusuf Sani"/>
+                    <i class="bi bi-person-fill fi"></i>
+                  </div>
+                  <div class="ferr" id="nameErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+                </div>
+                <div class="field-wrap">
+                  <label class="field-label">Phone Number</label>
+                  <div class="input-rel">
+                    <input type="tel" class="hms-input" id="fPhone" placeholder="e.g. 08012345678" maxlength="11"/>
+                    <i class="bi bi-telephone-fill fi"></i>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field-wrap">
+                <label class="field-label">Email Address <span class="req">*</span></label>
+                <div class="input-rel">
+                  <input type="email" class="hms-input" id="fEmail" placeholder="admin@futbabura.edu.ng"/>
+                  <i class="bi bi-envelope-fill fi"></i>
+                </div>
+                <div class="field-hint"><i class="bi bi-info-circle"></i>They will use this to sign in at the admin portal</div>
+                <div class="ferr" id="emailErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+              </div>
+
+              <div class="field-wrap">
+                <label class="field-label">Temporary Password <span class="req">*</span></label>
+                <div class="input-rel">
+                  <input type="text" class="hms-input" id="fPwd" placeholder="Enter or generate a secure password" autocomplete="off"/>
+                  <i class="bi bi-lock-fill fi"></i>
+                  <button class="pwd-eye" type="button" onclick="togglePwdView()"><i class="bi bi-eye-fill" id="pwdIcon"></i></button>
+                </div>
+                <div class="pwd-bar">
+                  <div class="pb-seg" id="pb1"></div><div class="pb-seg" id="pb2"></div>
+                  <div class="pb-seg" id="pb3"></div><div class="pb-seg" id="pb4"></div>
+                </div>
+                <div class="pb-label" id="pbLabel">Enter a password</div>
+                <button class="btn-gen" type="button" onclick="genPwd()">
+                  <i class="bi bi-arrow-repeat"></i>Generate Secure Password
+                </button>
+                <div class="ferr" id="pwdErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+              </div>
+
+              <div class="field-wrap">
+                <label class="field-label">Assign to Hostel Block <span style="font-size:11px;font-weight:400;color:var(--muted)">(Optional)</span></label>
+                <div class="input-rel">
+                  <select class="hms-input hms-select" id="fHostel">
+                    <option value="">No restriction — access all hostels</option>
+                  </select>
+                  <i class="bi bi-building fi"></i>
+                  <span class="sel-arr"><i class="bi bi-chevron-down"></i></span>
+                </div>
+              </div>
+
+              <button class="btn-submit" id="submitBtn" type="button">
+                <span id="submitText">Create Admin Account</span>
+                <i class="bi bi-person-check-fill" id="submitIcon"></i>
+              </button>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ── RIGHT PANEL ── -->
+        <div>
+          <!-- Permissions -->
+          <div class="info-card">
+            <div class="ic-title"><i class="bi bi-info-circle-fill"></i>Role Permissions Guide</div>
+            <div class="perm-item">
+              <div class="pi-row"><span class="pi-emoji">🏠</span><span class="pi-name">Hostel Admin</span></div>
+              <ul class="pi-perms"><li>Manage rooms & availability</li><li>View & process all bookings</li><li>Handle maintenance complaints</li><li>Generate reports & export CSV</li><li>Block/unblock student accounts</li></ul>
+            </div>
+            <div class="perm-item">
+              <div class="pi-row"><span class="pi-emoji">👮</span><span class="pi-name">Security Officer</span></div>
+              <ul class="pi-perms"><li>Verify student QR codes at gate</li><li>Validate visitor digital passes</li><li>View today's expected visitors</li><li>Record access logs</li></ul>
+            </div>
+            <div class="perm-item">
+              <div class="pi-row"><span class="pi-emoji">🔧</span><span class="pi-name">Maintenance Staff</span></div>
+              <ul class="pi-perms"><li>View complaints assigned to them</li><li>Update repair progress status</li><li>Flag unresolved issues</li><li>Access full maintenance history</li></ul>
+            </div>
+            <div class="perm-item">
+              <div class="pi-row"><span class="pi-emoji">⚙️</span><span class="pi-name">Super Admin</span></div>
+              <ul class="pi-perms"><li>Full system access & control</li><li>Create & manage staff accounts</li><li>Configure all system settings</li><li>Access audit logs</li></ul>
+            </div>
+          </div>
+
+          <!-- Existing Admins -->
+          <div class="admins-card">
+            <div class="ac-hdr"><i class="bi bi-shield-fill" style="color:var(--gold)"></i>Existing Admin Accounts</div>
+            <div id="adminsList">
+              <div style="padding:18px"><div class="skeleton" style="height:42px;border-radius:9px;margin-bottom:8px"></div><div class="skeleton" style="height:42px;border-radius:9px"></div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ FIREBASE ══ -->
+<script type="module">
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, query, where, getDocs, setDoc, doc, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const cfg={apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",authDomain:"futb-485e8.firebaseapp.com",projectId:"futb-485e8",storageBucket:"futb-485e8.firebasestorage.app",messagingSenderId:"260966342395",appId:"1:260966342395:web:8a43fd08e01af57c111a5e"};
+  const app=initializeApp(cfg), db=getFirestore(app), auth=getAuth(app);
+  let _saUid="";
+
+  // ── AUTH GUARD ──
+  onAuthStateChanged(auth, async user=>{
+    if(!user){ window.location.href="admin-login.html"; return; }
+    const snap=await getDocs(query(collection(db,"users"),where("uid","==",user.uid)));
+    if(snap.empty){ await signOut(auth); window.location.href="admin-login.html"; return; }
+    const d=snap.docs[0].data();
+    if(d.role!=="super_admin"){ window.location.href="admin-login.html"; return; }
+    _saUid=user.uid;
+    const init=(d.fullName||"SA").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    const el=document.getElementById("sbAva"); if(d.photoURL)el.innerHTML=`<img src="${d.photoURL}"/>`;else el.textContent=init;
+    document.getElementById("sbName").textContent=d.fullName||"Super Admin";
+    await loadPageData();
+  });
+
+  async function loadPageData(){
+    try{
+      const [admSnap,hostelSnap]=await Promise.all([
+        getDocs(query(collection(db,"users"),where("role","!=","student"))),
+        getDocs(collection(db,"hostels")),
+      ]);
+      const admins=admSnap.docs.map(d=>({id:d.id,...d.data()}));
+      document.getElementById("phTotal").textContent=admins.length;
+      document.getElementById("phActive").textContent=admins.filter(a=>a.isActive!==false).length;
+
+      // Hostel options
+      const sel=document.getElementById("fHostel");
+      hostelSnap.forEach(d=>{ const h=d.data(); const o=document.createElement("option"); o.value=d.id; o.textContent=h.name||h.blockName||"Hostel"; sel.appendChild(o); });
+
+      renderAdmins(admins);
+    }catch(e){ console.error(e); }
+  }
+
+  function renderAdmins(admins){
+    const list=document.getElementById("adminsList");
+    if(!admins.length){ list.innerHTML=`<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">No admins yet — create the first one!</div>`; return; }
+    const rm={super_admin:{cls:"ab-super",lbl:"Super",ava:"linear-gradient(135deg,#f5a623,#e8940f)"},hostel_admin:{cls:"ab-hostel",lbl:"Hostel",ava:"linear-gradient(135deg,#c53030,#991b1b)"},security:{cls:"ab-security",lbl:"Security",ava:"linear-gradient(135deg,#3b82f6,#1d4ed8)"},maintenance:{cls:"ab-maintenance",lbl:"Maint.",ava:"linear-gradient(135deg,#22c55e,#16a34a)"}};
+    list.innerHTML=admins.slice(0,7).map(a=>{
+      const r=rm[a.role]||rm.hostel_admin;
+      const init=(a.fullName||"A").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+      return `<div class="ar">
+        <div class="ar-ava" style="background:${r.ava}">${a.photoURL?`<img src="${a.photoURL}" style="width:100%;height:100%;object-fit:cover">`:init}</div>
+        <div><div class="ar-name">${a.fullName||"—"}</div><div class="ar-email">${a.email||""}</div></div>
+        <span class="ar-badge ${r.cls}">${r.lbl}</span>
+      </div>`;
+    }).join("")+(admins.length>7?`<div style="padding:10px 18px;font-size:12px;color:var(--muted);text-align:center">+${admins.length-7} more admins</div>`:"");
+  }
+
+  // ── SUBMIT ──
+  // Exposed on window so the plain <script> can call it
+  window._doCreate = async function(){
+    clearAlert();
+    const role  = window._role;
+    const name  = document.getElementById("fName").value.trim();
+    const email = document.getElementById("fEmail").value.trim().toLowerCase();
+    const phone = document.getElementById("fPhone").value.trim();
+    const pwd   = document.getElementById("fPwd").value.trim();
+    const hostel= document.getElementById("fHostel").value;
+    let ok = true;
+
+    if(!role)    { document.getElementById("roleErr").classList.add("show"); ok=false; }
+    if(!name||name.split(" ").filter(Boolean).length<2){ ferr("fName","nameErr","Enter full name — first and last name"); ok=false; }
+    if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ ferr("fEmail","emailErr","Enter a valid email address"); ok=false; }
+    if(!pwd||pwd.length<8){ ferr("fPwd","pwdErr","Password must be at least 8 characters"); ok=false; }
+    if(!ok) return;
+
+    const btn=document.getElementById("submitBtn");
+    btn.disabled=true;
+    document.getElementById("submitText").textContent="Creating...";
+    document.getElementById("submitIcon").style.display="none";
+    const sp=document.createElement("div"); sp.className="spin"; btn.insertBefore(sp,btn.firstChild);
+
+    try{
+      // Check email duplicate
+      const dup=await getDocs(query(collection(db,"users"),where("email","==",email)));
+      if(!dup.empty){ showAlert("This email is already registered to an existing account.","a-err"); return; }
+
+      // Create Firebase Auth account
+      const cred=await createUserWithEmailAndPassword(auth,email,pwd);
+      const uid=cred.user.uid;
+
+      // Save to Firestore
+      await setDoc(doc(db,"users",uid),{
+        uid, role, fullName:name, email,
+        phone:phone||"", assignedHostel:hostel||null,
+        isActive:true, createdBy:_saUid, createdAt:serverTimestamp(),
+      });
+
+      // Sign out new account + sign back in would lose super admin session
+      // Just sign out the new account - super admin will be prompted to re-login
+      await auth.signOut();
+
+      // Show success card
+      document.getElementById("formWrap").style.display="none";
+      document.getElementById("credBox").innerHTML=`Email: <strong>${email}</strong><br>Password: <strong>${pwd}</strong><br>Role: <strong>${role.replace(/_/g," ")}</strong>`;
+      document.getElementById("successCard").classList.add("show");
+      document.getElementById("gAlert").className="g-alert";
+
+    }catch(e){
+      let msg="Failed to create account. Please try again.";
+      if(e.code==="auth/email-already-in-use") msg="This email is already in use.";
+      else if(e.code==="auth/invalid-email") msg="Invalid email format.";
+      else if(e.code==="auth/weak-password") msg="Password is too weak — use at least 8 characters.";
+      showAlert(msg,"a-err");
+    }finally{
+      btn.disabled=false;
+      document.getElementById("submitText").textContent="Create Admin Account";
+      document.getElementById("submitIcon").style.display="";
+      document.querySelector(".spin")?.remove();
+    }
+  };
+
+  // Sign out listeners
+  ["sideSignOut","sbSignOut"].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener("click",async e=>{ e.preventDefault(); await signOut(auth); window.location.href="admin-login.html"; }); });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- ── PLAIN JS — no module scope issues ── -->
+<script>
+  window._role = "";
+
+  function pickRole(role, el){
+    window._role = role;
+    document.querySelectorAll(".role-opt").forEach(c=>c.classList.remove("selected"));
+    el.classList.add("selected");
+    document.getElementById("roleErr").classList.remove("show");
+  }
+  window.pickRole = pickRole;
+
+  function ferr(inputId, errId, msg){
+    const inp=document.getElementById(inputId); if(inp){inp.classList.add("err");inp.classList.remove("good");}
+    const e=document.getElementById(errId); if(e){e.classList.add("show");e.querySelector("span").textContent=msg;}
+  }
+  ["fName","fEmail","fPwd"].forEach(id=>{
+    document.getElementById(id).addEventListener("input",()=>{
+      document.getElementById(id).classList.remove("err");
+      const m={fName:"nameErr",fEmail:"emailErr",fPwd:"pwdErr"};
+      document.getElementById(m[id])?.classList.remove("show");
+    });
+  });
+
+  function showAlert(msg, cls){
+    const el=document.getElementById("gAlert"); el.className="g-alert show "+cls;
+    const icons={"a-err":"bi-exclamation-circle-fill","a-ok":"bi-check-circle-fill","a-warn":"bi-exclamation-triangle-fill"};
+    document.getElementById("gIcon").className="bi "+(icons[cls]||"bi-info-circle-fill");
+    document.getElementById("gMsg").innerHTML=msg;
+    el.scrollIntoView({behavior:"smooth",block:"nearest"});
+  }
+  function clearAlert(){ document.getElementById("gAlert").className="g-alert"; }
+
+  function genPwd(){
+    const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%";
+    let p=""; for(let i=0;i<12;i++) p+=chars[Math.floor(Math.random()*chars.length)];
+    const inp=document.getElementById("fPwd"); inp.type="text"; inp.value=p;
+    document.getElementById("pwdIcon").className="bi bi-eye-slash-fill";
+    checkPwdBar(p);
+  }
+  window.genPwd = genPwd;
+
+  function togglePwdView(){
+    const inp=document.getElementById("fPwd");
+    inp.type=inp.type==="password"?"text":"password";
+    document.getElementById("pwdIcon").className=inp.type==="password"?"bi bi-eye-fill":"bi bi-eye-slash-fill";
+  }
+  window.togglePwdView=togglePwdView;
+
+  function checkPwdBar(v){
+    const s=[v.length>=8,/[A-Z]/.test(v),/[0-9]/.test(v),/[!@#$%^&*]/.test(v)].filter(Boolean).length;
+    const cols=["","#ef4444","#f59e0b","#3b82f6","#22c55e"],labs=["","Weak","Fair","Good","Strong 🔒"];
+    [1,2,3,4].forEach(i=>document.getElementById("pb"+i).style.background=i<=s?cols[s]:"rgba(255,255,255,.07)");
+    const lbl=document.getElementById("pbLabel"); lbl.textContent=s>0?labs[s]:"Enter a password"; lbl.style.color=cols[s]||"var(--muted)";
+  }
+  document.getElementById("fPwd").addEventListener("input",function(){ checkPwdBar(this.value); });
+
+  // Submit — calls the module function via window
+  document.getElementById("submitBtn").addEventListener("click", function(){
+    if(typeof window._doCreate === "function") window._doCreate();
+    else console.error("_doCreate not ready yet");
+  });
+
+  function resetForm(){
+    window._role="";
+    document.querySelectorAll(".role-opt").forEach(c=>c.classList.remove("selected"));
+    ["fName","fEmail","fPhone","fPwd"].forEach(id=>{ document.getElementById(id).value=""; document.getElementById(id).classList.remove("err","good"); });
+    document.getElementById("fHostel").value="";
+    ["nameErr","emailErr","pwdErr","roleErr"].forEach(id=>document.getElementById(id).classList.remove("show"));
+    [1,2,3,4].forEach(i=>document.getElementById("pb"+i).style.background="rgba(255,255,255,.07)");
+    document.getElementById("pbLabel").textContent="Enter a password";
+    document.getElementById("successCard").classList.remove("show");
+    document.getElementById("formWrap").style.display="";
+    clearAlert();
+  }
+  window.resetForm = resetForm;
+
+  function toggleSb(){ document.getElementById("sidebar").classList.toggle("open"); document.getElementById("sbOverlay").classList.toggle("show"); }
+  window.toggleSb = toggleSb;
+</script>
+</body>
+</html>
