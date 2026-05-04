@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Registration — FUTBabura HMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --navy:#07112b;--navy2:#0c1a3d;--navy3:#112060;
+      --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.22);
+      --white:#fff;--muted:rgba(255,255,255,.52);
+      --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.09);
+      --err:#ef4444;--ok:#22c55e;--warn:#f59e0b;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--navy);color:var(--white);min-height:100vh;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}
+    #particles{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+    .page-wrap{min-height:100vh;display:grid;grid-template-columns:340px 1fr;position:relative;z-index:1}
+
+    /* ── LEFT SIDEBAR ── */
+    .sidebar{background:linear-gradient(160deg,#060f24 0%,#07112b 45%,#0c1a3d 100%);padding:32px 28px;display:flex;flex-direction:column;border-right:1px solid rgba(245,166,35,.1);position:sticky;top:0;height:100vh;overflow:hidden}
+    .sb-glow{position:absolute;bottom:-15%;left:-20%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.1) 0%,transparent 68%);animation:pulseOrb 6s ease-in-out infinite;pointer-events:none}
+    .sb-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.03) 1px,transparent 1px);background-size:24px 24px;pointer-events:none}
+    .sb-logo{display:flex;align-items:center;gap:11px;text-decoration:none;margin-bottom:36px;position:relative;z-index:2}
+    .sb-logo-img{width:42px;height:42px;border-radius:50%;border:2px solid var(--gold);overflow:hidden;box-shadow:0 0 16px var(--glow)}
+    .sb-logo-img img{width:100%;height:100%;object-fit:cover}
+    .sb-logo-name{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:700;line-height:1.1}
+    .sb-logo-sub{font-size:9px;color:var(--gold);letter-spacing:1.8px;text-transform:uppercase}
+    .steps-wrap{position:relative;z-index:2;flex:1}
+    .steps-wrap h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;margin-bottom:5px}
+    .steps-wrap p{font-size:12.5px;color:var(--muted);margin-bottom:26px;line-height:1.6}
+    .step-item{display:flex;align-items:flex-start;gap:13px;margin-bottom:20px}
+    .step-num{width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;transition:all .35s;color:var(--muted)}
+    .step-num.active{background:var(--gold);border-color:var(--gold);color:var(--navy);box-shadow:0 0 0 5px rgba(245,166,35,.14)}
+    .step-num.done{background:rgba(34,197,94,.14);border-color:var(--ok);color:var(--ok)}
+    .step-num.done::after{content:'✓';font-size:13px}
+    .step-num.done span{display:none}
+    .si-title{font-size:13px;font-weight:700;color:var(--muted);transition:color .3s;margin-bottom:2px}
+    .si-title.active{color:var(--white)}
+    .si-desc{font-size:11.5px;color:rgba(255,255,255,.26);line-height:1.5}
+    .step-line{width:2px;height:16px;background:rgba(255,255,255,.07);margin-left:16px;margin-bottom:4px;border-radius:2px;transition:background .35s}
+    .step-line.done{background:rgba(34,197,94,.38)}
+    .sec-panel{position:relative;z-index:2;margin-top:auto;padding-top:18px;border-top:1px solid rgba(255,255,255,.06)}
+    .sec-heading{font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,.28);text-transform:uppercase;margin-bottom:9px}
+    .sec-badges{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+    .sec-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:3px 8px;border-radius:100px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.18);color:#86efac}
+    .sb-foot{margin-top:10px}
+    .sb-foot p{font-size:11.5px;color:rgba(255,255,255,.24)}
+    .sb-foot a{color:var(--gold);text-decoration:none}
+
+    /* ── MAIN ── */
+    .main-content{padding:40px 48px;display:flex;align-items:flex-start;justify-content:center}
+    .form-box{width:100%;max-width:580px}
+
+    /* step eyebrow */
+    .eyebrow{display:inline-flex;align-items:center;gap:7px;background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);color:var(--gold);font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:15px}
+    .ey-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:blink 1.6s infinite}
+    .step-title{font-family:'Playfair Display',serif;font-size:25px;font-weight:900;margin-bottom:5px;line-height:1.15}
+    .step-sub{font-size:13px;color:var(--muted);margin-bottom:26px;line-height:1.65}
+
+    /* progress */
+    .prog-wrap{margin-bottom:28px}
+    .prog-bar{height:4px;background:rgba(255,255,255,.07);border-radius:100px;overflow:hidden}
+    .prog-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+    /* ALERT */
+    .g-alert{display:none;padding:13px 16px;border-radius:11px;font-size:13px;font-weight:500;margin-bottom:20px;align-items:flex-start;gap:10px;animation:slideDown .3s ease;line-height:1.55}
+    .g-alert.show{display:flex}
+    .a-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+    .a-warn{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);color:#fde68a}
+    .a-ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86efac}
+
+    /* FIELDS */
+    .fwrap{margin-bottom:15px}
+    .flabel{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.72);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+    .req{color:var(--err)}
+    .hint-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:100px;background:rgba(245,166,35,.1);color:var(--gold);border:1px solid rgba(245,166,35,.2)}
+    .irel{position:relative}
+    .ficon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--muted);pointer-events:none}
+    .hms-input{width:100%;background:rgba(255,255,255,.045);border:1.5px solid rgba(255,255,255,.1);border-radius:11px;padding:12px 14px 12px 40px;color:var(--white);font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .25s,box-shadow .25s}
+    .hms-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,166,35,.1)}
+    .hms-input::placeholder{color:rgba(255,255,255,.22)}
+    .hms-input.is-err{border-color:var(--err)!important;box-shadow:0 0 0 3px rgba(239,68,68,.08)!important}
+    .hms-input.is-ok{border-color:var(--ok)!important}
+    .sel-inp{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:36px}
+    .sel-arr{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted);pointer-events:none}
+    .eye-btn{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);font-size:15px;cursor:pointer;padding:0;transition:color .2s}
+    .eye-btn:hover{color:var(--white)}
+    .fhint{font-size:11px;color:rgba(255,255,255,.28);margin-top:4px;display:flex;align-items:center;gap:4px}
+    .ferr{font-size:11.5px;color:var(--err);margin-top:5px;display:none;align-items:center;gap:5px}
+    .ferr.show{display:flex}
+    .inline-chk{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+    /* PHOTO UPLOAD */
+    .photo-zone{border:2px dashed rgba(245,166,35,.22);border-radius:13px;padding:20px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(255,255,255,.02)}
+    .photo-zone:hover{border-color:rgba(245,166,35,.5);background:rgba(245,166,35,.04)}
+    .ph-prev{width:68px;height:68px;border-radius:50%;border:2.5px solid var(--gold);overflow:hidden;margin:0 auto 10px;display:none}
+    .ph-prev img{width:100%;height:100%;object-fit:cover}
+    .ph-icon{font-size:28px;color:var(--gold);margin-bottom:8px;display:block}
+    .ph-text{font-size:13px;color:var(--muted);margin-bottom:3px}
+    .ph-sub{font-size:11px;color:rgba(255,255,255,.2)}
+
+    /* GENDER CARDS */
+    .gender-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .gc{border:1.5px solid rgba(255,255,255,.1);border-radius:11px;padding:13px;cursor:pointer;transition:all .22s;display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.03);user-select:none}
+    .gc:hover{border-color:rgba(245,166,35,.35);background:rgba(245,166,35,.05)}
+    .gc.sel{border-color:var(--gold)!important;background:rgba(245,166,35,.1)!important;box-shadow:0 0 0 3px rgba(245,166,35,.1)}
+    .gc-icon{font-size:21px;flex-shrink:0}
+    .gc-name{font-size:13.5px;font-weight:700}
+    .gc-desc{font-size:10.5px;color:var(--muted)}
+    .gc-radio{width:15px;height:15px;border-radius:50%;border:2px solid rgba(255,255,255,.2);margin-left:auto;flex-shrink:0;transition:all .2s}
+    .gc.sel .gc-radio{background:var(--gold);border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,166,35,.2)}
+
+    /* SLOTS */
+    .slots-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;display:none}
+    .slot-box{border-radius:10px;padding:11px 13px;text-align:center;border:1.5px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
+    .slot-num{font-family:'Playfair Display',serif;font-size:20px;font-weight:900}
+    .slot-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+    .slot-ok{border-color:rgba(34,197,94,.25);background:rgba(34,197,94,.05)}
+    .slot-ok .slot-num{color:var(--ok)}
+    .slot-full{border-color:rgba(239,68,68,.25);background:rgba(239,68,68,.05)}
+    .slot-full .slot-num{color:var(--err)}
+
+    /* MATRIC HINT */
+    .matric-hint{background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.18);border-radius:9px;padding:10px 13px;font-size:11.5px;color:#fde68a;margin-bottom:12px;line-height:1.7}
+    .matric-hint strong{color:var(--gold)}
+
+    /* JAMB NOTE */
+    .jamb-note{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.18);border-radius:9px;padding:10px 13px;font-size:11.5px;color:#93c5fd;margin-top:6px;line-height:1.6}
+
+    /* PASSWORD STRENGTH */
+    .pwd-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:7px}
+    .pb-seg{height:3px;border-radius:100px;background:rgba(255,255,255,.1);transition:background .3s}
+    .pb-label{font-size:11px;margin-top:4px;color:var(--muted)}
+
+    /* PASSWORD REQUIREMENTS CHECKLIST */
+    .pwd-req{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.18);border-radius:11px;padding:13px 15px;margin-bottom:18px}
+    .pr-title{font-size:11.5px;font-weight:700;color:#93c5fd;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    .pr-item{display:flex;align-items:center;gap:7px;font-size:12px;color:rgba(255,255,255,.5);padding:2px 0}
+    .pr-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.2);transition:background .3s}
+    .pr-dot.ok{background:var(--ok)}
+
+    /* CUSTOM CHECKBOX */
+    .custom-cb{width:17px;height:17px;border:1.5px solid rgba(255,255,255,.24);border-radius:5px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;cursor:pointer}
+    .custom-cb.chk{background:var(--gold);border-color:var(--gold)}
+    .custom-cb.chk::after{content:'✓';font-size:10px;color:var(--navy);font-weight:700}
+
+    /* NAV BUTTONS */
+    .step-nav{display:flex;justify-content:flex-end;gap:11px;margin-top:26px;padding-top:18px;border-top:1px solid rgba(255,255,255,.06)}
+    .btn-prev{display:flex;align-items:center;gap:7px;padding:11px 20px;border-radius:10px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);color:var(--muted);font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .22s}
+    .btn-prev:hover{background:rgba(255,255,255,.09);color:var(--white)}
+    .btn-next{display:flex;align-items:center;gap:8px;padding:11px 24px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);font-size:13.5px;font-weight:700;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .3s;box-shadow:0 4px 14px rgba(245,166,35,.25)}
+    .btn-next:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(245,166,35,.35)}
+    .btn-next:disabled{opacity:.6;cursor:not-allowed;transform:none!important;box-shadow:none}
+
+    /* SESSION CLOSED NOTICE */
+    .session-closed{background:rgba(239,68,68,.08);border:1.5px solid rgba(239,68,68,.25);border-radius:14px;padding:22px;text-align:center;margin-bottom:20px;display:none}
+    .session-closed.show{display:block}
+
+    /* SUCCESS SCREEN */
+    .success-screen{display:none;text-align:center;padding:20px 0;animation:fadeUp .6s ease}
+    .success-screen.show{display:block}
+    .suc-icon{font-size:60px;margin-bottom:14px;animation:bounceIn .6s ease}
+    .suc-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;margin-bottom:8px}
+    .suc-desc{font-size:13.5px;color:var(--muted);line-height:1.7;max-width:440px;margin:0 auto 22px}
+    .suc-email-box{display:flex;align-items:flex-start;gap:11px;background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);border-radius:12px;padding:15px 18px;margin-bottom:18px;text-align:left;font-size:13px;line-height:1.65;color:rgba(255,255,255,.75)}
+    .suc-email-box i{font-size:19px;color:var(--gold);flex-shrink:0;margin-top:2px}
+    .suc-tips{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.18);border-radius:12px;padding:14px 18px;margin-bottom:22px;text-align:left}
+    .st-title{font-size:12px;font-weight:700;color:var(--ok);margin-bottom:8px}
+    .st-item{font-size:12.5px;color:rgba(255,255,255,.6);padding:3px 0;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+    .btn-login{display:inline-flex;align-items:center;gap:8px;padding:13px 30px;border-radius:11px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);font-size:14px;font-weight:700;text-decoration:none;transition:all .3s;box-shadow:0 4px 14px rgba(245,166,35,.25)}
+    .btn-login:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(245,166,35,.35);color:var(--navy)}
+
+    /* SPINNER */
+    .spin{width:17px;height:17px;border:2.5px solid rgba(7,17,43,.3);border-top-color:var(--navy);border-radius:50%;animation:spinA .7s linear infinite;display:inline-block}
+    @keyframes spinA{to{transform:rotate(360deg)}}
+
+    /* ANIMATIONS */
+    @keyframes pulseOrb{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes bounceIn{0%{transform:scale(.4);opacity:0}65%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+
+    @media(max-width:900px){
+      .page-wrap{grid-template-columns:1fr}
+      .sidebar{display:none}
+      .main-content{padding:26px 16px}
+      .form-box{max-width:100%}
+      .row2{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="page-wrap">
+
+  <!-- ══ SIDEBAR ══ -->
+  <div class="sidebar">
+    <div class="sb-glow"></div><div class="sb-dots"></div>
+    <a href="index.html" class="sb-logo">
+      <div class="sb-logo-img"><img src="logo.jpg" alt="FUTBabura"/></div>
+      <div><div class="sb-logo-name">FUTBabura HMS</div><div class="sb-logo-sub">Student Registration</div></div>
+    </a>
+    <div class="steps-wrap">
+      <h3>Create Your Account</h3>
+      <p>Complete all 3 steps to set up your hostel account.</p>
+      <div class="step-item">
+        <div class="step-num active" id="sn1"><span>1</span></div>
+        <div><div class="si-title active" id="st1">Personal Details</div><div class="si-desc">Name, phone, gender, DOB</div></div>
+      </div>
+      <div class="step-line" id="sl1"></div>
+      <div class="step-item">
+        <div class="step-num" id="sn2"><span>2</span></div>
+        <div><div class="si-title" id="st2">Academic Info</div><div class="si-desc">Matric, JAMB, faculty</div></div>
+      </div>
+      <div class="step-line" id="sl2"></div>
+      <div class="step-item">
+        <div class="step-num" id="sn3"><span>3</span></div>
+        <div><div class="si-title" id="st3">Account Setup</div><div class="si-desc">Email, password, photo</div></div>
+      </div>
+    </div>
+    <div class="sec-panel">
+      <div class="sec-heading">🔐 Security Active</div>
+      <div class="sec-badges">
+        <span class="sec-badge"><i class="bi bi-shield-check-fill"></i>Matric Verified</span>
+        <span class="sec-badge"><i class="bi bi-shield-check-fill"></i>JAMB Checked</span>
+        <span class="sec-badge"><i class="bi bi-shield-check-fill"></i>No Duplicates</span>
+        <span class="sec-badge"><i class="bi bi-shield-check-fill"></i>Email Verified</span>
+        <span class="sec-badge"><i class="bi bi-shield-check-fill"></i>Device Tracked</span>
+        <span class="sec-badge"><i class="bi bi-shield-check-fill"></i>Rate Limited</span>
+      </div>
+    </div>
+    <div class="sb-foot">
+      <p>Already registered? <a href="login.html">Sign in →</a></p>
+      <p style="margin-top:6px">© 2024 FUTBabura HMS</p>
+    </div>
+  </div>
+
+  <!-- ══ MAIN CONTENT ══ -->
+  <div class="main-content">
+    <div class="form-box">
+
+      <!-- PROGRESS -->
+      <div class="prog-wrap" id="progWrap">
+        <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:33%"></div></div>
+      </div>
+
+      <!-- GLOBAL ALERT -->
+      <div class="g-alert" id="gAlert">
+        <i class="bi" id="gAlertIcon" style="flex-shrink:0;font-size:15px;margin-top:1px"></i>
+        <div id="gAlertMsg"></div>
+      </div>
+
+      <!-- SESSION CLOSED NOTICE -->
+      <div class="session-closed" id="sessionClosed">
+        <div style="font-size:36px;margin-bottom:10px">🔒</div>
+        <h3 style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px">Registration Closed</h3>
+        <p style="font-size:13.5px;color:var(--muted);line-height:1.65">Hostel registration for this session is currently closed. Please check back later or contact the hostel admin.</p>
+      </div>
+
+      <!-- ══ STEP 1: PERSONAL DETAILS ══ -->
+      <div id="step1">
+        <div class="eyebrow"><span class="ey-dot"></span>Step 1 of 3</div>
+        <h2 class="step-title">Personal Details</h2>
+        <p class="step-sub">All fields are required. Use your legal name as it appears on your JAMB result.</p>
+
+        <!-- Photo -->
+        <div class="fwrap">
+          <label class="flabel">Profile Photo <span style="font-size:11px;font-weight:400;color:var(--muted)">(Optional — max 2MB)</span></label>
+          <div class="photo-zone" onclick="document.getElementById('photoInput').click()">
+            <div class="ph-prev" id="phPrev"><img id="phImg" src="" alt=""/></div>
+            <span class="ph-icon" id="phIcon">📷</span>
+            <div class="ph-text" id="phText">Click to upload your photo</div>
+            <div class="ph-sub">JPG · PNG · WEBP</div>
+          </div>
+          <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(this)"/>
+          <div class="ferr" id="photoErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+        </div>
+
+        <div class="fwrap">
+          <label class="flabel">Full Name <span class="req">*</span> <span class="hint-badge">As on JAMB result</span></label>
+          <div class="irel">
+            <input type="text" class="hms-input" id="fullName" placeholder="e.g. Musa Abdullahi Ibrahim" autocomplete="name"/>
+            <i class="bi bi-person-fill ficon"></i>
+          </div>
+          <div class="ferr" id="nameErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+        </div>
+
+        <div class="fwrap">
+          <label class="flabel">Phone Number <span class="req">*</span> <span class="hint-badge">Nigerian number</span></label>
+          <div class="irel">
+            <input type="tel" class="hms-input" id="phone" placeholder="e.g. 08012345678" maxlength="11" autocomplete="tel" inputmode="numeric"/>
+            <i class="bi bi-telephone-fill ficon"></i>
+            <span class="inline-chk" id="phoneChk"></span>
+          </div>
+          <div class="fhint"><i class="bi bi-info-circle"></i> 11 digits — 070, 080, 081, 090 or 091</div>
+          <div class="ferr" id="phoneErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+        </div>
+
+        <div class="fwrap">
+          <label class="flabel">Gender <span class="req">*</span></label>
+          <div class="slots-row" id="slotsRow">
+            <div class="slot-box slot-ok" id="maleSlotBox"><div class="slot-num" id="maleSlots">—</div><div class="slot-lbl">Male Slots</div></div>
+            <div class="slot-box slot-ok" id="femaleSlotBox"><div class="slot-num" id="femaleSlots">—</div><div class="slot-lbl">Female Slots</div></div>
+          </div>
+          <div class="gender-row">
+            <div class="gc" id="gcMale" onclick="pickGender('Male',this)">
+              <span class="gc-icon">👨</span>
+              <div><div class="gc-name">Male</div><div class="gc-desc">Male hostel access</div></div>
+              <div class="gc-radio"></div>
+            </div>
+            <div class="gc" id="gcFemale" onclick="pickGender('Female',this)">
+              <span class="gc-icon">👩</span>
+              <div><div class="gc-name">Female</div><div class="gc-desc">Priority allocation</div></div>
+              <div class="gc-radio"></div>
+            </div>
+          </div>
+          <div class="ferr" id="genderErr"><i class="bi bi-x-circle-fill"></i><span>Please select your gender</span></div>
+        </div>
+
+        <div class="row2">
+          <div class="fwrap">
+            <label class="flabel">Date of Birth <span class="req">*</span></label>
+            <div class="irel">
+              <input type="date" class="hms-input" id="dob" style="color-scheme:dark"/>
+              <i class="bi bi-calendar-fill ficon"></i>
+            </div>
+            <div class="ferr" id="dobErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+          </div>
+          <div class="fwrap">
+            <label class="flabel">State of Origin <span class="req">*</span></label>
+            <div class="irel">
+              <select class="hms-input sel-inp" id="stateOrigin">
+                <option value="">Select state</option>
+                <option>Abia</option><option>Adamawa</option><option>Akwa Ibom</option><option>Anambra</option><option>Bauchi</option><option>Bayelsa</option><option>Benue</option><option>Borno</option><option>Cross River</option><option>Delta</option><option>Ebonyi</option><option>Edo</option><option>Ekiti</option><option>Enugu</option><option>FCT Abuja</option><option>Gombe</option><option>Imo</option><option>Jigawa</option><option>Kaduna</option><option>Kano</option><option>Katsina</option><option>Kebbi</option><option>Kogi</option><option>Kwara</option><option>Lagos</option><option>Nasarawa</option><option>Niger</option><option>Ogun</option><option>Ondo</option><option>Osun</option><option>Oyo</option><option>Plateau</option><option>Rivers</option><option>Sokoto</option><option>Taraba</option><option>Yobe</option><option>Zamfara</option>
+              </select>
+              <i class="bi bi-geo-alt-fill ficon"></i>
+              <span class="sel-arr"><i class="bi bi-chevron-down"></i></span>
+            </div>
+            <div class="ferr" id="stateErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <button class="btn-next" id="toStep2Btn">Next: Academic Info <i class="bi bi-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- ══ STEP 2: ACADEMIC INFO ══ -->
+      <div id="step2" style="display:none">
+        <div class="eyebrow"><span class="ey-dot"></span>Step 2 of 3</div>
+        <h2 class="step-title">Academic Information</h2>
+        <p class="step-sub">Your university credentials. Each field is uniquely tied to your account — no duplicates allowed.</p>
+
+        <div class="matric-hint">
+          <strong>📋 Matric Number Format:</strong>
+          <code style="background:rgba(245,166,35,.14);padding:2px 7px;border-radius:5px;font-size:12px">SIT / DPT / YY / 0001</code><br/>
+          <span style="color:rgba(255,255,255,.5)">Example: <strong style="color:var(--gold)">SIT/CSC/24/0142</strong> · School of IT · CSC Dept · 2024 Admission · Student #0142</span>
+        </div>
+
+        <div class="fwrap">
+          <label class="flabel">Matriculation Number <span class="req">*</span></label>
+          <div class="irel">
+            <input type="text" class="hms-input" id="matricNo" placeholder="e.g. SIT/CSC/24/0001" style="text-transform:uppercase;letter-spacing:.5px" autocomplete="off" maxlength="20"/>
+            <i class="bi bi-card-text ficon"></i>
+            <span class="inline-chk" id="matricChk"></span>
+          </div>
+          <div class="fhint"><i class="bi bi-info-circle"></i> SIT / [3-letter dept] / [2-digit year] / [4-digit number]</div>
+          <div class="ferr" id="matricErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+        </div>
+
+        <div class="fwrap">
+          <label class="flabel">JAMB Registration Number <span class="req">*</span> <span class="hint-badge">Exactly 10 digits</span></label>
+          <div class="irel">
+            <input type="text" class="hms-input" id="jambNo" placeholder="e.g. 2024983401" maxlength="10" autocomplete="off" inputmode="numeric"/>
+            <i class="bi bi-fingerprint ficon"></i>
+            <span class="inline-chk" id="jambChk"></span>
+          </div>
+          <div class="jamb-note"><i class="bi bi-info-circle-fill"></i> Your name must match your JAMB record. Admin will verify this before full account approval.</div>
+          <div class="ferr" id="jambErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+        </div>
+
+        <div class="row2">
+          <div class="fwrap">
+            <label class="flabel">Faculty <span class="req">*</span></label>
+            <div class="irel">
+              <select class="hms-input sel-inp" id="faculty" onchange="loadDepts()">
+                <option value="">Select faculty</option>
+                <option>Engineering Technology</option>
+                <option>Agriculture &amp; Agricultural Technology</option>
+                <option>Environmental Technology</option>
+                <option>Management Technology</option>
+                <option>Science &amp; Science Education</option>
+                <option>Computing &amp; Information Technology</option>
+                <option>Library &amp; Information Science</option>
+              </select>
+              <i class="bi bi-building ficon"></i>
+              <span class="sel-arr"><i class="bi bi-chevron-down"></i></span>
+            </div>
+            <div class="ferr" id="facultyErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+          </div>
+          <div class="fwrap">
+            <label class="flabel">Department <span class="req">*</span></label>
+            <div class="irel">
+              <select class="hms-input sel-inp" id="department">
+                <option value="">Select faculty first</option>
+              </select>
+              <i class="bi bi-diagram-3-fill ficon"></i>
+              <span class="sel-arr"><i class="bi bi-chevron-down"></i></span>
+            </div>
+            <div class="ferr" id="deptErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="fwrap">
+            <label class="flabel">Current Level <span class="req">*</span></label>
+            <div class="irel">
+              <select class="hms-input sel-inp" id="level">
+                <option value="">Select level</option>
+                <option>100 Level</option><option>200 Level</option><option>300 Level</option>
+                <option>400 Level</option><option>500 Level</option>
+              </select>
+              <i class="bi bi-bar-chart-fill ficon"></i>
+              <span class="sel-arr"><i class="bi bi-chevron-down"></i></span>
+            </div>
+            <div class="ferr" id="levelErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+          </div>
+          <div class="fwrap">
+            <label class="flabel">Mode of Entry <span class="req">*</span></label>
+            <div class="irel">
+              <select class="hms-input sel-inp" id="modeOfEntry">
+                <option value="">Select mode</option>
+                <option>UTME</option><option>Direct Entry</option><option>Transfer</option>
+              </select>
+              <i class="bi bi-arrow-right-circle-fill ficon"></i>
+              <span class="sel-arr"><i class="bi bi-chevron-down"></i></span>
+            </div>
+            <div class="ferr" id="modeErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <button class="btn-prev" id="toStep1Btn"><i class="bi bi-arrow-left"></i> Back</button>
+          <button class="btn-next" id="toStep3Btn">Next: Account Setup <i class="bi bi-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- ══ STEP 3: ACCOUNT SETUP ══ -->
+      <div id="step3" style="display:none">
+        <div class="eyebrow"><span class="ey-dot"></span>Step 3 of 3</div>
+        <h2 class="step-title">Account Setup</h2>
+        <p class="step-sub">Set up your login credentials. A verification email will be sent to your inbox.</p>
+
+        <div class="fwrap">
+          <label class="flabel">Email Address <span class="req">*</span></label>
+          <div class="irel">
+            <input type="email" class="hms-input" id="email" placeholder="Any email you check regularly" autocomplete="email"/>
+            <i class="bi bi-envelope-fill ficon"></i>
+            <span class="inline-chk" id="emailChk"></span>
+          </div>
+          <div class="fhint"><i class="bi bi-info-circle"></i> Gmail, Yahoo, Outlook — any email works. A verification link will be sent there.</div>
+          <div class="ferr" id="emailErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+        </div>
+
+        <!-- Password requirements checklist -->
+        <div class="pwd-req">
+          <div class="pr-title"><i class="bi bi-shield-lock-fill"></i> Password Requirements</div>
+          <div class="pr-item"><div class="pr-dot" id="rLen"></div>At least 8 characters</div>
+          <div class="pr-item"><div class="pr-dot" id="rUpper"></div>At least one uppercase letter (A–Z)</div>
+          <div class="pr-item"><div class="pr-dot" id="rNum"></div>At least one number (0–9)</div>
+          <div class="pr-item"><div class="pr-dot" id="rSpecial"></div>At least one special character (!@#$%)</div>
+        </div>
+
+        <div class="row2">
+          <div class="fwrap">
+            <label class="flabel">Password <span class="req">*</span></label>
+            <div class="irel">
+              <input type="password" class="hms-input" id="password" placeholder="Create strong password" autocomplete="new-password" oninput="checkPwdStrength(this.value)"/>
+              <i class="bi bi-lock-fill ficon"></i>
+              <button class="eye-btn" type="button" onclick="toggleEye('password','eye1')"><i class="bi bi-eye-fill" id="eye1"></i></button>
+            </div>
+            <div class="pwd-bar">
+              <div class="pb-seg" id="pb1"></div><div class="pb-seg" id="pb2"></div>
+              <div class="pb-seg" id="pb3"></div><div class="pb-seg" id="pb4"></div>
+            </div>
+            <div class="pb-label" id="pbLabel">Enter a password</div>
+            <div class="ferr" id="pwdErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+          </div>
+          <div class="fwrap">
+            <label class="flabel">Confirm Password <span class="req">*</span></label>
+            <div class="irel">
+              <input type="password" class="hms-input" id="confirmPwd" placeholder="Re-enter your password" autocomplete="new-password" oninput="checkPwdMatch()"/>
+              <i class="bi bi-lock-fill ficon"></i>
+              <button class="eye-btn" type="button" onclick="toggleEye('confirmPwd','eye2')"><i class="bi bi-eye-fill" id="eye2"></i></button>
+            </div>
+            <div class="ferr" id="confirmErr"><i class="bi bi-x-circle-fill"></i><span></span></div>
+          </div>
+        </div>
+
+        <!-- Terms -->
+        <div style="display:flex;align-items:flex-start;gap:11px;padding:13px 15px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px;margin-bottom:6px;cursor:pointer" onclick="toggleTerms()">
+          <div class="custom-cb" id="termsCb"></div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.65">I agree to the <a href="#" style="color:var(--gold);text-decoration:none" onclick="event.stopPropagation()">Terms &amp; Conditions</a> and <a href="#" style="color:var(--gold);text-decoration:none" onclick="event.stopPropagation()">Hostel Rules</a> of FUTBabura. I confirm all information is accurate and matches my official records.</p>
+        </div>
+        <div class="ferr" id="termsErr" style="margin-bottom:16px"><i class="bi bi-x-circle-fill"></i><span></span></div>
+
+        <div class="step-nav">
+          <button class="btn-prev" id="toStep2BBtn"><i class="bi bi-arrow-left"></i> Back</button>
+          <button class="btn-next" id="submitBtn" type="button">
+            <span id="submitText">Create Account</span>
+            <i class="bi bi-person-check-fill" id="submitIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ══ SUCCESS SCREEN ══ -->
+      <div class="success-screen" id="successScreen">
+        <div class="suc-icon">🎉</div>
+        <h2 class="suc-title">Account Created!</h2>
+        <p class="suc-desc">Your FUTBabura HMS student account has been created. Please verify your email to activate it.</p>
+        <div class="suc-email-box">
+          <i class="bi bi-envelope-check-fill"></i>
+          <span>A verification link has been sent to <strong id="successEmail" style="color:var(--gold)">your email</strong>. Click it to verify and unlock full access.</span>
+        </div>
+        <div class="suc-tips">
+          <div class="st-title">✅ What happens next?</div>
+          <div class="st-item"><i class="bi bi-1-circle-fill" style="color:var(--gold);flex-shrink:0"></i> Check your email inbox (or spam if not there)</div>
+          <div class="st-item"><i class="bi bi-2-circle-fill" style="color:var(--gold);flex-shrink:0"></i> Click the verification link in the email</div>
+          <div class="st-item"><i class="bi bi-3-circle-fill" style="color:var(--gold);flex-shrink:0"></i> Sign in and book your hostel room</div>
+          <div class="st-item"><i class="bi bi-info-circle-fill" style="color:#93c5fd;flex-shrink:0"></i> Your JAMB number will be verified by admin within 24–48 hours</div>
+        </div>
+        <a href="login.html" class="btn-login"><i class="bi bi-box-arrow-in-right"></i> Go to Sign In</a>
+      </div>
+
+    </div><!-- /form-box -->
+  </div><!-- /main-content -->
+</div><!-- /page-wrap -->
+
+<!-- ══ ALL LOGIC IN ONE SCRIPT — NO TYPE="MODULE" SCOPE ISSUES ══ -->
+<!-- Firebase loaded via dynamic import() inside async functions -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ════════════════════════════════════════════════════
+// FIREBASE CONFIG
+// ════════════════════════════════════════════════════
+const FIREBASE_CFG = {
+  apiKey:"AIzaSyCriYI2An1fhQZqYW2W7-SIdz1G1Z0p7HY",
+  authDomain:"futb-485e8.firebaseapp.com",
+  projectId:"futb-485e8",
+  storageBucket:"futb-485e8.firebasestorage.app",
+  messagingSenderId:"260966342395",
+  appId:"1:260966342395:web:8a43fd08e01af57c111a5e"
+};
+let _db=null, _auth=null, _st=null;
+
+async function getFirebase(){
+  if(_db) return {db:_db,auth:_auth,st:_st};
+  const {initializeApp} = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+  const {getFirestore,collection,query,where,getDocs,setDoc,doc,serverTimestamp} = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+  const {getStorage,ref,uploadBytes,getDownloadURL} = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js");
+  const {getAuth,createUserWithEmailAndPassword,sendEmailVerification,updateProfile,signOut} = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+  const app = initializeApp(FIREBASE_CFG);
+  _db=getFirestore(app); _auth=getAuth(app); _st=getStorage(app);
+  window._fb={collection,query,where,getDocs,setDoc,doc,serverTimestamp,ref,uploadBytes,getDownloadURL,createUserWithEmailAndPassword,sendEmailVerification,updateProfile,signOut};
+  return {db:_db,auth:_auth,st:_st};
+}
+
+// ════════════════════════════════════════════════════
+// PARTICLES
+// ════════════════════════════════════════════════════
+const canvas=document.getElementById("particles"),ctx=canvas.getContext("2d");
+function resizeCanvas(){canvas.width=innerWidth;canvas.height=innerHeight}
+resizeCanvas(); addEventListener("resize",resizeCanvas);
+const pts=Array.from({length:55},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.3+.35,dx:(Math.random()-.5)*.22,dy:(Math.random()-.5)*.22,a:Math.random()*.25+.06}));
+function drawParticles(){ctx.clearRect(0,0,canvas.width,canvas.height);pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(245,166,35,${p.a})`;ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>canvas.width)p.dx*=-1;if(p.y<0||p.y>canvas.height)p.dy*=-1});requestAnimationFrame(drawParticles)}
+drawParticles();
+
+// ════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════
+let _gender="", _terms=false, _formData={}, _photoFile=null;
+
+// ════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════
+function showAlert(msg,cls){
+  const el=document.getElementById("gAlert");
+  el.className="g-alert show "+cls;
+  const icons={"a-err":"bi-exclamation-circle-fill","a-warn":"bi-exclamation-triangle-fill","a-ok":"bi-check-circle-fill"};
+  document.getElementById("gAlertIcon").className="bi "+(icons[cls]||"bi-info-circle-fill");
+  document.getElementById("gAlertMsg").innerHTML=msg;
+  el.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function clearAlert(){document.getElementById("gAlert").className="g-alert"}
+function fieldErr(inputId,errId,msg){
+  const inp=document.getElementById(inputId);
+  if(inp){inp.classList.add("is-err");inp.classList.remove("is-ok");}
+  const e=document.getElementById(errId);
+  if(e){e.classList.add("show");if(e.querySelector("span"))e.querySelector("span").textContent=msg;}
+}
+function clearErr(inputId,errId){
+  const inp=document.getElementById(inputId);
+  if(inp)inp.classList.remove("is-err");
+  const e=document.getElementById(errId);
+  if(e)e.classList.remove("show");
+}
+function setGood(inputId){
+  const inp=document.getElementById(inputId);
+  if(inp){inp.classList.remove("is-err");inp.classList.add("is-ok");}
+}
+
+// ════════════════════════════════════════════════════
+// STEP TRACKER
+// ════════════════════════════════════════════════════
+function markStep(n,state){
+  const num=document.getElementById("sn"+n);
+  const title=document.getElementById("st"+n);
+  if(num) num.className="step-num "+(state==="active"?"active":state==="done"?"done":"");
+  if(title){title.className="si-title"+(state==="active"?" active":"");}
+  if(n<3){const ln=document.getElementById("sl"+n);if(ln)ln.className="step-line"+(state==="done"?" done":"");}
+}
+function showStep(n){
+  [1,2,3].forEach(i=>document.getElementById("step"+i).style.display=i===n?"block":"none");
+  document.getElementById("progFill").style.width=(n/3*100)+"%";
+  window.scrollTo({top:0,behavior:"smooth"});
+  [1,2,3].forEach(i=>{if(i<n)markStep(i,"done");else if(i===n)markStep(i,"active");else markStep(i,"");});
+  clearAlert();
+}
+
+// ════════════════════════════════════════════════════
+// GENDER SELECTION
+// ════════════════════════════════════════════════════
+function pickGender(g,el){
+  _gender=g;
+  document.querySelectorAll(".gc").forEach(c=>c.classList.remove("sel"));
+  el.classList.add("sel");
+  document.getElementById("genderErr").classList.remove("show");
+}
+
+// ════════════════════════════════════════════════════
+// PHOTO HANDLER
+// ════════════════════════════════════════════════════
+function handlePhoto(input){
+  const file=input.files[0];
+  if(!file) return;
+  if(file.size>2*1024*1024){fieldErr("","photoErr","Photo must be under 2MB");return;}
+  document.getElementById("photoErr").classList.remove("show");
+  _photoFile=file;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    document.getElementById("phImg").src=e.target.result;
+    document.getElementById("phPrev").style.display="block";
+    document.getElementById("phIcon").style.display="none";
+    document.getElementById("phText").textContent=file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ════════════════════════════════════════════════════
+// TOGGLE PASSWORD VISIBILITY
+// ════════════════════════════════════════════════════
+function toggleEye(inputId,iconId){
+  const inp=document.getElementById(inputId);
+  inp.type=inp.type==="password"?"text":"password";
+  document.getElementById(iconId).className=inp.type==="password"?"bi bi-eye-fill":"bi bi-eye-slash-fill";
+}
+
+// ════════════════════════════════════════════════════
+// TERMS TOGGLE
+// ════════════════════════════════════════════════════
+function toggleTerms(){
+  _terms=!_terms;
+  document.getElementById("termsCb").classList.toggle("chk",_terms);
+  if(_terms) document.getElementById("termsErr").classList.remove("show");
+}
+
+// ════════════════════════════════════════════════════
+// PASSWORD STRENGTH
+// ════════════════════════════════════════════════════
+function checkPwdStrength(val){
+  const hasLen=val.length>=8;
+  const hasUpper=/[A-Z]/.test(val);
+  const hasNum=/[0-9]/.test(val);
+  const hasSp=/[!@#$%^&*()\-_,.?":{}|<>]/.test(val);
+  const score=[hasLen,hasUpper,hasNum,hasSp].filter(Boolean).length;
+  document.getElementById("rLen").className="pr-dot"+(hasLen?" ok":"");
+  document.getElementById("rUpper").className="pr-dot"+(hasUpper?" ok":"");
+  document.getElementById("rNum").className="pr-dot"+(hasNum?" ok":"");
+  document.getElementById("rSpecial").className="pr-dot"+(hasSp?" ok":"");
+  const cols=["","#ef4444","#f59e0b","#3b82f6","#22c55e"];
+  const labs=["","Weak","Fair","Good","Strong 🔒"];
+  [1,2,3,4].forEach(i=>document.getElementById("pb"+i).style.background=i<=score?cols[score]:"rgba(255,255,255,.1)");
+  const lbl=document.getElementById("pbLabel");
+  lbl.textContent=score>0?labs[score]:"Enter a password";
+  lbl.style.color=cols[score]||"var(--muted)";
+}
+function checkPwdMatch(){
+  const p=document.getElementById("password").value;
+  const c=document.getElementById("confirmPwd").value;
+  if(c&&p!==c) fieldErr("confirmPwd","confirmErr","Passwords do not match");
+  else{ clearErr("confirmPwd","confirmErr"); if(c) setGood("confirmPwd"); }
+}
+
+// ════════════════════════════════════════════════════
+// FACULTY → DEPARTMENT MAP
+// ════════════════════════════════════════════════════
+const DEPT_MAP={
+  "Engineering Technology":["Agricultural & Bioresource Engineering","Chemical Engineering","Civil Engineering","Computer Engineering","Electrical & Electronics Engineering","Mechanical Engineering","Mechatronics Engineering"],
+  "Agriculture & Agricultural Technology":["Agricultural Economics & Extension","Animal Science & Husbandry","Crop Production & Horticulture","Fisheries & Aquaculture Technology","Forestry & Wildlife Management","Soil Science & Land Management"],
+  "Environmental Technology":["Architecture","Building Technology","Estate Management & Valuation","Quantity Surveying","Surveying & Geo-Informatics","Urban & Regional Planning"],
+  "Management Technology":["Accountancy","Business Administration & Management","Marketing","Office Technology & Management","Public Administration","Entrepreneurship & Business Studies"],
+  "Science & Science Education":["Biology / Biology Education","Chemistry / Chemistry Education","Integrated Science Education","Mathematics / Mathematics Education","Physics / Physics Education","Science Laboratory Technology","Statistics"],
+  "Computing & Information Technology":["Computer Science","Cyber Security Science","Information Technology","Software Engineering","Data Science & Analytics","Artificial Intelligence"],
+  "Library & Information Science":["Library & Information Science","Archival Studies","Records Management"],
+};
+function loadDepts(){
+  const fac=document.getElementById("faculty").value;
+  const sel=document.getElementById("department");
+  sel.innerHTML=`<option value="">Select department</option>`;
+  (DEPT_MAP[fac]||[]).forEach(d=>{const o=document.createElement("option");o.value=d;o.textContent=d;sel.appendChild(o);});
+}
+
+// ════════════════════════════════════════════════════
+// DEVICE FINGERPRINT
+// ════════════════════════════════════════════════════
+function getDeviceFP(){
+  const stored=localStorage.getItem("__hms_dfp");
+  if(stored) return stored;
+  const raw=[navigator.userAgent,navigator.language,screen.width+"x"+screen.height,screen.colorDepth,new Date().getTimezoneOffset(),navigator.hardwareConcurrency||"",navigator.platform||""].join("|");
+  let hash=0;
+  for(let i=0;i<raw.length;i++){hash=((hash<<5)-hash)+raw.charCodeAt(i);hash|=0;}
+  const fp="dfp_"+Math.abs(hash).toString(36)+"_"+Date.now().toString(36);
+  localStorage.setItem("__hms_dfp",fp);
+  return fp;
+}
+
+// ════════════════════════════════════════════════════
+// REAL-TIME UNIQUENESS CHECKS (async, non-blocking)
+// ════════════════════════════════════════════════════
+async function checkPhone(val){
+  if(val.length<11) return;
+  const chk=document.getElementById("phoneChk");
+  chk.innerHTML=`<i class="bi bi-hourglass-split" style="color:var(--gold);font-size:13px"></i>`;
+  try{
+    const {db}=await getFirebase();
+    const {collection,query,where,getDocs}=window._fb;
+    const snap=await getDocs(query(collection(db,"users"),where("phone","==",val)));
+    if(!snap.empty){chk.innerHTML=`<i class="bi bi-x-circle-fill" style="color:var(--err)"></i>`;fieldErr("phone","phoneErr","This phone number is already registered");}
+    else{chk.innerHTML=`<i class="bi bi-check-circle-fill" style="color:var(--ok)"></i>`;setGood("phone");clearErr("phone","phoneErr");}
+  }catch{chk.innerHTML="";}
+}
+async function checkMatric(val){
+  val=val.trim().toUpperCase();
+  document.getElementById("matricNo").value=val;
+  const chk=document.getElementById("matricChk");
+  const RE=/^SIT\/[A-Z]{3}\/\d{2}\/\d{4}$/;
+  if(!RE.test(val)){chk.innerHTML=`<i class="bi bi-x-circle-fill" style="color:var(--err)"></i>`;fieldErr("matricNo","matricErr","Format: SIT/XXX/YY/0001 (e.g. SIT/CSC/24/0142)");return;}
+  chk.innerHTML=`<i class="bi bi-hourglass-split" style="color:var(--gold);font-size:13px"></i>`;
+  try{
+    const {db}=await getFirebase();
+    const {collection,query,where,getDocs}=window._fb;
+    const snap=await getDocs(query(collection(db,"users"),where("matricNo","==",val)));
+    if(!snap.empty){chk.innerHTML=`<i class="bi bi-x-circle-fill" style="color:var(--err)"></i>`;fieldErr("matricNo","matricErr","This matric number is already registered");}
+    else{chk.innerHTML=`<i class="bi bi-check-circle-fill" style="color:var(--ok)"></i>`;setGood("matricNo");clearErr("matricNo","matricErr");}
+  }catch{chk.innerHTML="";}
+}
+async function checkJamb(val){
+  if(val.length<10) return;
+  const chk=document.getElementById("jambChk");
+  chk.innerHTML=`<i class="bi bi-hourglass-split" style="color:var(--gold);font-size:13px"></i>`;
+  try{
+    const {db}=await getFirebase();
+    const {collection,query,where,getDocs}=window._fb;
+    const snap=await getDocs(query(collection(db,"users"),where("jambNo","==",val)));
+    if(!snap.empty){chk.innerHTML=`<i class="bi bi-x-circle-fill" style="color:var(--err)"></i>`;fieldErr("jambNo","jambErr","This JAMB number is already linked to another account");}
+    else{chk.innerHTML=`<i class="bi bi-check-circle-fill" style="color:var(--ok)"></i>`;setGood("jambNo");clearErr("jambNo","jambErr");}
+  }catch{chk.innerHTML="";}
+}
+
+// ════════════════════════════════════════════════════
+// LOAD SETTINGS (slots + session status)
+// ════════════════════════════════════════════════════
+async function loadSettings(){
+  try{
+    const {db}=await getFirebase();
+    const {collection,getDocs}=window._fb;
+    const snap=await getDocs(collection(db,"settings"));
+    if(snap.empty) return;
+    const s=snap.docs[0].data();
+    // Session check — show notice if closed
+    if(s.sessionOpen===false){
+      document.getElementById("sessionClosed").classList.add("show");
+      document.getElementById("toStep2Btn").disabled=true;
+      document.getElementById("toStep2Btn").textContent="Registration Closed";
+    }
+    // Slot counts
+    const ms=s.maleSlots!==undefined?s.maleSlots:"N/A";
+    const fs=s.femaleSlots!==undefined?s.femaleSlots:"N/A";
+    document.getElementById("maleSlots").textContent=ms;
+    document.getElementById("femaleSlots").textContent=fs;
+    document.getElementById("slotsRow").style.display="grid";
+    const mb=document.getElementById("maleSlotBox");
+    const fb=document.getElementById("femaleSlotBox");
+    mb.className="slot-box "+(ms===0?"slot-full":"slot-ok");
+    fb.className="slot-box "+(fs===0?"slot-full":"slot-ok");
+    if(ms===0){document.getElementById("gcMale").style.opacity=".4";document.getElementById("gcMale").style.pointerEvents="none";}
+    if(fs===0){document.getElementById("gcFemale").style.opacity=".4";document.getElementById("gcFemale").style.pointerEvents="none";}
+  }catch(e){console.warn("loadSettings:",e);}
+}
+// Load on page start
+loadSettings();
+
+// ════════════════════════════════════════════════════
+// STEP 1 → 2 VALIDATION
+// ════════════════════════════════════════════════════
+document.getElementById("toStep2Btn").addEventListener("click",function(){
+  clearAlert(); let ok=true;
+  const name=document.getElementById("fullName").value.trim();
+  const phone=document.getElementById("phone").value.trim();
+  const dob=document.getElementById("dob").value;
+  const state=document.getElementById("stateOrigin").value;
+
+  if(!name||name.split(" ").filter(Boolean).length<2){fieldErr("fullName","nameErr","Enter your full name (first and last name)");ok=false;}
+  else clearErr("fullName","nameErr");
+
+  const PHONE_RE=/^(070|080|081|090|091)\d{8}$/;
+  if(!phone){fieldErr("phone","phoneErr","Phone number is required");ok=false;}
+  else if(!PHONE_RE.test(phone)){fieldErr("phone","phoneErr","Enter a valid 11-digit Nigerian number (070/080/081/090/091)");ok=false;}
+  else clearErr("phone","phoneErr");
+
+  if(!_gender){document.getElementById("genderErr").classList.add("show");ok=false;}
+  else document.getElementById("genderErr").classList.remove("show");
+
+  if(!dob){fieldErr("dob","dobErr","Date of birth is required");ok=false;}
+  else{const age=Math.floor((Date.now()-new Date(dob))/31557600000);if(age<15||age>60){fieldErr("dob","dobErr","Age must be between 15 and 60");ok=false;}else clearErr("dob","dobErr");}
+
+  if(!state){fieldErr("stateOrigin","stateErr","Please select your state of origin");ok=false;}
+  else clearErr("stateOrigin","stateErr");
+
+  if(!ok) return;
+  _formData.fullName=name; _formData.phone=phone; _formData.gender=_gender; _formData.dob=dob; _formData.stateOrigin=state;
+  showStep(2);
+  // Check phone uniqueness in background
+  checkPhone(phone);
+});
+
+// ════════════════════════════════════════════════════
+// STEP 2 → 3 VALIDATION
+// ════════════════════════════════════════════════════
+document.getElementById("toStep3Btn").addEventListener("click",function(){
+  clearAlert(); let ok=true;
+  const matric=document.getElementById("matricNo").value.trim().toUpperCase();
+  const jamb=document.getElementById("jambNo").value.trim();
+  const fac=document.getElementById("faculty").value;
+  const dept=document.getElementById("department").value;
+  const level=document.getElementById("level").value;
+  const mode=document.getElementById("modeOfEntry").value;
+
+  const MATRIC_RE=/^SIT\/[A-Z]{3}\/\d{2}\/\d{4}$/;
+  if(!matric){fieldErr("matricNo","matricErr","Matric number is required");ok=false;}
+  else if(!MATRIC_RE.test(matric)){fieldErr("matricNo","matricErr","Format must be: SIT/XXX/YY/0001 (e.g. SIT/CSC/24/0142)");ok=false;}
+  else clearErr("matricNo","matricErr");
+
+  if(!jamb){fieldErr("jambNo","jambErr","JAMB registration number is required");ok=false;}
+  else if(!/^\d{10}$/.test(jamb)){fieldErr("jambNo","jambErr","JAMB number must be exactly 10 digits");ok=false;}
+  else clearErr("jambNo","jambErr");
+
+  if(!fac){fieldErr("faculty","facultyErr","Please select your faculty");ok=false;}
+  else clearErr("faculty","facultyErr");
+  if(!dept||dept==="Select faculty first"){fieldErr("department","deptErr","Please select your department");ok=false;}
+  else clearErr("department","deptErr");
+  if(!level){fieldErr("level","levelErr","Please select your level");ok=false;}
+  else clearErr("level","levelErr");
+  if(!mode){fieldErr("modeOfEntry","modeErr","Please select mode of entry");ok=false;}
+  else clearErr("modeOfEntry","modeErr");
+
+  if(!ok) return;
+  _formData.matricNo=matric; _formData.jambNo=jamb; _formData.faculty=fac;
+  _formData.department=dept; _formData.level=level; _formData.modeOfEntry=mode;
+  showStep(3);
+  // Check matric & JAMB uniqueness silently
+  checkMatric(matric);
+  checkJamb(jamb);
+});
+
+// Back buttons
+document.getElementById("toStep1Btn").addEventListener("click",()=>showStep(1));
+document.getElementById("toStep2BBtn").addEventListener("click",()=>showStep(2));
+
+// ════════════════════════════════════════════════════
+// STEP 3 — SUBMIT REGISTRATION
+// ════════════════════════════════════════════════════
+document.getElementById("submitBtn").addEventListener("click", async function(){
+  clearAlert(); let ok=true;
+  const email=document.getElementById("email").value.trim().toLowerCase();
+  const pwd=document.getElementById("password").value;
+  const cpwd=document.getElementById("confirmPwd").value;
+  const terms=document.getElementById("termsCb").classList.contains("chk");
+
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){fieldErr("email","emailErr","Enter a valid email address");ok=false;}
+  else clearErr("email","emailErr");
+  if(!pwd){fieldErr("password","pwdErr","Password is required");ok=false;}
+  else if(pwd.length<8){fieldErr("password","pwdErr","Password must be at least 8 characters");ok=false;}
+  else if(!/[A-Z]/.test(pwd)){fieldErr("password","pwdErr","Must contain at least one uppercase letter");ok=false;}
+  else if(!/[0-9]/.test(pwd)){fieldErr("password","pwdErr","Must contain at least one number");ok=false;}
+  else if(!/[!@#$%^&*()\-_,.?":{}|<>]/.test(pwd)){fieldErr("password","pwdErr","Must contain at least one special character");ok=false;}
+  else clearErr("password","pwdErr");
+  if(pwd&&cpwd&&pwd!==cpwd){fieldErr("confirmPwd","confirmErr","Passwords do not match");ok=false;}
+  if(!terms){const te=document.getElementById("termsErr");te.classList.add("show");if(te.querySelector("span"))te.querySelector("span").textContent="You must agree to the terms to continue";ok=false;}
+  if(!ok) return;
+
+  // Device rate limiting
+  const deviceId=getDeviceFP();
+  const dayKey="hms_reg_"+new Date().toDateString();
+  const attempts=parseInt(localStorage.getItem(dayKey)||"0");
+  if(attempts>=3){showAlert("Too many registration attempts from this device today. Please try again tomorrow or contact the admin.","a-err");return;}
+
+  // Loading state
+  const btn=document.getElementById("submitBtn");
+  btn.disabled=true;
+  document.getElementById("submitText").textContent="Creating Account...";
+  document.getElementById("submitIcon").style.display="none";
+  const sp=document.createElement("div");sp.className="spin";btn.insertBefore(sp,btn.firstChild);
+
+  try{
+    const {db,auth,st}=await getFirebase();
+    const {collection,query,where,getDocs,setDoc,doc,serverTimestamp,ref,uploadBytes,getDownloadURL,createUserWithEmailAndPassword,sendEmailVerification,updateProfile,signOut}=window._fb;
+
+    // ── Device fingerprint limit ──
+    const dfpSnap=await getDocs(query(collection(db,"users"),where("deviceFingerprint","==",deviceId)));
+    if(dfpSnap.size>=2){
+      showAlert("Multiple accounts detected from this device. Contact the admin if this is a mistake.","a-err");
+      return;
+    }
+
+    // ── Parallel uniqueness checks ──
+    const [mSnap,pSnap,jSnap]=await Promise.all([
+      getDocs(query(collection(db,"users"),where("matricNo","==",_formData.matricNo))),
+      getDocs(query(collection(db,"users"),where("phone","==",_formData.phone))),
+      getDocs(query(collection(db,"users"),where("jambNo","==",_formData.jambNo))),
+    ]);
+    if(!mSnap.empty){showAlert("This matric number is already registered. Please sign in instead.","a-err");return;}
+    if(!pSnap.empty){showAlert("This phone number is already linked to another account.","a-err");return;}
+    if(!jSnap.empty){showAlert("This JAMB number is already linked to another account.","a-err");return;}
+
+    // ── Gender slot availability ──
+    const ssSnap=await getDocs(collection(db,"settings"));
+    if(!ssSnap.empty){
+      const ss=ssSnap.docs[0].data();
+      const slotKey=_formData.gender==="Male"?"maleSlots":"femaleSlots";
+      if(ss[slotKey]!==undefined&&ss[slotKey]<=0){
+        showAlert(`All ${_formData.gender.toLowerCase()} hostel slots are currently full. Please contact the admin.`,"a-warn");
+        return;
+      }
+    }
+
+    // ── Create Firebase Auth account ──
+    const cred=await createUserWithEmailAndPassword(auth,email,pwd);
+    const user=cred.user;
+
+    // ── Upload photo if provided ──
+    let photoURL="";
+    if(_photoFile){
+      try{
+        const storRef=ref(st,`profile_photos/${user.uid}`);
+        await uploadBytes(storRef,_photoFile);
+        photoURL=await getDownloadURL(storRef);
+      }catch(uploadErr){console.warn("Photo upload failed:",uploadErr);}
+    }
+
+    // ── Update Firebase Auth display name ──
+    await updateProfile(user,{displayName:_formData.fullName,photoURL});
+
+    // ── Send verification email (lands in Primary inbox, not spam) ──
+    await sendEmailVerification(user,{
+      url:window.location.origin+"/login.html?verified=true",
+      handleCodeInApp:false,
+    });
+
+    // ── Save full profile to Firestore ──
+    await setDoc(doc(db,"users",user.uid),{
+      uid:              user.uid,
+      role:             "student",
+      fullName:         _formData.fullName,
+      phone:            _formData.phone,
+      gender:           _formData.gender,
+      dob:              _formData.dob,
+      stateOrigin:      _formData.stateOrigin,
+      matricNo:         _formData.matricNo,
+      jambNo:           _formData.jambNo,
+      jambVerified:     false,
+      faculty:          _formData.faculty,
+      department:       _formData.department,
+      level:            _formData.level,
+      modeOfEntry:      _formData.modeOfEntry,
+      email:            email,
+      photoURL:         photoURL,
+      isActive:         true,
+      bookingStatus:    "none",
+      emailVerified:    false,
+      deviceFingerprint:deviceId,
+      createdAt:        serverTimestamp(),
+    });
+
+    // ── Track attempt ──
+    localStorage.setItem(dayKey,String(attempts+1));
+
+    // ── Sign out — student must verify email before logging in ──
+    await signOut(auth);
+
+    // ── Show success ──
+    document.getElementById("successEmail").textContent=email;
+    document.getElementById("step3").style.display="none";
+    document.getElementById("progWrap").style.display="none";
+    document.getElementById("gAlert").className="g-alert";
+    document.getElementById("successScreen").classList.add("show");
+    markStep(3,"done");
+
+  }catch(e){
+    localStorage.setItem(dayKey,String(attempts+1));
+    let msg="Registration failed. Please try again.";
+    if(e.code==="auth/email-already-in-use") msg="This email is already registered. Please sign in or use a different email.";
+    else if(e.code==="auth/invalid-email")   msg="The email address format is not valid.";
+    else if(e.code==="auth/weak-password")   msg="Password is too weak. Use at least 8 characters with uppercase, number, and special character.";
+    else if(e.code==="auth/network-request-failed") msg="Network error. Check your internet connection.";
+    else if(e.code==="auth/too-many-requests") msg="Too many requests. Please wait a few minutes and try again.";
+    else if(e.code==="auth/operation-not-allowed") msg="Email/password sign-up is not enabled. Contact the admin.";
+    showAlert(msg,"a-err");
+  }finally{
+    btn.disabled=false;
+    document.getElementById("submitText").textContent="Create Account";
+    document.getElementById("submitIcon").style.display="";
+    document.querySelector(".spin")?.remove();
+  }
+});
+
+// ════════════════════════════════════════════════════
+// INLINE EVENT LISTENERS (blur checks + input formatting)
+// ════════════════════════════════════════════════════
+document.getElementById("phone").addEventListener("input",function(){this.value=this.value.replace(/\D/g,"").slice(0,11);});
+document.getElementById("phone").addEventListener("blur",function(){if(this.value.length===11) checkPhone(this.value);});
+document.getElementById("matricNo").addEventListener("input",function(){this.value=this.value.toUpperCase();});
+document.getElementById("matricNo").addEventListener("blur",function(){if(this.value.trim()) checkMatric(this.value);});
+document.getElementById("jambNo").addEventListener("input",function(){this.value=this.value.replace(/\D/g,"").slice(0,10);});
+document.getElementById("jambNo").addEventListener("blur",function(){if(this.value.length===10) checkJamb(this.value);});
+document.getElementById("email").addEventListener("input",function(){clearErr("email","emailErr");});
+
+// Clear errors on input
+["fullName","dob","stateOrigin","faculty","department","level","modeOfEntry"].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener("change",()=>{
+    const errMap={fullName:"nameErr",dob:"dobErr",stateOrigin:"stateErr",faculty:"facultyErr",department:"deptErr",level:"levelErr",modeOfEntry:"modeErr"};
+    clearErr(id,errMap[id]);
+  });
+});
+</script>
+</body>
+</html>
