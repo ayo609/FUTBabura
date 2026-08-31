@@ -13,7 +13,7 @@
       --gold:#f5a623;--gold2:#e8940f;--glow:rgba(245,166,35,.22);
       --white:#fff;--muted:rgba(255,255,255,.52);
       --card:rgba(255,255,255,.042);--border:rgba(255,255,255,.09);
-      --err:#ef4444;--ok:#22c55e;--warn:#f59e0b;
+      --err:#ef4444;--ok:#22c55e;--warn:#f59e0b;--info:#3b82f6;
       --radius:14px;
     }
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -111,6 +111,21 @@
     .custom-cb{width:17px;height:17px;border:1.5px solid rgba(255,255,255,.25);border-radius:5px;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
     .custom-cb.checked{background:var(--gold);border-color:var(--gold)}
     .custom-cb.checked::after{content:'✓';font-size:10px;color:var(--navy);font-weight:700}
+
+    /* Toast Notifications */
+    .toast-notification{background:#0c1a3d;border:1px solid var(--border);border-radius:12px;padding:14px 18px;min-width:280px;max-width:380px;display:flex;align-items:center;gap:12px;font-size:13px;box-shadow:0 12px 36px rgba(0,0,0,.5);animation:toastIn .35s ease;position:relative;overflow:hidden}
+    .toast-notification::before{content:'';position:absolute;top:0;left:0;bottom:0;width:4px}
+    .toast-success::before{background:var(--ok)}
+    .toast-error::before{background:var(--err)}
+    .toast-warning::before{background:var(--warn)}
+    .toast-info::before{background:var(--info)}
+    .toast-icon{font-size:20px;flex-shrink:0}
+    .toast-close{margin-left:auto;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0}
+    .toast-close:hover{color:var(--white)}
+    .toast-removing{animation:toastOut .3s ease forwards}
+
+    @keyframes toastIn{from{opacity:0;transform:translateX(100px)}to{opacity:1;transform:translateX(0)}}
+    @keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(100px)}}
     @keyframes pulseOrb{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.07)}}
     @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -119,6 +134,9 @@
 </head>
 <body>
 <canvas id="particles"></canvas>
+
+<!-- Toast Container -->
+<div id="toastContainer" style="position:fixed;top:24px;right:24px;z-index:100000;display:flex;flex-direction:column;gap:10px;"></div>
 
 <div class="mob-bar">
   <div class="ml"><img src="logo.jpg" alt=""/></div>
@@ -197,7 +215,7 @@
       <div id="step2" class="step-view" style="display:none">
         <div class="step-eyebrow"><span class="dot"></span>Step 2 of 3</div>
         <h2 class="step-heading">Academic Information</h2>
-        <p class="step-sub">Your university details. Matric format: SIT/DEPT/YY/NNNN (e.g., SIT/CSC/23/0001)</p>
+        <p class="step-sub">Matric format: SIT/DEPT/YY/NNNN (e.g., SIT/CSC/23/0001)</p>
 
         <div class="field-wrap"><label class="field-label">Matriculation Number <span class="req">*</span></label><div class="input-rel"><input type="text" class="hms-input" id="matricNo" placeholder="SIT/CSC/23/0001" style="text-transform:uppercase"><i class="bi bi-card-text fi"></i><span class="matric-check" id="matricCheck"></span></div><div class="ferr" id="matricErr"><i class="bi bi-x-circle-fill"></i><span></span></div></div>
 
@@ -263,100 +281,118 @@
   window._formData = {};
   window._photoFile = null;
   let selectedGender = "", termsChecked = false, currentStep = 1;
-  let preloadedStudents = [];
 
-  // Load pre-approved students from Firestore (admin uploaded CSV)
-  async function loadPreapprovedStudents() {
-    try {
-      const snap = await getDocs(collection(db, "approved_students"));
-      preloadedStudents = snap.docs.map(d => d.data());
-    } catch (e) { console.warn("No pre-approved list found"); }
+  // ═══════════════════════════════════════════════════════════
+  // TOAST NOTIFICATION SYSTEM
+  // ═══════════════════════════════════════════════════════════
+  function showToast(type, message) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    const icons = { success:'✅', error:'❌', warning:'⚠️', info:'ℹ️' };
+    const toast = document.createElement('div');
+    toast.className = `toast-notification toast-${type}`;
+    toast.innerHTML = `<span class="toast-icon">${icons[type]||icons.info}</span><span>${message}</span><button class="toast-close" onclick="this.parentElement.remove()">&times;</button>`;
+    container.appendChild(toast);
+    setTimeout(() => { toast.classList.add('toast-removing'); setTimeout(() => toast.remove(), 300); }, 4000);
   }
-  loadPreapprovedStudents();
+  window.showToast = showToast;
 
-  // Validate matric format: SIT/DEPT/YY/NNNN
+  // ═══════════════════════════════════════════════════════════
+  // VALIDATION FUNCTIONS
+  // ═══════════════════════════════════════════════════════════
   function validateMatricFormat(matric) {
-    const pattern = /^SIT\/(CSC|BCA|INF|SWE|CYB)\/(23|24|25)\/\d{4}$/;
-    return pattern.test(matric);
+    return /^SIT\/(CSC|BCA|INF|SWE|CYB)\/(23|24|25)\/\d{4}$/.test(matric);
   }
-
-  // Validate JAMB format
   function validateJAMBFormat(jamb) {
     return /^[A-Z0-9]{8,12}$/.test(jamb);
   }
 
-  // Name matching (fuzzy)
-  function namesMatch(name1, name2) {
-    if (!name1 || !name2) return false;
-    const n1 = name1.toLowerCase().replace(/\s+/g, ' ').trim();
-    const n2 = name2.toLowerCase().replace(/\s+/g, ' ').trim();
-    if (n1 === n2) return true;
-    const parts1 = n1.split(' '), parts2 = n2.split(' ');
-    let matches = 0;
-    parts1.forEach(p => { if (parts2.includes(p)) matches++; });
-    return matches >= Math.min(parts1.length, parts2.length) - 1;
-  }
-
-  // Matric validation on blur
+  // ═══════════════════════════════════════════════════════════
+  // MATRIC UNIQUE CHECK (By Department + Level)
+  // ═══════════════════════════════════════════════════════════
   document.getElementById("matricNo").addEventListener("blur", async function() {
     const val = this.value.trim().toUpperCase();
     if (!val) return;
     this.value = val;
     const check = document.getElementById("matricCheck");
+    const department = document.getElementById("department").value;
+    const level = document.getElementById("level").value;
+
+    if (!department || !level) {
+      check.innerHTML = `<i class="bi bi-exclamation-circle-fill" style="color:var(--warn)"></i>`;
+      showFieldErr("matricNo","matricErr","Select department and level first");
+      return;
+    }
+
     check.innerHTML = `<div style="display:inline-block;width:14px;height:14px;border:2px solid var(--gold);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite"></div>`;
-    
+
     if (!validateMatricFormat(val)) {
       check.innerHTML = `<i class="bi bi-x-circle-fill" style="color:var(--err)"></i>`;
-      showFieldErr("matricNo","matricErr","Invalid format. Use: SIT/DEPT/YY/NNNN (e.g., SIT/CSC/23/0001)");
+      showFieldErr("matricNo","matricErr","Invalid format. Use: SIT/DEPT/YY/NNNN");
       return;
     }
 
     try {
-      const snap = await getDocs(query(collection(db,"users"), where("matricNo","==",val)));
+      const snap = await getDocs(query(collection(db,"users"), where("matricNo","==",val), where("department","==",department), where("level","==",level)));
       if (!snap.empty) {
         check.innerHTML = `<i class="bi bi-x-circle-fill" style="color:var(--err)"></i>`;
-        showFieldErr("matricNo","matricErr","This matric number is already registered");
+        showFieldErr("matricNo","matricErr",`Already registered in ${department} (${level})`);
       } else {
         check.innerHTML = `<i class="bi bi-check-circle-fill" style="color:var(--ok)"></i>`;
         document.getElementById("matricNo").classList.remove("err");
         document.getElementById("matricNo").classList.add("good");
         document.getElementById("matricErr").classList.remove("show");
+        showToast("success", "✅ Matric number verified for your department and level");
       }
-    } catch { check.innerHTML = ""; }
+    } catch (e) { check.innerHTML = ""; }
   });
 
-  // JAMB validation on blur
+  // ═══════════════════════════════════════════════════════════
+  // JAMB UNIQUE CHECK (By Department + Level)
+  // ═══════════════════════════════════════════════════════════
   document.getElementById("jambNo").addEventListener("blur", async function() {
     const val = this.value.trim().toUpperCase();
     if (!val) return;
     this.value = val;
     const check = document.getElementById("jambCheck");
+    const department = document.getElementById("department").value;
+    const level = document.getElementById("level").value;
+
+    if (!department || !level) {
+      check.innerHTML = `<i class="bi bi-exclamation-circle-fill" style="color:var(--warn)"></i>`;
+      showFieldErr("jambNo","jambErr","Select department and level first");
+      return;
+    }
+
     check.innerHTML = `<div style="display:inline-block;width:14px;height:14px;border:2px solid var(--gold);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite"></div>`;
-    
+
     if (!validateJAMBFormat(val)) {
       check.innerHTML = `<i class="bi bi-x-circle-fill" style="color:var(--err)"></i>`;
-      showFieldErr("jambNo","jambErr","Invalid JAMB format (8-12 alphanumeric characters)");
+      showFieldErr("jambNo","jambErr","Invalid JAMB format (8-12 alphanumeric)");
       return;
     }
 
     try {
-      const snap = await getDocs(query(collection(db,"users"), where("jambNo","==",val)));
+      const snap = await getDocs(query(collection(db,"users"), where("jambNo","==",val), where("department","==",department), where("level","==",level)));
       if (!snap.empty) {
         check.innerHTML = `<i class="bi bi-x-circle-fill" style="color:var(--err)"></i>`;
-        showFieldErr("jambNo","jambErr","This JAMB number is already registered");
+        showFieldErr("jambNo","jambErr",`Already registered in ${department} (${level})`);
       } else {
         check.innerHTML = `<i class="bi bi-check-circle-fill" style="color:var(--ok)"></i>`;
         document.getElementById("jambNo").classList.remove("err");
         document.getElementById("jambNo").classList.add("good");
         document.getElementById("jambErr").classList.remove("show");
+        showToast("success", "✅ JAMB number verified for your department and level");
       }
-    } catch { check.innerHTML = ""; }
+    } catch (e) { check.innerHTML = ""; }
   });
 
-  // Email unique check
+  // ═══════════════════════════════════════════════════════════
+  // EMAIL UNIQUE CHECK
+  // ═══════════════════════════════════════════════════════════
   document.getElementById("email").addEventListener("blur", async function() {
     const val = this.value.trim().toLowerCase();
-    if (!val) return;
+    if (!val || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return;
     try {
       const snap = await getDocs(query(collection(db,"users"), where("email","==",val)));
       if (!snap.empty) {
@@ -365,11 +401,14 @@
         document.getElementById("email").classList.remove("err");
         document.getElementById("email").classList.add("good");
         document.getElementById("emailErr").classList.remove("show");
+        showToast("success", "✅ Email is available");
       }
     } catch {}
   });
 
-  // Phone unique check
+  // ═══════════════════════════════════════════════════════════
+  // PHONE UNIQUE CHECK
+  // ═══════════════════════════════════════════════════════════
   document.getElementById("phone").addEventListener("blur", async function() {
     const val = this.value.trim();
     if (!val || !/^0[7-9][0-1]\d{8}$/.test(val)) return;
@@ -381,6 +420,9 @@
     } catch {}
   });
 
+  // ═══════════════════════════════════════════════════════════
+  // SUBMIT REGISTRATION
+  // ═══════════════════════════════════════════════════════════
   window.submitRegistration = async function() {
     const email = document.getElementById("email").value.trim().toLowerCase();
     const pwd = document.getElementById("password").value;
@@ -389,6 +431,8 @@
     const jambNo = document.getElementById("jambNo").value.trim().toUpperCase();
     const matricNo = window._formData.matricNo;
     const fullName = window._formData.fullName;
+    const department = window._formData.department;
+    const level = window._formData.level;
 
     document.getElementById("gAlert").className = "g-alert";
     let valid = true;
@@ -403,36 +447,28 @@
     if (!validateJAMBFormat(jambNo)) { showAlert("Invalid JAMB format", "a-err"); goStep(2); return; }
     if (!valid) return;
 
-    // Check against pre-approved CSV
-    const preApproved = preloadedStudents.find(s => s.matricNo === matricNo);
-    if (!preApproved) {
-      showAlert("❌ Your matric number is not on the approved students list. Contact your department.", "a-err");
-      return;
-    }
-    if (preApproved.jambNo && preApproved.jambNo !== jambNo) {
-      showAlert("❌ JAMB number does not match university records.", "a-err");
-      return;
-    }
-    if (!namesMatch(fullName, preApproved.fullName)) {
-      showAlert(`❌ Name does not match university records. Expected: ${preApproved.fullName}`, "a-err");
-      return;
-    }
-
     const btn = document.getElementById("submitBtn"), btnText = document.getElementById("submitText"), btnIcon = document.getElementById("submitIcon");
     btn.disabled = true; btnText.textContent = "Creating..."; btnIcon.style.display = "none";
     const spinner = document.createElement("div"); spinner.className = "spin"; btn.appendChild(spinner);
 
     try {
-      const matricSnap = await getDocs(query(collection(db,"users"), where("matricNo","==",matricNo)));
-      if (!matricSnap.empty) { showAlert("Matric already registered", "a-err"); resetButton(); return; }
-      const emailSnap = await getDocs(query(collection(db,"users"), where("email","==",email)));
-      if (!emailSnap.empty) { showAlert("Email already registered", "a-err"); resetButton(); return; }
-      const jambSnap = await getDocs(query(collection(db,"users"), where("jambNo","==",jambNo)));
-      if (!jambSnap.empty) { showAlert("JAMB already registered", "a-err"); resetButton(); return; }
+      // Check matric unique (dept + level)
+      const matricSnap = await getDocs(query(collection(db,"users"), where("matricNo","==",matricNo), where("department","==",department), where("level","==",level)));
+      if (!matricSnap.empty) { showToast("error", `❌ Matric already registered in ${department} (${level})`); resetButton(); return; }
 
+      // Check JAMB unique (dept + level)
+      const jambSnap = await getDocs(query(collection(db,"users"), where("jambNo","==",jambNo), where("department","==",department), where("level","==",level)));
+      if (!jambSnap.empty) { showToast("error", `❌ JAMB already registered in ${department} (${level})`); resetButton(); return; }
+
+      // Check email unique
+      const emailSnap = await getDocs(query(collection(db,"users"), where("email","==",email)));
+      if (!emailSnap.empty) { showToast("error", "❌ Email already registered"); resetButton(); return; }
+
+      // Create auth user
       const cred = await createUserWithEmailAndPassword(auth, email, pwd);
       const user = cred.user;
 
+      // Upload photo
       let photoURL = "";
       if (window._photoFile) {
         try { const storRef = ref(storage, `profile_photos/${user.uid}`); await uploadBytes(storRef, window._photoFile); photoURL = await getDownloadURL(storRef); }
@@ -442,16 +478,18 @@
       await updateProfile(user, { displayName: fullName, photoURL: photoURL || null });
       await sendEmailVerification(user);
 
+      // Save to Firestore
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid, role: "student", fullName, phone: window._formData.phone,
         gender: window._formData.gender, dob: window._formData.dob, stateOrigin: window._formData.stateOrigin,
-        matricNo, jambNo, faculty: window._formData.faculty, department: window._formData.department,
-        level: window._formData.level, modeOfEntry: window._formData.modeOfEntry,
-        email, photoURL, emailVerified: false, isActive: true, accountStatus: "approved",
-        bookingStatus: "none", createdAt: serverTimestamp()
+        matricNo, jambNo, faculty: window._formData.faculty, department, level,
+        modeOfEntry: window._formData.modeOfEntry, email, photoURL,
+        emailVerified: false, isActive: true, accountStatus: "approved", bookingStatus: "none",
+        createdAt: serverTimestamp()
       });
 
       await auth.signOut();
+      showToast("success", "🎉 Account created successfully!");
       document.getElementById("successEmail").textContent = email;
       document.getElementById("step3").style.display = "none";
       document.getElementById("progressWrap").style.display = "none";
@@ -461,6 +499,7 @@
       let msg = "Registration failed.";
       if (e.code === "auth/email-already-in-use") msg = "Email already registered";
       else if (e.code === "auth/weak-password") msg = "Password too weak";
+      showToast("error", `❌ ${msg}`);
       showAlert(msg, "a-err");
       resetButton();
     }
@@ -492,7 +531,7 @@
   function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(245,166,35,${p.a})`;ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>canvas.width)p.dx*=-1;if(p.y<0||p.y>canvas.height)p.dy*=-1});requestAnimationFrame(draw)}draw();
 
   window.selectGender=function(g){window._selectedGender=g;["Male","Female"].forEach(x=>{document.getElementById("gc"+x).classList.toggle("selected",x===g);document.getElementById("gr"+x).classList.toggle("sel",x===g)});document.getElementById("genderErr").classList.remove("show")};
-  document.getElementById("photoInput").addEventListener("change",function(){const f=this.files[0];if(!f)return;if(f.size>2*1024*1024){alert("Photo must be under 2MB");return}window._photoFile=f;const r=new FileReader();r.onload=e=>{document.getElementById("photoPreview").innerHTML=`<img src="${e.target.result}" alt="photo"/>`};r.readAsDataURL(f)});
+  document.getElementById("photoInput").addEventListener("change",function(){const f=this.files[0];if(!f)return;if(f.size>2*1024*1024){showToast("error","❌ Photo must be under 2MB");return}window._photoFile=f;const r=new FileReader();r.onload=e=>{document.getElementById("photoPreview").innerHTML=`<img src="${e.target.result}" alt="photo"/>`};r.readAsDataURL(f)});
 
   const deptMap={"Engineering Technology":["Agricultural & Bio-Environmental Engineering","Civil Engineering","Chemical Engineering","Computer Engineering","Electrical Engineering","Mechanical Engineering"],"Agriculture & Agricultural Technology":["Agronomy","Animal Science","Crop Production","Fisheries & Aquaculture","Forestry & Wildlife"],"Environmental Technology":["Architecture","Building Technology","Estate Management","Geography","Quantity Surveying","Urban & Regional Planning"],"Management Technology":["Accounting","Business Administration","Marketing","Public Administration"],"Science & Science Education":["Biology","Chemistry","Mathematics","Physics","Statistics"],"Computing & Information Technology":["Computer Science","Information Technology","Software Engineering","Cyber Security"]};
   window.populateDepts=function(){const f=document.getElementById("faculty").value,d=document.getElementById("department");d.innerHTML=`<option value="">Select department</option>`;(deptMap[f]||[]).forEach(v=>{const o=document.createElement("option");o.textContent=v;d.appendChild(o)})};
